@@ -1,0 +1,18 @@
+export const changeTime = (value) => {
+  switch (value) {
+    case '7h-9h':
+      return '7h30-9h30'
+    case '7h':
+      return '7h30'
+    case '9h':
+      return '9h30'
+    case '15h30-17h30':
+      return '15h-16h30'
+    case '15h30':
+      return '15h'
+    case '17h30':
+      return '16h30'
+    default:
+      return value
+  }
+}
