@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Form, Input, Button, notification, Checkbox, Tabs, Spin,Tag,Pagination,Empty } from 'antd'
 import _ from 'lodash'
-import { SCHEDULE_STATUS_3_0, SCHEDULE_TITLE, VIHCLE_TYPES_STATE } from '../../constants/global'
+import { SCHEDULE_STATUS_3_0, SCHEDULE_TITLE, SCHEDULE_TYPE, VIHCLE_TYPES_STATE } from '../../constants/global'
 import { changeTime } from '../../helper/changeTime'
 import BookingService from './../../services/addBookingService'
 
@@ -35,7 +35,7 @@ const ScheduleItem = ({
   licensePlates,
   licensePlateColor,
   dateSchedule,
-  stationsName,
+  station,
   stationsAddress,
   time,
   status,
@@ -72,7 +72,7 @@ const ScheduleItem = ({
           <div className="d-flex mt-2 align-items-center inline-content">
             <span className="me-1 scheduleItem-lable">Dịch vụ: </span>
             <div className="scheduleItem-value scheduleItem-href d-inline">
-              {SCHEDULE_TITLE[scheduleType] ? SCHEDULE_TITLE[scheduleType].title : 'Đăng kiểm xe'}
+              {SCHEDULE_TYPE.find((e) => e.value == scheduleType)?.label || 'Đăng kiểm xe'}
             </div>
           </div>
           <div className="d-flex mt-2 align-items-center inline-content">
@@ -85,7 +85,7 @@ const ScheduleItem = ({
             <span>
               <span className="me-1 scheduleItem-lable">Tên trạm: </span>
               <a className="scheduleItem-value scheduleItem-href" href="#">
-                <span className="scheduleItem-decoration">{stationsName}</span>
+                <span className="scheduleItem-decoration">{station.stationsName}</span>
               </a>
             </span>
           </div>
@@ -101,14 +101,15 @@ const ScheduleItem = ({
   )
 };
 
-function BookingPartnerHistory({ location, onFinish, form }) {
+function BookingPartnerHistory() {
+  const phoneNumber = localStorage.getItem('phoneNumber')
 
-  
   const DEFAULT_FILTER = {
     skip: 0,
     limit: 20,
     filter: {
       // CustomerScheduleStatus: status
+      phone: phoneNumber
     }
   }
   const [filter, setFilter] = useState(DEFAULT_FILTER)

@@ -151,7 +151,7 @@ export default class BookingService {
     return new Promise((resolve) => {
       Request.send({
         method: 'POST',
-        path: '/PartnerAPI/CustomerSchedule/user/createSchedul',
+        path: '/PartnerAPI/CustomerSchedule/user/createSchedule',
         data: data
       }).then((result = {}) => {
         const { statusCode, data } = result

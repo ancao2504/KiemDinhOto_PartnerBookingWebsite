@@ -7,6 +7,7 @@ import BookingPartnerForm from './bookingPartnerForm'
 function BookingPartner() {
   const [isVisible, setIsVisible] = useState(false)
   const [nextTab, setNextTab] = useState('partner')
+  const [tabKey, setTabKey] = useState()
   const [form] = Form.useForm()
 
   const handCreateSchedule=()=>{
@@ -29,12 +30,12 @@ function BookingPartner() {
           <Tabs.TabPane tab="" key="partner">
             <div className="h-100">
               <div className="partner-select">
-                <Tabs>
+                <Tabs activeKey={tabKey}>
                   <Tabs.TabPane tab="Đặt lịch" key="booking">
-                    <BookingPartnerForm onFinish={handCreateSchedule} form={form} />
+                    <BookingPartnerForm setTabKey={setTabKey} onFinish={handCreateSchedule} form={form} />
                   </Tabs.TabPane>
                   <Tabs.TabPane tab="Lịch hẹn" key="bookingList">
-                    <BookingPartnerHistory form={form} />
+                    <BookingPartnerHistory setTabKey={setTabKey} form={form} />
                   </Tabs.TabPane>
                 </Tabs>
               </div>

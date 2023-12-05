@@ -79,6 +79,8 @@
 .ant-tabs-nav-operations{
   display: none !important;
 }
+.css-i8rdbu-control,
+.css-g9ruou-control,
 .css-icbtxn-control,
 .booking-input,
 .ant-select-selection-search-input,
@@ -96,6 +98,25 @@
     line-height: 30px;
     color: #0870d9;
   }
+}
+.text-primary{
+  color: #0870d9;
+}
+.d-flex{
+  display: flex;
+}
+.ai-c{
+  align-items: center;
+} 
+.j-sb{
+  justify-content: space-between;
+}
+.register-success h3{
+  color: var(--primary-color) !important;
+}
+.text-center{
+  text-align: center;
+  margin: auto;
 }
 
 .bookingHistoryTabs {
@@ -215,49 +236,6 @@
 .cursor {
   cursor: pointer;
 }
-
-// .QRCode {
-//   &-box {
-//     padding: 8px 30px 50px;
-
-//     & .ant-btn-primary {
-//       border-color: #0870d9 !important;
-//       background: #0870d9 !important;
-//       color: #fff;
-//       display: flex !important;
-//       align-items: center !important;
-//     }
-
-//     & .ant-btn span {
-//       font: normal normal 300 14px/20px sans-serif;
-//       font-weight: 500;
-//       font-size: 10px;
-//       line-height: 15px;
-//     }
-
-//     & .ant-btn-dangerous.ant-btn-primary {
-//       border-color: #ff0000 !important;
-//       background: #fff !important;
-//       color: #ff0000;
-//     }
-
-//     & .ant-btn > .anticon + span,
-//     .ant-btn > span + .anticon {
-//       margin-left: 4px;
-//     }
-//   }
-
-//   &-title {
-//     font-weight: 600;
-//     font-size: 16px;
-//     line-height: 15px;
-//     color: #0870d9;
-//     margin-top: 20px;
-//     margin-bottom: 15px;
-//     width: 100%;
-//     text-align: center;
-//   }
-// }
 
 .wrap {
   min-width: 48px;

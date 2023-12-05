@@ -11,6 +11,7 @@ import moment from 'moment'
 import Select from 'react-select'
 import { PLATE_COLOR, SCHEDULE_ERROR, SCHEDULE_TYPE } from '../../constants/global'
 import PopupMessage from './PopupMessage'
+import BookingSuccess from './BookingSuccessModal'
 
 
 function getContentAutoFill() {
@@ -25,12 +26,11 @@ function getContentAutoFill() {
     return undefined
   }
 }
-function BookingPartnerForm({form}) {
+function BookingPartnerForm({form, setTabKey}) {
   const [customerParam, setCustomerParam] = useState({filter: {} })
   const [errorMessage, setErrorMessage] = useState('')
   const [isModalErrOpen, setIsModalErrOpen] = useState(false)
   const [bookingData, setBookingData] = useState({})
-  console.log("BookingPartnerForm ~ bookingData:", bookingData)
   const [listPlate, setListPlate] = useState([])
   const [listStation, setListStation] = useState([])
   const [listBookingTime, setListBookingTime] = useState([])
@@ -128,11 +128,9 @@ function BookingPartnerForm({form}) {
   }
 
   const onFinish = (values) => {
-    console.log("onFinish ~ values:", values)
-    console.log(form.getFieldsValue())
     setIsVisible(false)
     const newData = {
-      licensePlates: values.licensePlates,
+      licensePlates: values.licensePlates.toUpperCase(),
       phone: values.phone,
       fullnameSchedule: values.fullnameSchedule,
       email: values.email,
@@ -157,9 +155,18 @@ function BookingPartnerForm({form}) {
       setIsVisible(false)
       } else {
         setIsModalOpen(true)
-        setIsModalErrOpen(true)
-        setErrorMessage('Đặt lịch thành công')
+        localStorage.setItem('phoneNumber', values.phone)
 
+        setTimeout(() => {
+          setBookingData({})
+          form.resetFields();
+          form.setFieldsValue({
+            vntId:null,
+            dateSchedule: null,
+            time: null,
+            stationsId: null
+          })
+        }, 500);
       }
     })
     setIsVisible(true)
@@ -291,46 +298,46 @@ function BookingPartnerForm({form}) {
     }
   }, [])
 
-  // useEffect(() => {
-  //   const dataCompleteForm = getContentAutoFill()
-  //   if (
-  //     !_.isEmpty(dataCompleteForm) &&
-  //     !bookingData?.vntId &&
-  //     !bookingData?.stationsId &&
-  //     !bookingData?.dateSchedule &&
-  //     !bookingData?.time
-  //   ) {
-  //     Promise.all([
-  //       getStationAreas(),
-  //       getStations({
-  //         filter: {
-  //           stationArea: dataCompleteForm.stationArea || undefined
-  //         }
-  //       }),
-  //       setDateFilter({
-  //         ...dateFilter,
-  //         stationsId: dataCompleteForm.stationsId,
-  //       }),
-  //       dataCompleteForm.scheduleDate &&
-  //         getBookingHours({
-  //           stationsId: dataCompleteForm.stationsId,
-  //           date: dataCompleteForm.scheduleDate,
-  //           vehicleType: bookingData.vehicleType
-  //         })
-  //     ]).then(() => {
-  //       setBookingData({
-  //         vntId: dataCompleteForm.stationArea,
-  //         stationsId: dataCompleteForm.stationsId,
-  //         dateSchedule: dataCompleteForm.scheduleDate
-  //       })
-  //       form.setFieldsValue({
-  //         vntId: dataCompleteForm.stationArea,
-  //         stationsId: dataCompleteForm.stationsId,
-  //         dateSchedule: dataCompleteForm.scheduleDate
-  //       })
-  //     })
-  //   }
-  // }, [])
+  useEffect(() => {
+    const dataCompleteForm = getContentAutoFill()
+    if (
+      !_.isEmpty(dataCompleteForm) &&
+      !bookingData?.vntId &&
+      !bookingData?.stationsId &&
+      !bookingData?.dateSchedule &&
+      !bookingData?.time
+    ) {
+      Promise.all([
+        getStationAreas(),
+        getStations({
+          filter: {
+            stationArea: dataCompleteForm.stationArea || undefined
+          }
+        }),
+        setDateFilter({
+          ...dateFilter,
+          stationsId: dataCompleteForm.stationsId,
+        }),
+        dataCompleteForm.scheduleDate &&
+          getBookingHours({
+            stationsId: dataCompleteForm.stationsId,
+            date: dataCompleteForm.scheduleDate,
+            vehicleType: bookingData.vehicleType
+          })
+      ]).then(() => {
+        setBookingData({
+          vntId: dataCompleteForm.stationArea,
+          stationsId: dataCompleteForm.stationsId,
+          dateSchedule: dataCompleteForm.scheduleDate
+        })
+        form.setFieldsValue({
+          vntId: dataCompleteForm.stationArea,
+          stationsId: dataCompleteForm.stationsId,
+          dateSchedule: dataCompleteForm.scheduleDate
+        })
+      })
+    }
+  }, [])
 
   // fix antd select label
   useEffect(() => {
@@ -347,7 +354,6 @@ function BookingPartnerForm({form}) {
     }
   }, [listStation])
 
-
   return (
     <Form
       name="booking"
@@ -359,7 +365,7 @@ function BookingPartnerForm({form}) {
         vntId: bookingData?.vntId,
         stationsId: bookingData?.stationsId,
         dateSchedule: bookingData?.dateSchedule,
-        time: bookingData?.time
+        time: bookingData?.time ,
       }}
       form={form}
       onFinish={(values) => {
@@ -422,6 +428,7 @@ function BookingPartnerForm({form}) {
             options={scheduleTypes}
             menuPlacement="top"
             isOptionDisabled={(option) => option.disabled}
+            value={bookingData.scheduleType}
             // disabled={!bookingData.stationsId}
             onChange={(values) => {
               form.setFieldsValue({
@@ -459,7 +466,7 @@ function BookingPartnerForm({form}) {
             }
           ]}>
         <div className="login__input__icon">
-          <Input className="login__input" classNames={'booking-input'} placeholder="59B16856" type="text" size="large" />
+          <Input className="login__input" style={{textTransform:'uppercase'}} classNames={'booking-input'} placeholder="59B16856" type="text" size="large" />
         </div>
       </Form.Item>
       <Form.Item
@@ -478,12 +485,12 @@ function BookingPartnerForm({form}) {
             placeholder="Vui lòng chọn màu biển số"
             styles={customStyles}
             options={licensePlateColor}
+            value={bookingData.licensePlateColor}
             menuPlacement="top"
             defaultValue={bookingData?.licensePlateColor}
             isOptionDisabled={(option) => option.disabled}
-            disabled={!bookingData.scheduleType}
+            disabled={!bookingData?.scheduleType}
             onChange={(values) => {
-              console.log("BookingPartnerForm ~ values:", values)
               form.setFieldsValue({
               licensePlateColor:values,
                 vehicleType: null,
@@ -524,10 +531,20 @@ function BookingPartnerForm({form}) {
             styles={customStyles}
             options={vehicleType}
             menuPlacement="top"
+            value={bookingData.vehicleType}
             isOptionDisabled={(option) => option.disabled}
-            disabled={!bookingData.licensePlateColor}
+            disabled={!bookingData?.licensePlateColor}
             onChange={(values) => {
               form.setFieldsValue({
+                vntId: null,
+                area: null,
+                stationsId: null,
+                dateSchedule: null,
+                time: null,
+                vehicleType: values,
+              })
+              setBookingData({
+                ...bookingData,
                 vehicleType: values,
                 vntId: null,
                 area: null,
@@ -535,15 +552,7 @@ function BookingPartnerForm({form}) {
                 dateSchedule: null,
                 time: null
               })
-              setBookingData({
-              ...bookingData,
-              vehicleType: values,
-              vntId: null,
-              area: null,
-              stationsId: null,
-              dateSchedule: null,
-              time: null
-            })
+              
             }}
           />
         </div>
@@ -555,6 +564,7 @@ function BookingPartnerForm({form}) {
             return xoa_dau((option?.value ?? '').toLowerCase()).includes(xoa_dau(input.toLowerCase()))
           }}
           showSearch
+          disabled={!bookingData.vehicleType}
           onChange={(values) => {
             form.setFieldsValue({
               stationsId: null,
@@ -713,6 +723,7 @@ function BookingPartnerForm({form}) {
           Đặt lịch
         </Button>
       </div>
+      <BookingSuccess isModalOpen={isModalOpen} setTabKey={setTabKey} setIsModalOpen={setIsModalOpen} onClose={() => setIsModalOpen(false)}></BookingSuccess>
       {isModalErrOpen &&
       <PopupMessage isModalOpen={isModalErrOpen} onClose={() => {setIsModalErrOpen(false)}} text={errorMessage} ></PopupMessage>
       }
