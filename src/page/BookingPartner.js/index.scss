@@ -74,7 +74,7 @@
   }
 }
 .partner-select .ant-tabs-nav .ant-tabs-tab-active{
-  background: #0870d9 !important;
+  background: var(--title-color) !important;
 }
 .ant-tabs-nav-operations{
   display: none !important;
@@ -96,11 +96,11 @@
     font-weight: 500;
     font-size: 20px;
     line-height: 30px;
-    color: #0870d9;
+    color: var(--title-color);
   }
 }
 .text-primary{
-  color: #0870d9;
+  color: var(--title-color);
 }
 .d-flex{
   display: flex;
@@ -149,7 +149,7 @@
   }
 
   & .ant-tabs-tab-active div {
-    color: #0870d9 !important;
+    color: var(--title-color) !important;
   }
   & .ant-tabs-tab-active {
     border: none;
@@ -182,7 +182,7 @@
   }
 
   &-href {
-    color: #0870d9;
+    color: var(--title-color);
   }
 
   &-decoration {
@@ -216,6 +216,7 @@
   border: 1px solid transparent;
   width: 100%;
   margin-top: 15px;
+  background: var(--title-color) !important;
   &.ant-btn span {
     font-weight: 550;
     font-size: 15px;
@@ -227,7 +228,7 @@
 
 .notification {
   &-btn.login__button.df {
-    background: #0870d9 !important;
+    background: var(--title-color) !important;
     border-radius: 14px !important;
     height: 56px !important;
   }
