@@ -12,7 +12,7 @@ const PopupMessage = (props) => {
   } = props
   return (
     <div >
-      <Modal title={type}  visible={isModalOpen}  onCancel={false}
+      <Modal title={type}  visible={isModalOpen}  onCancel={onClose}
       footer ={<Button className='btn-ok' onClick={onClose}>{buttonText}</Button>}
       className="popup-message"
       style={{

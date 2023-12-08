@@ -13,6 +13,7 @@ import { PLATE_COLOR, SCHEDULE_TYPE, VIHCLE_TYPES } from '../../constants/global
 import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import PopupMessage from './PopupMessage'
 import BookingSuccess from './BookingSuccessModal'
+import { useLocation } from 'react-router-dom'
 
 
 function getContentAutoFill() {
@@ -28,6 +29,9 @@ function getContentAutoFill() {
   }
 }
 function BookingPartnerForm({form, setTabKey}) {
+  const location = useLocation();
+  const searchparam = location.search
+  const params = new URLSearchParams(searchparam)
   const [customerParam, setCustomerParam] = useState({filter: {} })
   const [errorMessage, setErrorMessage] = useState('')
   const [isModalErrOpen, setIsModalErrOpen] = useState(false)
@@ -52,6 +56,18 @@ function BookingPartnerForm({form, setTabKey}) {
     stationsId: false,
     dateSchedule: false,
     time: false
+  })
+  const [dataBookingParam, setBookingParam] = useState({
+    licensePlates: params.get('licenseplates'),
+    phone: params.get('phone'),
+    fullnameSchedule: params.get('name'),
+    email: params.get('email'),
+    dateSchedule: params.get('dateschedule'),
+    time: params.get('time'),
+    stationsId: params.get('stationsid'),
+    vehicleType:params.get('vehicletype'),
+    licensePlateColor: params.get('licenseplatecolor'),
+    scheduleType: params.get('scheduletype'),
   })
   const customStyles = {
     control: (base) => ({
@@ -346,13 +362,15 @@ function BookingPartnerForm({form, setTabKey}) {
       name="booking"
       layout="vertical"
       initialValues={{
-        scheduleType:bookingData?.scheduleType,
-        licensePlateColor:bookingData?.licensePlateColor,
-        vehicleType: bookingData?.vehicleType,
-        vntId: bookingData?.vntId,
-        stationsId: bookingData?.stationsId,
-        dateSchedule: bookingData?.dateSchedule,
-        time: bookingData?.time ,
+        fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
+        phone:dataBookingParam?.phone|| undefined,
+        scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
+        licensePlateColor:dataBookingParam?.licensePlateColor|| undefined,
+        vehicleType: dataBookingParam?.vehicleType|| undefined,
+        vntId: dataBookingParam?.vntId|| undefined,
+        stationsId: dataBookingParam?.stationsId|| undefined,
+        dateSchedule: dataBookingParam?.dateSchedule|| undefined,
+        time: dataBookingParam?.time || undefined,
       }}
       form={form}
       onFinish={(values) => {
@@ -368,7 +386,7 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input className="login__input" classNames={'booking-input'} placeholder="Nguyễn Văn a" type="text" size="large" />
+          <Input className="login__input booking-input" placeholder="Nguyễn Văn a" type="text" size="large" />
         </div>
       </Form.Item>
       <Form.Item
@@ -393,7 +411,7 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input className="login__input" classNames={'booking-input'} placeholder="Nhập số điện thoại" type="text" size="large" />
+          <Input className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" />
         </div>
       </Form.Item>
 
@@ -453,7 +471,7 @@ function BookingPartnerForm({form, setTabKey}) {
             }
           ]}>
         <div className="login__input__icon">
-          <Input className="login__input" style={{textTransform:'uppercase'}} classNames={'booking-input'} placeholder="59B16856" type="text" size="large" />
+          <Input className="login__input booking-input" style={{textTransform:'uppercase'}} placeholder="59B16856" type="text" size="large" />
         </div>
       </Form.Item>
       <Form.Item

@@ -23,9 +23,9 @@ const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen }) => {
               <div>Đặt lịch thành công</div>
             </div>
             <div>
-              <Button className="login__button df" onClick={()=>handleViewListBooking()} type="primary" htmlType="submit" size="large">
+              {/* <Button className="login__button df" onClick={()=>handleViewListBooking()} type="primary" htmlType="submit" size="large">
                 Xem lịch hẹn
-              </Button>
+              </Button> */}
               <Button className="login__button df" onClick={onClose} type="primary" htmlType="submit" size="large">
                 Xác nhận
               </Button>

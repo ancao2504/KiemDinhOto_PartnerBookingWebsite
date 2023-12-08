@@ -229,6 +229,11 @@
 .popup-cancel .ant-modal-footer{
   display: none !important;
 }
+.booking-title{
+  text-align: center;
+  margin-top: 20px;
+  color: var(--title-color);
+}
 
 .notification {
   &-btn.login__button.df {

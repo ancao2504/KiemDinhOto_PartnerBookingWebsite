@@ -26,14 +26,17 @@ function BookingPartner() {
           ${nextTab === 'partner' ? 'small' : 'full'}
           ${nextTab === 'success' ? 'd-flex justify-content-center align-items-center' : ''}
           `}>
-        <Tabs activeKey={nextTab}>
+        {/* <Tabs activeKey={nextTab}>
           <Tabs.TabPane tab="" key="partner">
             <div className="h-100">
               <div className="partner-select">
                 <Tabs activeKey={tabKey}>
-                  <Tabs.TabPane tab="Đặt lịch" key="booking">
+                  <Tabs.TabPane tab="Đặt lịch" key="booking"> */}
+                  <div className='booking-title title-small'>ĐẶT LỊCH ĐĂNG KIỂM</div>
+                  <div className='mt-4'>
                     <BookingPartnerForm setTabKey={setTabKey} onFinish={handCreateSchedule} form={form} />
-                  </Tabs.TabPane>
+                  </div>
+                  {/* </Tabs.TabPane>
                   <Tabs.TabPane tab="Lịch hẹn" key="bookingList">
                     <BookingPartnerHistory setTabKey={setTabKey} tabKey={tabKey} form={form} />
                   </Tabs.TabPane>
@@ -41,7 +44,7 @@ function BookingPartner() {
               </div>
             </div>
           </Tabs.TabPane>
-        </Tabs>
+        </Tabs> */}
       </div>
     </div>
   )
