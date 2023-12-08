@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Form, Input, Button, Select as SelectAntd } from 'antd'
-import BookingService from './../../services/addBookingService'
+import BookingService from '../../services/addBookingService'
 import { WarningOutlined } from '@ant-design/icons'
-import { xoa_dau } from './../../helper/common'
+import { xoa_dau } from '../../helper/common'
 import { DATE_DISPLAY_FORMAT } from '../../constants/dateFormats'
 import { changeTime } from '../../helper/changeTime'
 import queryString from 'query-string'
 import _ from 'lodash'
 import moment from 'moment'
 import Select from 'react-select'
-import { PLATE_COLOR, SCHEDULE_ERROR, SCHEDULE_TYPE } from '../../constants/global'
+import { PLATE_COLOR, SCHEDULE_TYPE, VIHCLE_TYPES } from '../../constants/global'
+import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import PopupMessage from './PopupMessage'
 import BookingSuccess from './BookingSuccessModal'
 
@@ -36,20 +37,6 @@ function BookingPartnerForm({form, setTabKey}) {
   const [listBookingTime, setListBookingTime] = useState([])
   const [listStationArea, setListStationArea] = useState([])
   const [listBookingDate, setListBookingDate] = useState([])
-  const [vehicleType, setVehicleType] = useState([
-    {
-      label: 'Xe ô tô con < 9 chỗ',
-      value: 1,
-    },
-    {
-      label: 'Xe rơ mooc',
-      value: 20,
-    },
-    {
-      label: 'Xe bán tải, phương tiện khác',
-      value: 10,
-    }
-  ])
   const [licensePlateColor, setLicensePlateColor] = useState(PLATE_COLOR)
   const [scheduleTypes, setScheduleTypes] = useState(SCHEDULE_TYPE)
   const [disableBookingDate, setDisableBookingDate] = useState(true)
@@ -59,7 +46,7 @@ function BookingPartnerForm({form, setTabKey}) {
     stationsId: null,
     startDate: moment().format(DATE_DISPLAY_FORMAT),
     endDate:moment().add(30, 'days').format(DATE_DISPLAY_FORMAT),
-    vehicleType: 1
+    // vehicleType: 1
   })
   const [isVisible, setIsVisible] = useState({
     stationsId: false,
@@ -529,7 +516,7 @@ function BookingPartnerForm({form, setTabKey}) {
             isSearchable={true}
             placeholder="Vui lòng chọn loại xe"
             styles={customStyles}
-            options={vehicleType}
+            options={VIHCLE_TYPES}
             menuPlacement="top"
             value={bookingData.vehicleType}
             isOptionDisabled={(option) => option.disabled}
@@ -552,7 +539,10 @@ function BookingPartnerForm({form, setTabKey}) {
                 dateSchedule: null,
                 time: null
               })
-              
+              setDateFilter({
+                ...dateFilter,
+                vehicleType: values,
+              })
             }}
           />
         </div>
@@ -630,7 +620,7 @@ function BookingPartnerForm({form, setTabKey}) {
               })
               setDateFilter({
                 ...dateFilter,
-                stationsId: values
+                stationsId: values,
               })
               const stationSelected = listStation?.find((e) => e.stationsId == values)
               setBookingData({

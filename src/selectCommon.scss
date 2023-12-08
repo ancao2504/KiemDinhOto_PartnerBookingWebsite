@@ -1,0 +1,17 @@
+@import './main';
+
+.ant-select-selector,
+.ant-picker {
+  background: $--unnamed-color-ffffff 0% 0% no-repeat padding-box;
+  border-radius: 4px !important;
+}
+
+.ant-picker-active-bar {
+  background-color: #1a1a1a !important;
+}
+
+.ant-form-item-has-error {
+  .ant-picker {
+    border: 1px solid #ff4d4f !important;
+  }
+}

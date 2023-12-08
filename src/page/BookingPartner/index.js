@@ -35,7 +35,7 @@ function BookingPartner() {
                     <BookingPartnerForm setTabKey={setTabKey} onFinish={handCreateSchedule} form={form} />
                   </Tabs.TabPane>
                   <Tabs.TabPane tab="Lịch hẹn" key="bookingList">
-                    <BookingPartnerHistory setTabKey={setTabKey} form={form} />
+                    <BookingPartnerHistory setTabKey={setTabKey} tabKey={tabKey} form={form} />
                   </Tabs.TabPane>
                 </Tabs>
               </div>

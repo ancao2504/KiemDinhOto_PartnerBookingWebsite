@@ -15,9 +15,11 @@ function cleanUp() {
 
 function send({ method = 'get', path, data = null, query = null, headers = {}, newUrl, }) {
   return new Promise((resolve) => {
+    let params = new URLSearchParams(document.location.search);
+    const apikey =params.get("apikey")
     let _query={
       ...query,
-      apikey : '2898a2a7-bdde-414a-8ef8-272328be6c82'
+      apikey : apikey
     }
     let url = HOST + `${path}${getQueryString(_query)}`
     if (newUrl) {

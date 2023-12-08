@@ -1,0 +1,102 @@
+.sticky-header {
+  padding-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--primary-button-color);
+  svg{
+    path{
+      stroke: #0C42BC;
+    }
+  }
+  &-title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 30px;
+    color: var(--title-color);
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    &-title {
+      font-size: 16px;
+      line-height: 28px;
+    }
+    padding: 5px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    &-title {
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 30px;
+      color: var(--title-color);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      &-title {
+        font-size: 16px;
+        line-height: 28px;
+      }
+    }
+  }
+}
+.back-btn svg path{
+  fill: var(--title-color);
+}
+.default-btn{
+  align-items: center;
+  & span{
+    height: 100%;
+    align-items: center;
+    display: flex !important;
+    justify-content: center;
+  }
+}
+.desktop-header {
+  padding-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  &-title {
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 30px;
+    color: var(--title-color);
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    &-title {
+      font-size: 16px;
+      line-height: 28px;
+    }
+    padding-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    &-title {
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 30px;
+      color: var(--title-color);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      &-title {
+        font-size: 16px;
+        line-height: 28px;
+      }
+      &-style-color{
+        svg{
+          path{
+            stroke: #0C42BC;
+          }
+        }
+      }
+    }
+  }
+}

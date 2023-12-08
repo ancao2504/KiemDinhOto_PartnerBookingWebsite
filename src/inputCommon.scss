@@ -1,0 +1,25 @@
+@import './main';
+
+.ant-input,
+.ant-input-affix-wrapper {
+  border-radius: 4px;
+}
+
+.ant-input-wrapper {
+  .ant-btn {
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+  }
+}
+
+.ant-input-number {
+  border-radius: 4px;
+}
+
+.ant-select-item-option-content,
+.ant-select-selection-item {
+  text-align: left;
+  font: normal normal 600 14px/20px sans-serif;
+  letter-spacing: 0px;
+  color: $--unnamed-color-24242600;
+}

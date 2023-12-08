@@ -1,0 +1,52 @@
+@import './main';
+
+.ant-table-thead {
+  tr {
+    th {
+      text-align: center;
+      font: normal normal bold 16px/20px sans-serif;
+      letter-spacing: 0px;
+      color: #6b6b6b;
+    }
+  }
+}
+.ant-table-row {
+  td {
+    text-align: left;
+    font: normal normal 600 14px/20px sans-serif;
+    letter-spacing: 0px;
+    color: $--unnamed-color-24242600;
+  }
+
+  .blue-text {
+    color: var(--main-color);
+  }
+}
+
+.ant-table-thead {
+  .ant-table-cell {
+    text-transform: uppercase;
+  }
+}
+.ant-table-tbody {
+  .ant-table-cell {
+    padding: 8px 16px;
+    .editable-cell-value-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+.ant-table-cell {
+  font-size: 16px !important;
+}
+
+.ant-pagination-options {
+  display: none;
+}
+
+.ant-table-row {
+  max-height: 103px !important;
+}

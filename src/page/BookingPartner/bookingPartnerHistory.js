@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Input, Button, notification, Checkbox, Tabs, Spin,Tag,Pagination,Empty } from 'antd'
+import { Button, Modal, Spin,Tag,Pagination,Empty,Radio,Space,Input } from 'antd'
 import _ from 'lodash'
 import { SCHEDULE_STATUS_3_0, SCHEDULE_TITLE, SCHEDULE_TYPE, VIHCLE_TYPES_STATE } from '../../constants/global'
 import { changeTime } from '../../helper/changeTime'
-import BookingService from './../../services/addBookingService'
+import BookingService from '../../services/addBookingService'
+import PopupMessage from './PopupMessage'
+
+const { TextArea } = Input
 
 const LicensePlateTag = ({ color, licensePlate }) => {
   const plateColor = {
@@ -47,8 +50,15 @@ const ScheduleItem = ({
   chatLinkUserToEmployee
 }) => {
   const [isModal, setIsModal] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [vali, setVali] = useState(false)
+  const [reasonRateCancelSchedule, setReasonRateCancelSchedule] = useState(null)
+  const [reasonNoteCancelSchedule, setReasonNoteCancelSchedule] = useState(null)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isModalErrOpen, setIsModalErrOpen] = useState(false)
 
+  const onChangeReasonRateCancelSchedule = (e) => {
+    setReasonRateCancelSchedule(e.target.value)
+  }
   const RetunStatus = ({ status }) => {
     let el = _.find(SCHEDULE_STATUS_3_0, { value: status })
     return el ? (
@@ -59,7 +69,37 @@ const ScheduleItem = ({
       <></>
     )
   }
+  const handleOk = () => {
+    setIsModal(false);
+  };
 
+  const handleCancel = () => {
+    setIsModal(false);
+  };
+  const handleCheck = (customerScheduleId) => {
+    if ((reasonNoteCancelSchedule || reasonRateCancelSchedule) !== null) {
+      setIsModal(true)
+      BookingService.cancelBooking({
+        customerScheduleId: customerScheduleId,
+        reason: reasonNoteCancelSchedule || reasonRateCancelSchedule
+      }).then((result) => {
+        const { isSuccess, data } = result
+        if (!isSuccess || !data) {
+          setErrorMessage('Hủy lịch thất bại. Vui lòng liên hệ CSKH để được hỗ trợ')
+          setIsModalErrOpen(true)
+        } else {
+          setErrorMessage('Hủy lịch hẹn thành công')
+          setIsModalErrOpen(true)
+          setIsModal(false)
+          setTimeout(() => {
+            window.location.reload()
+          }, 2000);
+        }
+      })
+    } else {
+      setVali(true)
+    }
+  }
   return (
     <div className="scheduleItem cursor" >
       <div className="d-flex justify-content-between">
@@ -96,19 +136,70 @@ const ScheduleItem = ({
           Trạng thái:
           <RetunStatus status={status} />
         </span>
+        {status != 20 &&
+          <span className="mb-0">
+            <Button className="cancel-schedule" type="primary" onClick={()=>{setIsModal(true)}} size="small">
+              Hủy lịch hẹn
+            </Button>
+          </span>
+        }
       </div>
+      <Modal title="Hủy Lịch hẹn" open={isModal} onCancel={()=>handleCancel()} className='popup-cancel'>
+      <div style={{ maxWidth: 600, margin: 'auto', padding: '0 30px', minHeight: '400px', paddingTop: 30 }}>
+          <div>
+            <strong>Lý do huỷ lịch:</strong>
+
+            <div className="box-form">
+              <Radio.Group
+                onChange={(e) => {
+                  setVali(false)
+                  onChangeReasonRateCancelSchedule(e)
+                }}
+                value={reasonRateCancelSchedule}>
+                <Space direction="vertical">
+                  <Radio value={'Tôi đặt nhầm thời gian / địa điểm.'} style={{ color: '#909090',padding:"8px 0" }}>
+                    Tôi đặt nhầm thời gian / địa điểm
+                  </Radio>
+                  <Radio value={'Trung tâm từ chối lịch của tôi.'} style={{ color: '#909090',padding:"8px 0" }}>
+                    Trung tâm từ chối lịch của tôi
+                  </Radio>
+                  <Radio value={'Tôi bận việc khác, không đến đúng giờ hẹn trước.'} style={{ color: '#909090',padding:"8px 0" }}>
+                    Tôi bận việc khác, không đến đúng giờ hẹn trước
+                  </Radio>
+                  <Radio value={'Khác.'} style={{ color: '#909090',padding:"8px 0" }}>
+                    Khác
+                  </Radio>
+                </Space>
+              </Radio.Group>
+              <TextArea
+                rows={4}
+                onChange={(e) => {
+                  setReasonNoteCancelSchedule((e.target.value+'.'))
+                }}
+                placeholder="Nhập lý do...."
+              />
+              {vali && <p className="validate_text text-danger">Vui lòng nhập/chọn lý do bạn muốn hủy lịch</p>}
+            </div>
+            <Button className="login__button df custom-default-btn" style={{ marginTop: 25 }} onClick={() => handleCheck(customerScheduleId)} type="primary" size="large">
+              Xác nhận
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      {isModalErrOpen &&
+      <PopupMessage isModalOpen={isModalErrOpen} onClose={() => {setIsModalErrOpen(false)}} text={errorMessage} ></PopupMessage>
+      }
     </div>
   )
 };
 
-function BookingPartnerHistory() {
+function BookingPartnerHistory({tabKey}) {
   const phoneNumber = localStorage.getItem('phoneNumber')
 
   const DEFAULT_FILTER = {
     skip: 0,
     limit: 20,
     filter: {
-      // CustomerScheduleStatus: status
       phone: phoneNumber
     }
   }
@@ -117,16 +208,10 @@ function BookingPartnerHistory() {
   const [loading, setLoading] = useState(false)
   const [dataList, setDataList] = useState({ data: [], total: 0 })
 
-  // useEffect(() => {
-  //   setFilter((prev) => ({
-  //     ...prev,
-  //     searchText: search
-  //   }))
-  //   getData({
-  //     ...filter,
-  //     searchText: search
-  //   })
-  // }, [search])
+  useEffect(() => {
+    getData(filter)
+  }, [tabKey])
+
   useEffect(() => {
     getData(filter)
   }, [])
@@ -138,7 +223,6 @@ function BookingPartnerHistory() {
       const { isSuccess, message, data } = result
       setLoading(false)
       if (!isSuccess || !data) {
-        //lấy danh sách lỗi không cần show lỗi
         return
       } else {
         setDataList(data)
@@ -171,14 +255,14 @@ function BookingPartnerHistory() {
         })}
       </div>
       <div className="" style={{ maxWidth: 600, margin: 'auto', width: '100%',marginBottom:'60px' }}>
-        {(dataList.data.length > 0 && (
+        {(dataList?.data?.length > 0 && (
           <Pagination
             current={currentPage}
             style={{ textAlign: 'right' }}
             defaultPageSize={filter.limit}
             className='paging'
             simple={true}
-            total={dataList.total}
+            total={dataList?.total}
             onChange={(pageCurrent, pageSize) => {
               const skip = (pageCurrent-1) * filter.limit
               const newFilter = {

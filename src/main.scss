@@ -1,0 +1,67 @@
+$--unnamed-color-ffffff: #ffffff;
+$--unnamed-color-b4b4b4: #b4b4b4;
+$--unnamed-color-d6d6d6: #d6d6d6;
+$--unnamed-color-007bff: #007bff;
+$--unnamed-color-24242600: #242426;
+$--unnamed-color-6b6b6b: #6b6b6b;
+$--unnamed-color-7ee010: #7ee010;
+$--unnamed-color-356203: #356203;
+$--unnamed-color-24242: #242424;
+$--unnamed-color-002399: #002399;
+
+html {
+  --main-color: #002399;
+  --sub-color: #ffffff;
+  --main-color30: #0870d9;
+}
+
+.BLACK {
+  --main-color: #242426;
+  --sub-color: #ffffff;
+}
+
+.BLUE {
+  --main-color: #002399;
+  --sub-color: #ffffff;
+}
+
+.BLUE_SECOND {
+  --main-color: #007bff;
+  --sub-color: #ffffff;
+}
+
+.BLUE_THIRD {
+  --main-color: #25f7f2;
+  --sub-color: #ffffff;
+}
+
+.GREEN {
+  --main-color: #7ee010;
+  --sub-color: #ffffff;
+}
+
+.mgt-10 {
+  margin-top: 10px;
+}
+.search-form {
+  padding: 15px;
+}
+
+input.ant-input.login__input.search {
+  height: 36px;
+  line-height: 36px;
+  width: calc(100% - 70px);
+}
+button.ant-btn.ant-btn-button.search {
+  width: 50px;
+  height: 36px;
+  background: #051945;
+  color: white;
+}
+.ant-input-number-lg input {
+  height: 45px;
+  background: #dddddd1a;
+}
+.cancel-schedule{
+  background-color: var(--error-btn-color) !important;
+}

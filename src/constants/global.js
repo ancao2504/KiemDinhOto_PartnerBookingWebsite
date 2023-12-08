@@ -1,5 +1,9 @@
 import React from 'react'
-
+import { ReactComponent as MoMoIcon } from '../assets/Booking-icon/momo2.svg'
+import { ReactComponent as BankIcon } from '../assets/Booking-icon/banking-svgrepo-com2.svg'
+import ViSaIcon  from '../assets/Booking-icon/visa.png'
+import  CashIcon  from '../assets/Booking-icon/cash.png'
+import AtmIcon from "../assets/Booking-icon/atmCard.png";
 export const IS_ZALO_MINI_APP = window.APP_CONTEXT === 'zalo-mini-app'
 
 export const SCHEDULE_STATUS_3_0 = [
@@ -24,6 +28,56 @@ export const SCHEDULE_STATUS_3_0 = [
     color: '#34AA44'
   }
 ]
+export const SCHEDULE_STATUS = [
+  {
+    label: 'Tất cả',
+    color: '#C87800',
+    key:'ALL'
+  },
+  {
+    label: 'Chưa xác nhận',
+    value: 0,
+    color: '#C87800',
+    key:'UNCONFIRMED'
+  },
+  {
+    label: 'Đã xác nhận',
+    value: 10,
+    color: '#0870D9',
+    key:'CONFIRMED'
+  },
+  {
+    label: 'Đã hủy',
+    value: 20,
+    color: '#D7D7D7',
+    key:'CANCELED'
+  },
+  {
+    label: 'Đã hoàn thành',
+    value: 30,
+    color: '#34AA44',
+    key:'CLOSED'
+  }
+]
+
+export const CUSTOMER_RECEIPT_STATUS = {
+  NEW: 'New',
+  PROCESSING: 'Processing',
+  PENDING: 'Pending',
+  FAILED: 'Failed',
+  SUCCESS: 'Success',
+  CANCELED: 'Canceled'
+}
+
+export const CUSTOMER_RECEIPT_STATUS_TO_TEXT = {
+  NEW: 'Mới',
+  PROCESSING: 'Đang xử lý',
+  PENDING: 'Chờ xử lý',
+  FAILED: 'Thất bại',
+  SUCCESS: 'Thành công',
+  CANCELED: 'Đã hủy'
+}
+
 export const VIHCLE_TYPES_STATE = {
   CAR: 0,
   OTHER_VEHICLES: 10,
@@ -67,29 +121,640 @@ export const SCHEDULE_TITLE = {
     subTitle: 'Dành cho khách hàng đăng kiểm lần đầu - không mang phương tiện đến trạm đăng kiểm'
   },
 }
-export const SCHEDULE_ERROR = {
-  INVALID_STATION: 'Thiếu thông tin trạm',
-  INVALID_BOOKING_CONFIG: 'Lịch hẹn đã đầy',
-  BOOKING_MAX_LIMITED: 'Lịch hẹn đạt số lượng tối đa',
-  UNCONFIRMED_BOOKING_EXISTED: 'Phương tiện của quý khách đã có lịch hẹn. Vui lòng kiểm tra lại!',
-  INVALID_DATE: 'Ngày hẹn không hợp lệ',
-  BLOCK_USER_BOOKING_SCHEDULE: 'Người dùng bị khóa đặt lịch',
-  BOOKING_ON_DAY_OFF: 'Ngày hẹn không đúng',
-  BOOKING_ON_SUNDAY: 'Sai thông tin ngày hẹn',
-  INVALID_PLATE_NUMBER: 'Biển số xe không hợp lệ',
-  INVALID_REQUEST: 'Đặt lịch thất bại',
-  MAX_LIMIT_SCHEDULE_BY_USER: 'Số lượng lịch hẹn của người dùng quá giới hạn',
-  MAX_LIMIT_SCHEDULE_BY_PHONE: 'Số lượng lịch hẹn của số điện thoại quá giới hạn ',
-  MAX_LIMIT_SCHEDULE_BY_PLATE_NUMBER: 'Số lượng lịch hẹn của biển số xe quá giới hạn',
-  ALREADY_CANCEL: 'Lịch hẹn đã hủy trước đó',
-  BOOKING_MAX_LIMITED_BY_CONFIG: 'Lịch hẹn không được vượt giới hạn',
-  BOOKING_MAX_LIMITED: 'Lịch hẹn đạt số lượng tối đa',
-  CONFIRMED_BY_STATION_STAFF: 'Đã được trung tâm xác nhận',
-  EARLY_BOOKING: ' Không được đặt lịch hẹn sớm hơn 10 ngày so với ngày hết hạn',
-  BOOKING_ON_TODAY: 'Đã được trung tâm xác nhận',
-  INVALID_VEHICLE_CERTIFICATE: 'Số seri GCN không trùng khớp với BSX',
-  BLOCK_BOOKING_BY_PHONE: 'Tài khoản đã bị khóa chức năng đặt lịch',
-  BLOCK_BOOKING_BY_LICENSE_PLATE: 'Biển số xe đã bị khóa do đặt lịch quá nhiều',
-  MAX_LIMIT_SCHEDULE_BY_VEHICLE_COUNT: 'Số lượng lịch vượt quá giới hạn',
-  STATION_NOT_ACCEPT_VEHICLE:'trạm không nhận đặt lịch cho xe trên 16 chỗ',
+export const VIHCLE_TYPES = [
+  {
+    label: 'Xe ô tô con < 9 chỗ',
+    value: 1,
+  },
+  {
+    label: 'Xe rơ mooc',
+    value: 20,
+  },
+  {
+    label: 'Xe bán tải, phương tiện khác',
+    value: 10,
+  }
+]
+export const VEHICLE_SUB_CATEGORY = {
+  CAR: 1, //- Ô tô con
+  PASSENGER: 11, //- Ô tô khách
+  TRUCKER: 12, //- Xe tải
+  GROUP: 13, // đoàn oto
+  ROMOOCL: 20, //- Romooc, sơmi romooc
+  CAR_SPECIALIZED: 14, // xe bán tải
+  ORTHER: 10 // phương tiện khác
 }
+export const PAYMENT_OBJECT = {
+  CASH: {
+    id: 1,
+    value: 'cash',
+    label: 'Tiền mặt',
+    enablePaymentOnline: 1,
+    icon: (
+      <div className="d-flex align-items-center justify-content-center">
+        <img src={CashIcon} style={{ maxWidth: '83px',width:'100%', height: '100px' }} />
+      </div>
+    )
+  },
+  ATM: {
+    id: 2,
+    value: 'atm',
+    label: 'Chuyển khoản ngân hàng',
+    enablePaymentOnline: 1,
+    icon: <BankIcon className="w-icon " />
+  }, // atm/bank
+  MOMO: {
+    id: 5,
+    value: 'momo',
+    label: 'Ví điện tử MoMo',
+    enablePaymentOnline: 1,
+    icon: <MoMoIcon className="w-icon " />
+  },
+  CREDIT_CARD: {
+    id: 4,
+    value: 'creditcard', // visa
+    label: 'VISA / MASTER / JCB',
+    enablePaymentOnline: 1,
+    icon: (
+      <div  className="d-flex align-items-center justify-content-center">
+        <img src={ViSaIcon} style={{ maxWidth: '83px',width:'100%', height: '100px' }} />
+      </div>
+    )
+  },
+  DOMESTIC_CARD: {
+    id: 6,
+    value: 'domesticcard',
+    label: 'Thẻ thanh toán nội địa (ATM)',
+    enablePaymentOnline: 1,
+    icon: (
+      <div className="d-flex align-items-center justify-content-center">
+        <img src={AtmIcon}  style={{ maxWidth: '75px',width:'100%', height: '80px',marginBottom:'10px'}}/>
+      </div>
+    )
+  },
+  MOMO_BUSINESS: {
+    id: 7,
+    value: 'momobusiness',
+    label: 'Thanh toán qua MoMo',
+    enablePaymentOnline: 1,
+    icon: <MoMoIcon className="w-icon " />
+  }
+}
+export const VEHICLE_COLOR = { 1: 'WHITE', 2: 'BLUE', 3: 'YELLOW', 4: 'RED' }
+
+export const VIHCLE_CATEGORY_OTO = [
+  {
+    label: 'Xe ô tô 4 chỗ',
+    value: 1001,
+    seat:4
+  },
+  {
+    label: 'Xe ô tô 5 chỗ',
+    value: 1002,
+    seat:5
+  },
+  {
+    label: 'Xe ô tô 6 chỗ',
+    value: 1003,
+    seat:6
+  },
+  {
+    label: 'Xe ô tô 7 chỗ',
+    value: 1004,
+    seat:7
+  },
+  {
+    label: 'Xe ô tô 8 chỗ',
+    value: 1005,
+    seat:8
+  },
+  {
+    label: 'Xe ô tô 9 chỗ',
+    value: 1006,
+    seat:9
+  }
+]
+
+export const VIHCLE_CATEGORY_BUS = [
+  {
+    label: 'Xe ô tô 10 chỗ',
+    value: 1007,
+    seat:10
+  },
+  {
+    label: 'Xe ô tô 11 chỗ',
+    value: 1008,
+    seat:11
+  },
+  {
+    label: 'Xe ô tô 12 chỗ',
+    value: 1009,
+    seat:12
+  },
+  {
+    label: 'Xe ô tô 13 chỗ',
+    value: 1010,
+    seat:13
+  },
+  {
+    label: 'Xe ô tô 14 chỗ',
+    value: 1011,
+    seat:14
+  },
+  {
+    label: 'Xe ô tô 15 chỗ',
+    value: 1012,
+    seat:15
+  },
+  {
+    label: 'Xe ô tô 16 chỗ',
+    value: 1013,
+    seat:16
+  },
+  {
+    label: 'Xe ô tô 17 chỗ',
+    value: 1014,
+    seat:17
+  },
+  {
+    label: 'Xe ô tô 18 chỗ',
+    value: 1015,
+    seat:18
+  },
+  {
+    label: 'Xe ô tô 19 chỗ',
+    value: 1016,
+    seat:19
+  },
+  {
+    label: 'Xe ô tô 20 chỗ',
+    value: 1017,
+    seat:20
+  },
+  {
+    label: 'Xe ô tô 21 chỗ',
+    value: 1018,
+    seat:21
+  },
+  {
+    label: 'Xe ô tô 22 chỗ',
+    value: 1019,
+    seat:22
+  },
+  {
+    label: 'Xe ô tô 23 chỗ',
+    value: 1020,
+    seat:23
+  },
+  {
+    label: 'Xe ô tô 24 chỗ',
+    value: 1021,
+    seat:24
+  },
+  {
+    label: 'Xe ô tô 25 chỗ',
+    value: 1022,
+    seat:25
+  },
+  {
+    label: 'Xe ô tô 29 chỗ',
+    value: 1023,
+    seat:29
+  },
+  {
+    label: 'Xe ô tô 45 chỗ',
+    value: 1024,
+    seat:45
+  },
+  {
+    label: 'Xe ô tô 52 chỗ',
+    value: 1025,
+    seat:52
+  }
+]
+
+export const VIHCLE_CATEGORY_TRUCK = [
+  {
+    label: 'Xe tải dưới 1 tấn',
+    value: 2002,
+    maxWeight:999,
+    minWeight:0
+  },
+  {
+    label: 'Xe tải dưới 2 tấn',
+    value: 2003,
+    maxWeight:1999,
+    minWeight:1000
+  },
+  {
+    label: 'Xe tải dưới 3 tấn',
+    value: 2004,
+    maxWeight:2999,
+    minWeight:2000
+  },
+  {
+    label: 'Xe tải dưới 4 tấn',
+    value: 2005,
+    maxWeight:3999,
+    minWeight:3000
+  },
+  {
+    label: 'Xe tải dưới 5 tấn',
+    value: 2006,
+    maxWeight:4999,
+    minWeight:4000
+  },
+  {
+    label: 'Xe tải dưới 6 tấn',
+    value: 2007,
+    maxWeight:5999,
+    minWeight:5000
+  },
+  {
+    label: 'Xe tải dưới 7 tấn',
+    value: 2008,
+    maxWeight:6999,
+    minWeight:6000
+  },
+  {
+    label: 'Xe tải dưới 8 tấn',
+    value: 2009,
+    maxWeight:7999,
+    minWeight:7000
+  },
+  {
+    label: 'Xe tải dưới 9 tấn',
+    value: 2010,
+    maxWeight:8999,
+    minWeight:8000
+  },
+  {
+    label: 'Xe tải dưới 10 tấn',
+    value: 2011,
+    maxWeight:9999,
+    minWeight:9000
+  },
+  {
+    label: 'Xe tải dưới 11 tấn',
+    value: 2012,
+    maxWeight:10999,
+    minWeight:10000
+  },
+  {
+    label: 'Xe tải dưới 12 tấn',
+    value: 2013,
+    maxWeight:11999,
+    minWeight:11000
+  },
+  {
+    label: 'Xe tải dưới 13 tấn',
+    value: 2014,
+    maxWeight:12999,
+    minWeight:12000
+  },
+  {
+    label: 'Xe tải dưới 14 tấn',
+    value: 2015,
+    maxWeight:13999,
+    minWeight:13000
+  },
+  {
+    label: 'Xe tải dưới 15 tấn',
+    value: 2016,
+    maxWeight:14999,
+    minWeight:14000
+  },
+  {
+    label: 'Xe tải dưới 16 tấn',
+    value: 2017,
+    maxWeight:15999,
+    minWeight:15000
+  },
+  {
+    label: 'Xe tải dưới 17 tấn',
+    value: 2018,
+    maxWeight:16999,
+    minWeight:16000
+  },
+  {
+    label: 'Xe tải dưới 18 tấn',
+    value: 2019,
+    maxWeight:17999,
+    minWeight:17000
+  },
+  {
+    label: 'Xe tải dưới 19 tấn',
+    value: 2020,
+    maxWeight:18999,
+    minWeight:18000
+  },
+  {
+    label: 'Xe tải dưới 27 tấn',
+    value: 2021,
+    maxWeight:26999,
+    minWeight:26000
+  },
+  {
+    label: 'Xe tải dưới 40 tấn',
+    value: 2022,
+    maxWeight:39999,
+    minWeight:27000
+  },
+  {
+    label: 'Xe tải trên 40 tấn',
+    value: 2023,
+    maxWeight:99999,
+    minWeight:40000
+  }
+]
+
+export const VIHCLE_CATEGORY_GROUP = [
+  {
+    label: 'Xe đầu kéo dưới 19 tấn',
+    value: 2024,
+    maxWeight:18999,
+    minWeight:0,
+  },
+  {
+    label: 'Xe đầu kéo dưới 27 tấn',
+    value: 2025,
+    maxWeight:26999,
+    minWeight:19000,
+  },
+  {
+    label: 'Xe đầu kéo dưới 40 tấn',
+    value: 2026,
+    maxWeight:39999,
+    minWeight:27000,
+  },
+  {
+    label: 'Xe đầu kéo trên 40 tấn',
+    value: 2027,
+    maxWeight:99999,
+    minWeight:40000,
+  }
+]
+
+export const VIHCLE_CATEGORY_MOOC = [
+  {
+    label: 'Xe ro_mooc',
+    value: 3000,
+    maxWeight:99999,
+    minWeight:0,
+  }
+]
+
+export const VIHCLE_CATEGORY_PICKUP = [
+  {
+    label: 'Xe bán tải',
+    value: 2001,
+    maxWeight:3999,
+    minWeight:0,
+    seat:5
+  }
+]
+
+export const VIHCLE_CATEGORY_SPECIALIZED = [
+  {
+    label: 'Xe chuyên dụng',
+    value: 4000
+  },
+  {
+    label: 'Xe 4 bánh có động cơ',
+    value: 5000
+  },
+  {
+    label: 'Xe cứu thương',
+    value: 6000
+  }
+]
+
+export const VIHCLE_CATEGORY_ORTHER = [
+  {
+    label: 'Xe ô tô 10 chỗ',
+    value: 1007
+  },
+  {
+    label: 'Xe ô tô 11 chỗ',
+    value: 1008
+  },
+  {
+    label: 'Xe ô tô 12 chỗ',
+    value: 1009
+  },
+  {
+    label: 'Xe ô tô 13 chỗ',
+    value: 1010
+  },
+  {
+    label: 'Xe ô tô 14 chỗ',
+    value: 1011
+  },
+  {
+    label: 'Xe ô tô 15 chỗ',
+    value: 1012
+  },
+  {
+    label: 'Xe ô tô 16 chỗ',
+    value: 1013
+  },
+  {
+    label: 'Xe ô tô 17 chỗ',
+    value: 1014
+  },
+  {
+    label: 'Xe ô tô 18 chỗ',
+    value: 1015
+  },
+  {
+    label: 'Xe ô tô 19 chỗ',
+    value: 1016
+  },
+  {
+    label: 'Xe ô tô 20 chỗ',
+    value: 1017
+  },
+  {
+    label: 'Xe ô tô 21 chỗ',
+    value: 1018
+  },
+  {
+    label: 'Xe ô tô 22 chỗ',
+    value: 1019
+  },
+  {
+    label: 'Xe ô tô 23 chỗ',
+    value: 1020
+  },
+  {
+    label: 'Xe ô tô 24 chỗ',
+    value: 1021
+  },
+  {
+    label: 'Xe ô tô 25 chỗ',
+    value: 1022
+  },
+  {
+    label: 'Xe ô tô 29 chỗ',
+    value: 1023
+  },
+  {
+    label: 'Xe ô tô 45 chỗ',
+    value: 1024
+  },
+  {
+    label: 'Xe ô tô 52 chỗ',
+    value: 1025
+  },
+  {
+    label: 'Xe tải dưới 1 tấn',
+    value: 2002
+  },
+  {
+    label: 'Xe tải dưới 2 tấn',
+    value: 2003
+  },
+  {
+    label: 'Xe tải dưới 3 tấn',
+    value: 2004
+  },
+  {
+    label: 'Xe tải dưới 4 tấn',
+    value: 2005
+  },
+  {
+    label: 'Xe tải dưới 5 tấn',
+    value: 2006
+  },
+  {
+    label: 'Xe tải dưới 6 tấn',
+    value: 2007
+  },
+  {
+    label: 'Xe tải dưới 7 tấn',
+    value: 2008
+  },
+  {
+    label: 'Xe tải dưới 8 tấn',
+    value: 2009
+  },
+  {
+    label: 'Xe tải dưới 9 tấn',
+    value: 2010
+  },
+  {
+    label: 'Xe tải dưới 10 tấn',
+    value: 2011
+  },
+  {
+    label: 'Xe tải dưới 11 tấn',
+    value: 2012
+  },
+  {
+    label: 'Xe tải dưới 12 tấn',
+    value: 2013
+  },
+  {
+    label: 'Xe tải dưới 13 tấn',
+    value: 2014
+  },
+  {
+    label: 'Xe tải dưới 14 tấn',
+    value: 2015
+  },
+  {
+    label: 'Xe tải dưới 15 tấn',
+    value: 2016
+  },
+  {
+    label: 'Xe tải dưới 16 tấn',
+    value: 2017
+  },
+  {
+    label: 'Xe tải dưới 17 tấn',
+    value: 2018
+  },
+  {
+    label: 'Xe tải dưới 18 tấn',
+    value: 2019
+  },
+  {
+    label: 'Xe tải dưới 19 tấn',
+    value: 2020
+  },
+  {
+    label: 'Xe tải dưới 27 tấn',
+    value: 2021
+  },
+  {
+    label: 'Xe tải dưới 40 tấn',
+    value: 2022
+  },
+  {
+    label: 'Xe tải trên 40 tấn',
+    value: 2023
+  },
+  {
+    label: 'Xe đầu kéo dưới 19 tấn',
+    value: 2024
+  },
+  {
+    label: 'Xe đầu kéo dưới 27 tấn',
+    value: 2025
+  },
+  {
+    label: 'Xe đầu kéo dưới 40 tấn',
+    value: 2026
+  },
+  {
+    label: 'Xe đầu kéo trên 40 tấn',
+    value: 2027
+  },
+  {
+    label: 'Xe bán tải',
+    value: 2001
+  },
+  {
+    label: 'Xe chuyên dụng',
+    value: 4000
+  },
+  {
+    label: 'Xe 4 bánh có động cơ',
+    value: 5000
+  },
+  {
+    label: 'Xe cứu thương',
+    value: 6000
+  }
+]
+
+export const VEHICLE_SUB_TYPE = [
+  {
+    label: 'Xe ô tô con',
+    value: 1
+  },
+  {
+    label: 'Xe khách',
+    value: 11
+  },
+  {
+    label: 'Xe tải',
+    value: 12
+  },
+  {
+    label: 'Đoàn ô tô (ô tô đầu kéo + sơ mi rơ mooc)',
+    value: 13
+  },
+  {
+    label: 'Rơ moóc và sơ mi rơ moóc',
+    value: 20,
+  },
+  {
+    label: 'Phương tiện khác',
+    value: 10
+  },
+  {
+    label: 'Xe bán tải',
+    value: 14
+  }
+]
