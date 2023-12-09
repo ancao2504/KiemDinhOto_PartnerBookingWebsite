@@ -103,11 +103,11 @@ export const PLATE_COLOR=[
 ]
 export const SCHEDULE_TYPE = [
   {
-    label: 'Đăng kiểm xe cũ',
+    label: 'Xe cũ (Đã từng đăng kiểm)',
     value: 1,
   },
   {
-    label: 'Đăng kiểm xe mới',
+    label: 'Xe mới (Chưa đăng kiểm lần nào)',
     value: 2,
   },
 ]

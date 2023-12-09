@@ -356,21 +356,53 @@ function BookingPartnerForm({form, setTabKey}) {
       }
     }
   }, [listStation])
+  useEffect(()=>{
+    setBookingData({
+      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
+      phone:dataBookingParam?.phone|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| undefined,
+      licensePlates:dataBookingParam?.licensePlates|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| undefined,
+      vntId: dataBookingParam?.vntId|| undefined,
+      stationsId: dataBookingParam?.stationsId|| undefined,
+      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
+      time: dataBookingParam?.time || undefined,
+      ...bookingData,
+    })
+    setDateFilter({
+      vehicleType: Number(dataBookingParam?.vehicleType)|| undefined,
+      ...dateFilter,
+    })
+    form.setFieldsValue({
+      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
+      phone:dataBookingParam?.phone|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| undefined,
+      licensePlates:dataBookingParam?.licensePlates|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| undefined,
+      vntId: dataBookingParam?.vntId|| undefined,
+      stationsId: dataBookingParam?.stationsId|| undefined,
+      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
+      time: dataBookingParam?.time || undefined,
+    })
+  },[])
 
   return (
     <Form
       name="booking"
       layout="vertical"
       initialValues={{
-        fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
-        phone:dataBookingParam?.phone|| undefined,
-        scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
-        licensePlateColor:dataBookingParam?.licensePlateColor|| undefined,
-        vehicleType: dataBookingParam?.vehicleType|| undefined,
-        vntId: dataBookingParam?.vntId|| undefined,
-        stationsId: dataBookingParam?.stationsId|| undefined,
-        dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-        time: dataBookingParam?.time || undefined,
+        // fullname:dataBookingParam?.fullnameSchedule|| undefined,
+        // phone:dataBookingParam?.phone|| undefined,
+        // scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
+        // licensePlateColor:dataBookingParam?.licensePlateColor|| undefined,
+        // licensePlates:dataBookingParam?.licensePlates|| undefined
+        // vehicleType: dataBookingParam?.vehicleType|| undefined,
+        // vntId: dataBookingParam?.vntId|| undefined,
+        // stationsId: dataBookingParam?.stationsId|| undefined,
+        // dateSchedule: dataBookingParam?.dateSchedule|| undefined,
+        // time: dataBookingParam?.time || undefined,
       }}
       form={form}
       onFinish={(values) => {
@@ -386,7 +418,7 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input className="login__input booking-input" placeholder="Nguyễn Văn a" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.fullnameSchedule|| undefined} className="login__input booking-input" placeholder="Nguyễn Văn a" type="text" size="large" />
         </div>
       </Form.Item>
       <Form.Item
@@ -411,7 +443,7 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.phone|| undefined} className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" />
         </div>
       </Form.Item>
 
@@ -431,6 +463,7 @@ function BookingPartnerForm({form, setTabKey}) {
             placeholder="Vui lòng chọn tình trạng xe"
             styles={customStyles}
             options={scheduleTypes}
+            defaultValue={Number(dataBookingParam?.scheduleType)|| undefined}
             menuPlacement="top"
             isOptionDisabled={(option) => option.disabled}
             value={bookingData.scheduleType}
@@ -471,7 +504,7 @@ function BookingPartnerForm({form, setTabKey}) {
             }
           ]}>
         <div className="login__input__icon">
-          <Input className="login__input booking-input" style={{textTransform:'uppercase'}} placeholder="59B16856" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || undefined} className="login__input booking-input" style={{textTransform:'uppercase'}} placeholder="59B16856" type="text" size="large" />
         </div>
       </Form.Item>
       <Form.Item
@@ -492,9 +525,9 @@ function BookingPartnerForm({form, setTabKey}) {
             options={licensePlateColor}
             value={bookingData.licensePlateColor}
             menuPlacement="top"
-            defaultValue={bookingData?.licensePlateColor}
+            defaultValue={Number(dataBookingParam?.licensePlateColor)|| undefined}
             isOptionDisabled={(option) => option.disabled}
-            disabled={!bookingData?.scheduleType}
+            // disabled={!bookingData?.scheduleType}
             onChange={(values) => {
               form.setFieldsValue({
               licensePlateColor:values,
@@ -506,15 +539,15 @@ function BookingPartnerForm({form, setTabKey}) {
                 time: null
               })
               setBookingData({
-              ...bookingData,
-              licensePlateColor:values,
-              vehicleType: null,
-              vntId: null,
-              area: null,
-              stationsId: null,
-              dateSchedule: null,
-              time: null
-            })
+                ...bookingData,
+                licensePlateColor:values,
+                vehicleType: null,
+                vntId: null,
+                area: null,
+                stationsId: null,
+                dateSchedule: null,
+                time: null
+              })
             }}
           />
         </div>
@@ -535,10 +568,10 @@ function BookingPartnerForm({form, setTabKey}) {
             placeholder="Vui lòng chọn loại xe"
             styles={customStyles}
             options={VIHCLE_TYPES}
+            defaultValue={Number(dataBookingParam?.vehicleType)|| undefined}
             menuPlacement="top"
-            value={bookingData.vehicleType}
             isOptionDisabled={(option) => option.disabled}
-            disabled={!bookingData?.licensePlateColor}
+            // disabled={!bookingData?.licensePlateColor}
             onChange={(values) => {
               form.setFieldsValue({
                 vntId: null,
