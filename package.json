@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/core": "^7.23.5",
+    "@chaunnt/reactjs_buildpackageandnotify": "1.0.19",
     "@babel/preset-env": "^7.23.5",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -19,13 +20,25 @@
     "react-router-dom": "^5.2.0",
     "react-select": "^5.8.0",
     "sass": "^1.69.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zmp-cli": "^3.13.0",
+    "zmp-sdk": "^2.27.1"
+  },
+  "devDependencies": {
+    "copyright-header": "^0.4.6",
+    "husky": "^8.0.2",
+    "prettier": "^2.8.1"
   },
   "scripts": {
+    "deploy-zalo-app": "node deployZApp.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "formatAll": "./node_modules/.bin/prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\" & ./node_modules/.bin/copyright-header copyright-header --fix --copyrightHolder 'TORITI LIMITED 2022'",
+    "format": "./node_modules/.bin/prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "autobuild": "npx @chaunnt/reactjs_buildpackageandnotify",
+    "postinstall": "husky install"
   },
   "eslintConfig": {
     "extends": [
@@ -43,6 +56,17 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "yarn format",
+      "git add"
     ]
   }
 }
