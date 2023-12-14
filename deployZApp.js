@@ -9,7 +9,7 @@ const log = require('./node_modules/zmp-cli/utils/log')
 function configFile() {
   const temp = {
     app: {
-      title: 'Trung tâm đăng kiểm',
+      title: 'TTDK',
       headerColor: '#1843EF',
       textColor: 'white',
       statusBarColor: '#1843EF',
