@@ -5,7 +5,7 @@ FROM node:14.20 as cache-image
 COPY . /usr/src/app/
 
 WORKDIR /usr/src/app
-RUN yarn install
+RUN npm install
 
 # Build frontend
 FROM cache-image as builder
@@ -25,26 +25,16 @@ ARG REACT_APP_API_URL=${REACT_APP_API_URL}
 ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 RUN sed -i 's|REACT_APP_API_URL=.*|REACT_APP_API_URL='"$REACT_APP_API_URL"'|' .env
 
-#read REACT_APP_ADMIN_PAGE_URL from system environment
-ARG REACT_APP_ADMIN_PAGE_URL=${REACT_APP_ADMIN_PAGE_URL}
-ENV REACT_APP_ADMIN_PAGE_URL=${REACT_APP_ADMIN_PAGE_URL}
-RUN sed -i 's|REACT_APP_ADMIN_PAGE_URL=.*|REACT_APP_ADMIN_PAGE_URL='"$REACT_APP_ADMIN_PAGE_URL"'|' .env
-
 #read REACT_APP_THEME_NAME from system environment
 ARG REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
 ENV REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
 RUN sed -i 's|REACT_APP_THEME_NAME=.*|REACT_APP_THEME_NAME='"$REACT_APP_THEME_NAME"'|' .env
 
-#read REACT_APP_LAYOUT from system environment
-ARG REACT_APP_LAYOUT=${REACT_APP_LAYOUT}
-ENV REACT_APP_LAYOUT=${REACT_APP_LAYOUT}
-RUN sed -i 's|REACT_APP_LAYOUT=.*|REACT_APP_LAYOUT='"$REACT_APP_LAYOUT"'|' .env
-
 #run command to build and notify
-RUN yarn autobuild
+RUN npm run autobuild
 
 # deploy to zalo mini app
-# RUN yarn deploy-zalo-app
+# RUN npm deploy-zalo-app
 
 # PROD environment
 # Create image based on the official NGINX image from dockerhub
