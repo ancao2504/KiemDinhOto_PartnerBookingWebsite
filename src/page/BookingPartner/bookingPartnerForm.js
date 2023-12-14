@@ -449,18 +449,18 @@ function BookingPartnerForm({form, setTabKey}) {
 
       <Form.Item
         name="scheduleType"
-        label="Tình trạng xe"
+        label="Mục đích"
         rules={[
           {
             required: true,
-            message: 'Vui lòng chọn tình trạng xe'
+            message: 'Vui lòng chọn mục đích đặt lịch'
           }
         ]}>
         <div className="login__input__icon">
         <SelectAntd
             className="cs-select ant-custom booking-input"
             isSearchable={true}
-            placeholder="Vui lòng chọn tình trạng xe"
+            placeholder="Vui lòng chọn mục đích đặt lịch"
             styles={customStyles}
             options={scheduleTypes}
             defaultValue={Number(dataBookingParam?.scheduleType)|| undefined}

@@ -20,8 +20,8 @@ function BookingPartner() {
   }
   return (
     <>
-    {/* {apiKey ?  */}
-      {/* ( */}
+    {apiKey ? 
+      (
         <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 600, margin: 'auto',padding:'10px' }}>
         {isVisible && (
           <div className="loading">
@@ -55,11 +55,11 @@ function BookingPartner() {
           </Tabs> */}
         </div>
       </div>
-      {/* ):
+      ):
       (
         <LoadFormBookingFailed></LoadFormBookingFailed>
       )
-    } */}
+    }
     </>
   )
 }
