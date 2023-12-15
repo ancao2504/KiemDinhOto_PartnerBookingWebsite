@@ -731,30 +731,37 @@ export const VIHCLE_CATEGORY_ORTHER = [
 export const VEHICLE_SUB_TYPE = [
   {
     label: 'Xe ô tô con',
-    value: 1
+    value: 1,
+    vehicleType:1,
   },
   {
     label: 'Xe khách',
-    value: 11
+    value: 11,
+    vehicleType:10,
   },
   {
     label: 'Xe tải',
-    value: 12
+    value: 12,
+    vehicleType:10,
   },
   {
     label: 'Đoàn ô tô (ô tô đầu kéo + sơ mi rơ mooc)',
-    value: 13
+    value: 13,
+    vehicleType:10,
   },
   {
     label: 'Rơ moóc và sơ mi rơ moóc',
     value: 20,
+    vehicleType:20,
   },
   {
     label: 'Phương tiện khác',
-    value: 10
+    value: 10,
+    vehicleType:10,
   },
   {
     label: 'Xe bán tải',
-    value: 14
+    value: 14,
+    vehicleType:10,
   }
 ]

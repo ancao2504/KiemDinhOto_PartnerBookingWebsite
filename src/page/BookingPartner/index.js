@@ -22,7 +22,7 @@ function BookingPartner() {
     <>
     {apiKey ? 
       (
-        <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 600, margin: 'auto',padding:'10px' }}>
+        <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 480, margin: 'auto',padding:'10px' }}>
         {isVisible && (
           <div className="loading">
             <Spin />
