@@ -14,6 +14,8 @@ import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import PopupMessage from './PopupMessage'
 import BookingSuccess from './BookingSuccessModal'
 import { useLocation } from 'react-router-dom'
+import AreaByIP from '../../services/getAreaByIP'
+import addKeyLocalStorage from '../../helper/localStorage'
 
 
 function getContentAutoFill() {
@@ -36,6 +38,7 @@ function BookingPartnerForm({form, setTabKey}) {
   const [errorMessage, setErrorMessage] = useState('')
   const [isModalErrOpen, setIsModalErrOpen] = useState(false)
   const [bookingData, setBookingData] = useState({})
+  const [localBookingData, setLocalBookingData] = useState(JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData'))))
   const [listPlate, setListPlate] = useState([])
   const [listStation, setListStation] = useState([])
   const [listBookingTime, setListBookingTime] = useState([])
@@ -59,18 +62,19 @@ function BookingPartnerForm({form, setTabKey}) {
     time: false
   })
   const [dataBookingParam, setDataBookingParam] = useState({
-    licensePlates: params.get('licenseplates'),
-    phone: params.get('phone'),
-    fullnameSchedule: params.get('name'),
-    email: params.get('email'),
-    dateSchedule: params.get('dateschedule'),
-    time: params.get('time'),
-    stationsId: params.get('stationsid'),
-    vehicleType:params.get('vehicletype'),
-    licensePlateColor: params.get('licenseplatecolor'),
-    scheduleType: params.get('scheduletype'),
-    vehicleSubType: params.get('vehiclesubtype'),
-    vehicleSubCategory: params.get('vehiclesubcategory'),
+    licensePlates: localBookingData?.licensePlates || params.get('licenseplates'),
+    phone: localBookingData?.phone || params.get('phone'),
+    fullnameSchedule: localBookingData?.fullnameSchedule || params.get('name'),
+    email: localBookingData?.email || params.get('email'),
+    dateSchedule: localBookingData?.dateSchedule || params.get('dateschedule'),
+    time: localBookingData?.time?.scheduleTime || params.get('time'),
+    stationsId: localBookingData?.stationsId?.stationsId || params.get('stationsid'),
+    vehicleType: localBookingData?.vehicleType ||params.get('vehicletype'),
+    licensePlateColor: localBookingData?.licensePlateColor || params.get('licenseplatecolor'),
+    scheduleType: localBookingData?.scheduleType || params.get('scheduletype'),
+    vehicleSubType: localBookingData?.vehicleSubType || params.get('vehiclesubtype'),
+    vehicleSubCategory: localBookingData?.vehicleSubCategory || params.get('vehiclesubcategory'),
+    vntId: localBookingData?.vntId || params.get('vntid'),
   })
   const customStyles = {
     control: (base) => ({
@@ -87,7 +91,7 @@ function BookingPartnerForm({form, setTabKey}) {
         let tmp = data || []
         if (tmp.length > 0) {
           tmp.forEach((element) => {
-            if(bookingData.stationsId.stationStatus){
+            if(bookingData?.stationsId?.stationStatus){
               element.disabled = element.scheduleTimeStatus == 0
             }
             element.label = (
@@ -132,6 +136,34 @@ function BookingPartnerForm({form, setTabKey}) {
         setIsLoading(false)
       })
   }
+  const getAreaByIP = () => {
+    AreaByIP.getAreaByIP().then((result) => {
+      const { statusCode,data } = result
+      if (statusCode == 200) {
+        if(data.stationArea){
+          setBookingData((prev)=>({
+            ...prev,
+            vntId:data.stationArea,
+          }))
+          form.setFieldsValue({
+            vntId:data.stationArea,
+          })
+          getStations({
+            filter: {
+              stationArea: data.stationArea
+            }
+          })
+        }
+      }else{
+        getStations({
+          filter: {
+            stationArea: dataBookingParam?.vntId
+          }
+        })
+      }
+      return result
+    })
+  }
 
   const onFinish = (values) => {
     setIsVisible(false)
@@ -149,7 +181,7 @@ function BookingPartnerForm({form, setTabKey}) {
       scheduleType: values.scheduleType,
       vehicleSubCategory:values.vehicleSubCategory,
       vehicleSubType:values.vehicleSubType,
-      certificateSeries:values.certificateSeries,
+      // certificateSeries:values.certificateSeries,
     }
 
     BookingService.createSchedule(newData).then((result) => {
@@ -164,8 +196,7 @@ function BookingPartnerForm({form, setTabKey}) {
       setIsVisible(false)
       } else {
         setIsModalOpen(true)
-        localStorage.setItem('phoneNumber', values.phone)
-
+        localStorage.removeItem(addKeyLocalStorage('bookingData'))
         setTimeout(() => {
           setBookingData({})
           form.resetFields();
@@ -315,14 +346,52 @@ function BookingPartnerForm({form, setTabKey}) {
         ...prev,
         vehicleSubCategory: vehicleSubCategory||options[0].value,
       }));
+      let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+      let localData={
+        ...data,
+        vehicleSubCategory: dataBookingParam?.vehicleSubCategory || vehicleSubCategory||options[0].value,
+      }
+      localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
       form.setFieldsValue({
         vehicleSubCategory: vehicleSubCategory||options[0].value,
       })
     }
       setVehicleSubCategoryOptions(options);
   }
+  const handleFillData=()=>{
+    setBookingData({
+      ...bookingData,
+      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
+      phone:dataBookingParam?.phone|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)|| SCHEDULE_TYPE[0].value,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
+      licensePlates:dataBookingParam?.licensePlates|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
+      vntId: dataBookingParam?.vntId || undefined,
+      stationsId: dataBookingParam?.stationsId || undefined,
+      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
+      time: dataBookingParam?.time || undefined,
+      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
+    })
+    form.setFieldsValue({
+      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
+      phone:dataBookingParam?.phone|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)||  SCHEDULE_TYPE[0].value,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
+      licensePlates:dataBookingParam?.licensePlates|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
+      vntId: dataBookingParam?.vntId|| undefined,
+      stationsId: dataBookingParam?.stationsId|| undefined,
+      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
+      time: dataBookingParam?.time || undefined,
+      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
+    })
+  }
 
   useEffect(() => {
+    getAreaByIP()
     if (!bookingData?.vntId && !bookingData?.stationsId && !bookingData?.dateSchedule && !bookingData?.time) {
       getStationAreas()
     } else {
@@ -333,7 +402,17 @@ function BookingPartnerForm({form, setTabKey}) {
   useEffect(() => {
     if(!dataBookingParam.vehicleSubType){
       handleCategory(VEHICLE_SUB_TYPE[0].value)
+    }else{
+      handleCategory(dataBookingParam.vehicleSubType)
     }
+    let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+      let localData={
+        ...data,
+        vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+        vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
+        vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
+      }
+      localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
     const dataCompleteForm = getContentAutoFill()
     if (
       !_.isEmpty(dataCompleteForm) &&
@@ -389,40 +468,21 @@ function BookingPartnerForm({form, setTabKey}) {
     }
   }, [listStation])
   useEffect(()=>{
-    setBookingData({
-      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
-      phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)|| SCHEDULE_TYPE[0].value,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
-      licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
-      vntId: dataBookingParam?.vntId|| undefined,
-      stationsId: dataBookingParam?.stationsId|| undefined,
-      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-      time: dataBookingParam?.time || undefined,
-      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
-      ...bookingData,
-    })
+    handleFillData()
     setDateFilter({
-      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
       ...dateFilter,
+      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
+      stationsId: dataBookingParam?.stationsId || undefined,
     })
-    form.setFieldsValue({
-      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
-      phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)||  SCHEDULE_TYPE[0].value,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
-      licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
-      vntId: dataBookingParam?.vntId|| undefined,
-      stationsId: dataBookingParam?.stationsId|| undefined,
-      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-      time: dataBookingParam?.time || undefined,
-      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
-    })
+    if (dataBookingParam.stationsId && bookingData) {
+      getBookingHours({
+        stationsId: dataBookingParam?.stationsId,
+        date: dataBookingParam?.dateSchedule,
+        vehicleType: dataBookingParam?.vehicleType
+      })
+    }
   },[])
+  console.log(form.getFieldsValue())
 
   return (
     <Form
@@ -454,7 +514,19 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.fullnameSchedule|| undefined} className="login__input booking-input" placeholder="Nguyễn Văn a" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.fullnameSchedule|| undefined}
+            className="login__input booking-input"
+            placeholder="Nguyễn Văn a" 
+            type="text" 
+            size="large"
+            onInput={(e) => {
+              let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+              let localData={
+                ...data,
+                fullnameSchedule:e.target.value
+              }
+              localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            }} />
         </div>
       </Form.Item>
       <Form.Item
@@ -479,7 +551,19 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.phone|| undefined} className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.phone|| undefined} 
+            className="login__input booking-input" 
+            placeholder="Nhập số điện thoại" 
+            type="text" 
+            size="large"
+            onInput={(e)=>{
+              let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+              let localData={
+                ...data,
+                phone:e.target.value
+              }
+              localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            }} />
         </div>
       </Form.Item>
 
@@ -505,6 +589,12 @@ function BookingPartnerForm({form, setTabKey}) {
             value={bookingData.scheduleType}
             // disabled={!bookingData.stationsId}
             onChange={(values) => {
+              let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+              let localData={
+                ...data,
+                scheduleType:values
+              }
+              localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
               form.setFieldsValue({
                 scheduleType:values,
                 licensePlateColor:null,
@@ -540,7 +630,20 @@ function BookingPartnerForm({form, setTabKey}) {
             }
           ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || undefined} className="login__input booking-input" style={{textTransform:'uppercase'}} placeholder="59B16856" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || undefined} 
+            className="login__input booking-input" 
+            style={{textTransform:'uppercase'}} 
+            placeholder="59B16856" 
+            type="text" 
+            size="large"
+            onInput={(e)=>{
+              let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+              let localData={
+                ...data,
+                licensePlates:e.target.value
+              }
+              localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            }} />
         </div>
       </Form.Item>
       <Form.Item
@@ -565,6 +668,12 @@ function BookingPartnerForm({form, setTabKey}) {
             isOptionDisabled={(option) => option.disabled}
             // disabled={!bookingData?.scheduleType}
             onChange={(values) => {
+              let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+              let localData={
+                ...data,
+                licensePlateColor:values
+              }
+              localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
               form.setFieldsValue({
               licensePlateColor:values,
                 vehicleType: null,
@@ -605,6 +714,13 @@ function BookingPartnerForm({form, setTabKey}) {
                 options={VEHICLE_SUB_TYPE}
                 defaultValue={Number(dataBookingParam?.vehicleSubType)|| undefined}
                 onChange={(values,vehicletype) => {
+                  let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+                  let localData={
+                    ...data,
+                    vehicleSubType:values,
+                    vehicleType: vehicletype.vehicleType,
+                  }
+                  localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
                   handleCategory(values,null)
                   form.setFieldsValue({
                     vehicleType: vehicletype.vehicleType,
@@ -635,6 +751,12 @@ function BookingPartnerForm({form, setTabKey}) {
               options={vehicleSubCategoryOptions}
               defaultValue={Number(dataBookingParam?.vehicleSubCategory)|| undefined}
               onChange={(values) => {
+                let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+                let localData={
+                  ...data,
+                  vehicleSubCategory:values
+                }
+                localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
                 form.setFieldsValue({
                     vehicleSubCategory: values,
                   })
@@ -673,6 +795,12 @@ function BookingPartnerForm({form, setTabKey}) {
           size="large"
           onInput={(event) => {
             event.target.value = event.target.value.toUpperCase()
+            let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+            let localData={
+              ...data,
+              certificateSeries:event.target.value
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
           }}
         />
       </Form.Item>
@@ -684,7 +812,14 @@ function BookingPartnerForm({form, setTabKey}) {
           }}
           showSearch
           disabled={!bookingData.vehicleSubType}
+          defaultValue={dataBookingParam.vntId || undefined}
           onChange={(values) => {
+            let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+            let localData={
+              ...data,
+              vntId:values
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             form.setFieldsValue({
               stationsId: null,
               dateSchedule: null,
@@ -741,7 +876,9 @@ function BookingPartnerForm({form, setTabKey}) {
             options={listStation}
             menuPlacement="top"
             disabled={!bookingData.vntId || isVisible.stationsId}
+            defaultValue={dataBookingParam.stationsId || undefined}
             onChange={(values) => {
+              console.log("BookingPartnerForm ~ values:", values)
               form.setFieldsValue({
                 dateSchedule: null,
                 time: null,
@@ -752,6 +889,12 @@ function BookingPartnerForm({form, setTabKey}) {
                 stationsId: values,
               })
               const stationSelected = listStation?.find((e) => e.stationsId == values)
+              let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+              let localData={
+                ...data,
+                stationsId:stationSelected
+              }
+              localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
               setBookingData({
                 ...bookingData,
                 stationsId: stationSelected,
@@ -783,6 +926,12 @@ function BookingPartnerForm({form, setTabKey}) {
           isOptionDisabled={(option) => option.disabled}
           disabled={!bookingData.stationsId || isVisible.dateSchedule}
           onChange={(values) => {
+            let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+            let localData={
+              ...data,
+              dateSchedule:values
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             form.setFieldsValue({
               time: null
             })
@@ -821,14 +970,19 @@ function BookingPartnerForm({form, setTabKey}) {
           )}
           isDisabled={!bookingData.dateSchedule || isVisible.time}
           styles={customStyles}
-          defaultValue={bookingData?.time?.scheduleTime}
           options={listBookingTime}
           getOptionValue={(option) => option.label}
           menuPlacement="top"
           onChange={(values) => {
-            // form.setFieldsValue({
-            //   time: values.scheduleTime
-            // })
+            form.setFieldsValue({
+              time: values
+            })
+            let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+            let localData={
+              ...data,
+              time:values
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             setBookingData({
               ...bookingData,
               time: values.scheduleTime
@@ -842,7 +996,7 @@ function BookingPartnerForm({form, setTabKey}) {
           Đặt lịch
         </Button>
       </div>
-      <BookingSuccess isModalOpen={isModalOpen} setTabKey={setTabKey} setIsModalOpen={setIsModalOpen} onClose={() => setIsModalOpen(false)}></BookingSuccess>
+      <BookingSuccess isModalOpen={isModalOpen} setTabKey={setTabKey} setIsModalOpen={setIsModalOpen} onClose={() => {setIsModalOpen(false);window.location.reload()}}></BookingSuccess>
       {isModalErrOpen &&
       <PopupMessage isModalOpen={isModalErrOpen} onClose={() => {setIsModalErrOpen(false)}} text={errorMessage} ></PopupMessage>
       }
