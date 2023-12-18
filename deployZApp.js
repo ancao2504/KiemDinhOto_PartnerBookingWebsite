@@ -49,11 +49,14 @@ async function deployToZalo() {
   let envConfig = {}
   fs.readFileSync(__dirname + '/.env', { encoding: 'utf-8' })
     .split('\n')
-    .forEach((_item) => {
-      if (_item.trim().replace(/\r/g, '')) {
+    .forEach((envVariable) => {
+      let _item = envVariable.trim()
+      if (_item && _item.length > 0 && _item.replace(/\r/g, '')) {
         _item = _item.replace(/\r/g, '')
         const keyValue = _item.split('=')
-        envConfig[keyValue[0]] = keyValue[1].replace(/\r/g, '')
+        if (keyValue.length === 2) {
+          envConfig[keyValue[0]] = keyValue[1].replace(/\r/g, '')
+        }
       }
     })
 
@@ -62,11 +65,11 @@ async function deployToZalo() {
   }
 
   configFile()
-  const REACT_APP_API_URL = envConfig['REACT_APP_API_URL']
+  const REACT_APP_API_URL = "https://zalo.ttdkapi.ttdk.com.vn"
 
-  const accessToken = await axios({
+  let accessToken = await axios({
     method: 'GET',
-    url: `${REACT_APP_API_URL}/getZaloAccessToken`,
+    url: `${REACT_APP_API_URL}/ZaloAPI/robot/getOAAccessToken`,
     headers: {
       authorization: envConfig['GET_ZALO_USER_ACCESS_TOKEN_API_KEY']
     }
