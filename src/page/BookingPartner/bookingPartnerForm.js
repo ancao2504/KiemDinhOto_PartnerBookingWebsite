@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Input, Button, Select as SelectAntd } from 'antd'
+import { Form, Input, Button, Select as SelectAntd, Row, Col } from 'antd'
 import BookingService from '../../services/addBookingService'
 import { WarningOutlined } from '@ant-design/icons'
 import { xoa_dau } from '../../helper/common'
@@ -9,7 +9,7 @@ import queryString from 'query-string'
 import _ from 'lodash'
 import moment from 'moment'
 import Select from 'react-select'
-import { PLATE_COLOR, SCHEDULE_TYPE, VIHCLE_TYPES } from '../../constants/global'
+import { PLATE_COLOR, SCHEDULE_TYPE, VEHICLE_SUB_CATEGORY, VEHICLE_SUB_TYPE, VIHCLE_CATEGORY_BUS, VIHCLE_CATEGORY_GROUP, VIHCLE_CATEGORY_MOOC, VIHCLE_CATEGORY_OTO, VIHCLE_CATEGORY_PICKUP, VIHCLE_CATEGORY_SPECIALIZED, VIHCLE_CATEGORY_TRUCK, VIHCLE_TYPES } from '../../constants/global'
 import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import PopupMessage from './PopupMessage'
 import BookingSuccess from './BookingSuccessModal'
@@ -46,18 +46,19 @@ function BookingPartnerForm({form, setTabKey}) {
   const [disableBookingDate, setDisableBookingDate] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [vehicleSubCategoryOptions, setVehicleSubCategoryOptions] = useState([])
   const [dateFilter, setDateFilter] = useState({
     stationsId: null,
     startDate: moment().format(DATE_DISPLAY_FORMAT),
     endDate:moment().add(30, 'days').format(DATE_DISPLAY_FORMAT),
-    // vehicleType: 1
+    vehicleType: 1
   })
   const [isVisible, setIsVisible] = useState({
     stationsId: false,
     dateSchedule: false,
     time: false
   })
-  const [dataBookingParam, setBookingParam] = useState({
+  const [dataBookingParam, setDataBookingParam] = useState({
     licensePlates: params.get('licenseplates'),
     phone: params.get('phone'),
     fullnameSchedule: params.get('name'),
@@ -68,6 +69,8 @@ function BookingPartnerForm({form, setTabKey}) {
     vehicleType:params.get('vehicletype'),
     licensePlateColor: params.get('licenseplatecolor'),
     scheduleType: params.get('scheduletype'),
+    vehicleSubType: params.get('vehiclesubtype'),
+    vehicleSubCategory: params.get('vehiclesubcategory'),
   })
   const customStyles = {
     control: (base) => ({
@@ -140,10 +143,13 @@ function BookingPartnerForm({form, setTabKey}) {
       dateSchedule: values.dateSchedule,
       time: values.time.scheduleTime,
       stationsId: values.stationsId,
-      vehicleType:values.vehicleType,
+      vehicleType:bookingData.vehicleType,
       licensePlateColor: values.licensePlateColor,
       notificationMethod: 'SMS',
       scheduleType: values.scheduleType,
+      vehicleSubCategory:values.vehicleSubCategory,
+      vehicleSubType:values.vehicleSubType,
+      certificateSeries:values.certificateSeries,
     }
 
     BookingService.createSchedule(newData).then((result) => {
@@ -292,6 +298,29 @@ function BookingPartnerForm({form, setTabKey}) {
         // notification.error('Lấy thông tin thất bại')
       })
   }
+  const handleCategory = (evt,vehicleSubCategory) => {
+    const categoryOptionsMap = {
+      [VEHICLE_SUB_CATEGORY.CAR]: VIHCLE_CATEGORY_OTO,
+      [VEHICLE_SUB_CATEGORY.PASSENGER]: VIHCLE_CATEGORY_BUS,
+      [VEHICLE_SUB_CATEGORY.TRUCKER]: VIHCLE_CATEGORY_TRUCK,
+      [VEHICLE_SUB_CATEGORY.GROUP]: VIHCLE_CATEGORY_GROUP,
+      [VEHICLE_SUB_CATEGORY.ROMOOCL]: VIHCLE_CATEGORY_MOOC,
+      [VEHICLE_SUB_CATEGORY.CAR_SPECIALIZED]: VIHCLE_CATEGORY_PICKUP,
+      [VEHICLE_SUB_CATEGORY.ORTHER]: VIHCLE_CATEGORY_SPECIALIZED,
+    };
+
+    const options = categoryOptionsMap[evt];
+    if(options){
+      setBookingData(prev => ({
+        ...prev,
+        vehicleSubCategory: vehicleSubCategory||options[0].value,
+      }));
+      form.setFieldsValue({
+        vehicleSubCategory: vehicleSubCategory||options[0].value,
+      })
+    }
+      setVehicleSubCategoryOptions(options);
+  }
 
   useEffect(() => {
     if (!bookingData?.vntId && !bookingData?.stationsId && !bookingData?.dateSchedule && !bookingData?.time) {
@@ -302,6 +331,9 @@ function BookingPartnerForm({form, setTabKey}) {
   }, [])
 
   useEffect(() => {
+    if(!dataBookingParam.vehicleSubType){
+      handleCategory(VEHICLE_SUB_TYPE[0].value)
+    }
     const dataCompleteForm = getContentAutoFill()
     if (
       !_.isEmpty(dataCompleteForm) &&
@@ -360,31 +392,35 @@ function BookingPartnerForm({form, setTabKey}) {
     setBookingData({
       fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
       phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)|| SCHEDULE_TYPE[0].value,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
       licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
       vntId: dataBookingParam?.vntId|| undefined,
       stationsId: dataBookingParam?.stationsId|| undefined,
       dateSchedule: dataBookingParam?.dateSchedule|| undefined,
       time: dataBookingParam?.time || undefined,
+      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
       ...bookingData,
     })
     setDateFilter({
-      vehicleType: Number(dataBookingParam?.vehicleType)|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
       ...dateFilter,
     })
     form.setFieldsValue({
       fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
       phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)||  SCHEDULE_TYPE[0].value,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
       licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
       vntId: dataBookingParam?.vntId|| undefined,
       stationsId: dataBookingParam?.stationsId|| undefined,
       dateSchedule: dataBookingParam?.dateSchedule|| undefined,
       time: dataBookingParam?.time || undefined,
+      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
     })
   },[])
 
@@ -449,7 +485,7 @@ function BookingPartnerForm({form, setTabKey}) {
 
       <Form.Item
         name="scheduleType"
-        label="Mục đích"
+        label="Mục đích đặt hẹn"
         rules={[
           {
             required: true,
@@ -480,16 +516,16 @@ function BookingPartnerForm({form, setTabKey}) {
                 time: null
               })
               setBookingData({
-              ...bookingData,
-              scheduleType:values,
-              licensePlateColor:null,
-              vehicleType: null,
-              vntId: null,
-              area: null,
-              stationsId: null,
-              dateSchedule: null,
-              time: null
-            })
+                ...bookingData,
+                scheduleType:values,
+                licensePlateColor:null,
+                vehicleType: null,
+                vntId: null,
+                area: null,
+                stationsId: null,
+                dateSchedule: null,
+                time: null
+              })
             }}
           />
         </div>
@@ -552,51 +588,93 @@ function BookingPartnerForm({form, setTabKey}) {
           />
         </div>
       </Form.Item>
+      <Row className='vehicleType'>
+        <Col className='mWidth-100' span={11}>
+          <Form.Item
+            className="radio-label ps-23"
+            label="Loại phương tiện"
+            name="vehicleSubType"
+            rules={[
+              {
+                required: true,
+                message: 'Vui lòng nhập'
+              }
+            ]}>
+            <SelectAntd
+                className='cs-select ant-custom booking-input'
+                options={VEHICLE_SUB_TYPE}
+                defaultValue={Number(dataBookingParam?.vehicleSubType)|| undefined}
+                onChange={(values,vehicletype) => {
+                  handleCategory(values,null)
+                  form.setFieldsValue({
+                    vehicleType: vehicletype.vehicleType,
+                    vehicleSubType: values,
+                  })
+                  setBookingData({
+                    ...bookingData,
+                    vehicleType: vehicletype.vehicleType,
+                    vehicleSubType: values,
+                  })
+                  setDateFilter({
+                    ...dateFilter,
+                    vehicleType: vehicletype.vehicleType,
+                  })
+                }}
+              />
+          </Form.Item>
+        </Col>
+        <Col span={2}></Col>
+        <Col className='mWidth-100' span={11}>
+          <Form.Item
+            className="radio-label ps-23"
+            label="Phân loại"
+            name="vehicleSubCategory"
+            >
+            <SelectAntd
+              className='cs-select ant-custom booking-input'
+              options={vehicleSubCategoryOptions}
+              defaultValue={Number(dataBookingParam?.vehicleSubCategory)|| undefined}
+              onChange={(values) => {
+                form.setFieldsValue({
+                    vehicleSubCategory: values,
+                  })
+                  setBookingData({
+                    ...bookingData,
+                    vehicleSubCategory: values,
+                  })
+              }}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
       <Form.Item
-        name="vehicleType"
-        label="Chọn loại xe"
+        name="certificateSeries"
+        extra={'Nhập số seri GCN để được tự động kiểm tra phạt nguội'}
+        label={
+          <div>
+            Số tem GCN mới nhất
+            <span
+              className="text-important text-very-small text-primary"
+              onClick={() =>{
+                setIsModalErrOpen(true);
+                setErrorMessage('Số seri là dãy số có dạng XXXXXXXX.<br>Số seri có thể được tìm thấy trên tem đăng kiểm hoặc dòng chữ cuối cùng ở trang 1 của sổ / giấy đăng kiểm')
+              }}>
+              (Tìm số seri)
+            </span>
+          </div>
+          }
+        className="ps-40 mt-3"
         rules={[
-          {
-            required: true,
-            message: 'Vui lòng chọn loại xe'
-          },
         ]}>
-        <div className="login__input__icon">
-          <SelectAntd
-            className="cs-select ant-custom booking-input"
-            isSearchable={true}
-            placeholder="Vui lòng chọn loại xe"
-            styles={customStyles}
-            options={VIHCLE_TYPES}
-            defaultValue={Number(dataBookingParam?.vehicleType)|| undefined}
-            menuPlacement="top"
-            isOptionDisabled={(option) => option.disabled}
-            // disabled={!bookingData?.licensePlateColor}
-            onChange={(values) => {
-              form.setFieldsValue({
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null,
-                vehicleType: values,
-              })
-              setBookingData({
-                ...bookingData,
-                vehicleType: values,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
-              })
-              setDateFilter({
-                ...dateFilter,
-                vehicleType: values,
-              })
-            }}
-          />
-        </div>
+        <Input
+          className="login__input"
+          placeholder="Ví dụ: KA-7461980"
+          type="text"
+          size="large"
+          onInput={(event) => {
+            event.target.value = event.target.value.toUpperCase()
+          }}
+        />
       </Form.Item>
       <Form.Item label="Khu vực" name="vntId" rules={[]}>
         <SelectAntd
@@ -605,7 +683,7 @@ function BookingPartnerForm({form, setTabKey}) {
             return xoa_dau((option?.value ?? '').toLowerCase()).includes(xoa_dau(input.toLowerCase()))
           }}
           showSearch
-          disabled={!bookingData.vehicleType}
+          disabled={!bookingData.vehicleSubType}
           onChange={(values) => {
             form.setFieldsValue({
               stationsId: null,

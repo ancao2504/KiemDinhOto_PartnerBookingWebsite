@@ -87,6 +87,10 @@
 .ant-select-selector{
   height: 48px !important;
 }
+#booking_dateSchedule_extra,
+#booking_certificateSeries_extra{
+  color: var(--primary-button-color);
+}
 .headerBookingHistory {
   display: flex;
   justify-content: space-between;
@@ -275,6 +279,15 @@
   }
   .wrap{
     height: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .vehicleType{
+    width: 100%;
+    flex-flow: column;
+    :where(.css-dev-only-do-not-override-p7e5j5).ant-col-11{
+      max-width: 100%;
+    }
   }
 }
 .inline-content{

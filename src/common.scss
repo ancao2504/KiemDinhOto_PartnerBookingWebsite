@@ -305,7 +305,7 @@ a.menu-item {
     color: #909090;
   }
 
-  @media (max-width: 376px) {
+  @media (max-width: 280px) {
     .mtitle {
       display: none;
     }
@@ -315,6 +315,11 @@ a.menu-item {
 .w-100 {
   width: 100%;
 }
+
+.text-important {
+  margin-left: 5px;
+}
+
 
 .app-container {
   padding: 15px;
