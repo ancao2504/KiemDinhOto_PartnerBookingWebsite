@@ -49,6 +49,9 @@ function BookingPartnerForm({form, setTabKey}) {
   const [disableBookingDate, setDisableBookingDate] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isStation, setIsStation] = useState(false)
+  const [isDateBooing, setIsDateBooing] = useState(false)
+  const [isHoursBooking, setIsHoursBooking] = useState(false)
   const [vehicleSubCategoryOptions, setVehicleSubCategoryOptions] = useState([])
   const [dateFilter, setDateFilter] = useState({
     stationsId: null,
@@ -86,6 +89,7 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   function getBookingHours(params) {
     setIsVisible((prev) => ({ ...prev, time: true }))
+    setIsHoursBooking(false)
     BookingService.getBookingHours(params)
       .then((data) => {
         let tmp = data || []
@@ -105,11 +109,12 @@ function BookingPartnerForm({form, setTabKey}) {
             element.value = element.value
           })
           setListBookingTime(tmp)
+          setIsHoursBooking(true)
         }
       })
       .catch(() => {
         // notification.error('Lấy thông tin thất bại')
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin giờ hẹn thất bại.')
         setIsModalErrOpen(true)
       })
       .finally(() => {
@@ -131,16 +136,98 @@ function BookingPartnerForm({form, setTabKey}) {
         setIsLoading(false)
       })
       .catch(() => {
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin khu vực thất bại.')
         setIsModalErrOpen(true)
         setIsLoading(false)
       })
+  }
+  const getStationBooking=()=>{
+    let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+      if(!data?.stationsId){
+        for(let i =0;i<listStation?.length;i++){
+          if(listStation[i].stationStatus){
+            setBookingData((prev)=>({
+              ...prev,
+              stationsId:listStation[i],
+            }))
+            form.setFieldsValue({
+              stationsId:listStation[i].stationsId,
+            })
+            let localData={
+              ...data,
+              stationsId:listStation[i],
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            setDateFilter({
+              ...dateFilter,
+              stationsId: listStation[i].stationsId,
+            })
+            return
+          }
+        }
+      }
+    
+  }
+  const getDateBooking=()=>{
+    let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+      if(!data?.dateSchedule){
+        for(let i =0;i<listBookingDate?.length;i++){
+          if(listBookingDate[i].scheduleDateStatus){
+            setBookingData((prev)=>({
+              ...prev,
+              dateSchedule:listBookingDate[i].scheduleDate,
+            }))
+            form.setFieldsValue({
+              dateSchedule:listBookingDate[i],
+            })
+            let localData={
+              ...data,
+              dateSchedule:listBookingDate[i].scheduleDate,
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            const  stationsId  = bookingData.stationsId.stationsId
+            if (stationsId && bookingData) {
+              getBookingHours({
+                stationsId: stationsId,
+                date: listBookingDate[i].scheduleDate,
+                vehicleType: bookingData.vehicleType
+              })
+            }
+            return
+          }
+        }
+      }
+    
+  }
+  const getHoursBooking=()=>{
+    let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+      if(!data?.time){
+        for(let i =0;i<listBookingTime?.length;i++){
+          if(listBookingTime[i].scheduleTime){
+            setBookingData((prev)=>({
+              ...prev,
+              time:listBookingTime[i].scheduleTime,
+            }))
+            form.setFieldsValue({
+              time:listBookingTime[i],
+            })
+            let localData={
+              ...data,
+              time:listBookingTime[i].scheduleTime,
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            return
+          }
+        }
+      }
+    
   }
   const getAreaByIP = () => {
     AreaByIP.getAreaByIP().then((result) => {
       const { statusCode,data } = result
       if (statusCode == 200) {
         if(data.stationArea){
+          let localdata=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
           setBookingData((prev)=>({
             ...prev,
             vntId:data.stationArea,
@@ -153,17 +240,25 @@ function BookingPartnerForm({form, setTabKey}) {
               stationArea: data.stationArea
             }
           })
-        }
-      }else{
-        getStations({
-          filter: {
-            stationArea: dataBookingParam?.vntId
+          let localData={
+            ...localdata,
+            vntId:data.stationArea,
           }
-        })
+          localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+        }
       }
       return result
     })
   }
+  useEffect(()=>{
+    getHoursBooking()
+  },[isHoursBooking])
+  useEffect(()=>{
+    getDateBooking()
+  },[isDateBooing])
+  useEffect(()=>{
+    getStationBooking()
+  },[isStation])
 
   const onFinish = (values) => {
     setIsVisible(false)
@@ -219,6 +314,7 @@ function BookingPartnerForm({form, setTabKey}) {
     }
   }, [dateFilter])
   function getBookingDate() {
+    setIsDateBooing(false)
     setIsVisible((prev) => ({ ...prev, dateSchedule: true }))
     BookingService.getBookingDate(dateFilter)
       .then((data) => {
@@ -243,6 +339,7 @@ function BookingPartnerForm({form, setTabKey}) {
               element.value = element.scheduleDate
             })
             setListBookingDate(tmp)
+            setIsDateBooing(true)
           }
         }else{
         setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
@@ -256,7 +353,7 @@ function BookingPartnerForm({form, setTabKey}) {
         }
       })
       .catch(() => {
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin ngày hẹn thất bại.')
         setIsModalErrOpen(true)
         // notification.error('Lấy thông tin thất bại')
       })
@@ -265,12 +362,9 @@ function BookingPartnerForm({form, setTabKey}) {
       })
   }
 
-  useEffect(() => {
-    const dataCompleteForm = getContentAutoFill()
-    if (customerParam.filter && _.isEmpty(dataCompleteForm)) getStations()
-  }, [customerParam])
 
   function getStations(filter = null, callback = null) {
+    setIsStation(false)
     filter = filter ? filter : customerParam
     setIsVisible((prev) => ({ ...prev, stationsId: true }))
     BookingService.getStationList(filter)
@@ -318,21 +412,21 @@ function BookingPartnerForm({form, setTabKey}) {
               }
             }
           })
-
-        if (!callback) return setListStation(tmp)
-        callback(tmp)
+          setIsStation(true)
+          if (!callback) return setListStation(tmp)
+          callback(tmp)
       })
       .catch(() => {
         setIsVisible((prev) => ({ ...prev, stationsId: false }))
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin trung tâm thất bại.')
         setIsModalErrOpen(true)
         // notification.error('Lấy thông tin thất bại')
       })
-  }
-  const handleCategory = (evt,vehicleSubCategory) => {
-    const categoryOptionsMap = {
-      [VEHICLE_SUB_CATEGORY.CAR]: VIHCLE_CATEGORY_OTO,
-      [VEHICLE_SUB_CATEGORY.PASSENGER]: VIHCLE_CATEGORY_BUS,
+    }
+    const handleCategory = (evt,vehicleSubCategory) => {
+      const categoryOptionsMap = {
+        [VEHICLE_SUB_CATEGORY.CAR]: VIHCLE_CATEGORY_OTO,
+        [VEHICLE_SUB_CATEGORY.PASSENGER]: VIHCLE_CATEGORY_BUS,
       [VEHICLE_SUB_CATEGORY.TRUCKER]: VIHCLE_CATEGORY_TRUCK,
       [VEHICLE_SUB_CATEGORY.GROUP]: VIHCLE_CATEGORY_GROUP,
       [VEHICLE_SUB_CATEGORY.ROMOOCL]: VIHCLE_CATEGORY_MOOC,
@@ -392,6 +486,13 @@ function BookingPartnerForm({form, setTabKey}) {
 
   useEffect(() => {
     getAreaByIP()
+    if(localBookingData.vntId){
+      getStations({
+        filter: {
+          stationArea: localBookingData.vntId
+        }
+      })
+    }
     if (!bookingData?.vntId && !bookingData?.stationsId && !bookingData?.dateSchedule && !bookingData?.time) {
       getStationAreas()
     } else {
@@ -413,44 +514,6 @@ function BookingPartnerForm({form, setTabKey}) {
         vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
       }
       localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-    const dataCompleteForm = getContentAutoFill()
-    if (
-      !_.isEmpty(dataCompleteForm) &&
-      !bookingData?.vntId &&
-      !bookingData?.stationsId &&
-      !bookingData?.dateSchedule &&
-      !bookingData?.time
-    ) {
-      Promise.all([
-        getStationAreas(),
-        getStations({
-          filter: {
-            stationArea: dataCompleteForm.stationArea || undefined
-          }
-        }),
-        setDateFilter({
-          ...dateFilter,
-          stationsId: dataCompleteForm.stationsId,
-        }),
-        dataCompleteForm.scheduleDate &&
-          getBookingHours({
-            stationsId: dataCompleteForm.stationsId,
-            date: dataCompleteForm.scheduleDate,
-            vehicleType: bookingData.vehicleType
-          })
-      ]).then(() => {
-        setBookingData({
-          vntId: dataCompleteForm.stationArea,
-          stationsId: dataCompleteForm.stationsId,
-          dateSchedule: dataCompleteForm.scheduleDate
-        })
-        form.setFieldsValue({
-          vntId: dataCompleteForm.stationArea,
-          stationsId: dataCompleteForm.stationsId,
-          dateSchedule: dataCompleteForm.scheduleDate
-        })
-      })
-    }
   }, [])
 
   // fix antd select label
@@ -482,7 +545,6 @@ function BookingPartnerForm({form, setTabKey}) {
       })
     }
   },[])
-  console.log(form.getFieldsValue())
 
   return (
     <Form
@@ -597,24 +659,10 @@ function BookingPartnerForm({form, setTabKey}) {
               localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
               form.setFieldsValue({
                 scheduleType:values,
-                licensePlateColor:null,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
               setBookingData({
                 ...bookingData,
                 scheduleType:values,
-                licensePlateColor:null,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
             }}
           />
@@ -676,22 +724,10 @@ function BookingPartnerForm({form, setTabKey}) {
               localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
               form.setFieldsValue({
               licensePlateColor:values,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
               setBookingData({
                 ...bookingData,
                 licensePlateColor:values,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
             }}
           />
@@ -817,7 +853,8 @@ function BookingPartnerForm({form, setTabKey}) {
             let data=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
             let localData={
               ...data,
-              vntId:values
+              vntId:values,
+              stationsId: null,
             }
             localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             form.setFieldsValue({
@@ -878,7 +915,6 @@ function BookingPartnerForm({form, setTabKey}) {
             disabled={!bookingData.vntId || isVisible.stationsId}
             defaultValue={dataBookingParam.stationsId || undefined}
             onChange={(values) => {
-              console.log("BookingPartnerForm ~ values:", values)
               form.setFieldsValue({
                 dateSchedule: null,
                 time: null,
