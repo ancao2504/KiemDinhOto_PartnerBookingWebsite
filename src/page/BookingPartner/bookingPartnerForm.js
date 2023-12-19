@@ -17,19 +17,6 @@ import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
 
-
-function getContentAutoFill() {
-  const dataCompleteForm = queryString.parse(window.location.search)
-  if (
-    !_.isEmpty(dataCompleteForm) &&
-    dataCompleteForm.stationsId &&
-    dataCompleteForm.stationArea
-  ) {
-    return dataCompleteForm
-  } else {
-    return undefined
-  }
-}
 function BookingPartnerForm({form, setTabKey}) {
   const location = useLocation();
   const searchparam = location.search
@@ -39,7 +26,6 @@ function BookingPartnerForm({form, setTabKey}) {
   const [isModalErrOpen, setIsModalErrOpen] = useState(false)
   const [bookingData, setBookingData] = useState({})
   const [localBookingData, setLocalBookingData] = useState(JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData'))))
-  const [listPlate, setListPlate] = useState([])
   const [listStation, setListStation] = useState([])
   const [listBookingTime, setListBookingTime] = useState([])
   const [listStationArea, setListStationArea] = useState([])
@@ -486,10 +472,10 @@ function BookingPartnerForm({form, setTabKey}) {
 
   useEffect(() => {
     getAreaByIP()
-    if(localBookingData.vntId){
+    if(localBookingData?.vntId){
       getStations({
         filter: {
-          stationArea: localBookingData.vntId
+          stationArea: localBookingData?.vntId
         }
       })
     }
