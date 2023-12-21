@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Input, Button, Select as SelectAntd, Row, Col } from 'antd'
+import { Form, Input, Button, Select as SelectAntd, Row, Col, Spin } from 'antd'
 import BookingService from '../../services/addBookingService'
 import { WarningOutlined } from '@ant-design/icons'
 import { xoa_dau } from '../../helper/common'
@@ -14,29 +14,19 @@ import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import PopupMessage from './PopupMessage'
 import BookingSuccess from './BookingSuccessModal'
 import { useLocation } from 'react-router-dom'
+import AreaByIP from '../../services/getAreaByIP'
+import addKeyLocalStorage from '../../helper/localStorage'
 
-
-function getContentAutoFill() {
-  const dataCompleteForm = queryString.parse(window.location.search)
-  if (
-    !_.isEmpty(dataCompleteForm) &&
-    dataCompleteForm.stationsId &&
-    dataCompleteForm.stationArea
-  ) {
-    return dataCompleteForm
-  } else {
-    return undefined
-  }
-}
 function BookingPartnerForm({form, setTabKey}) {
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
+  const dataLocal=JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
   const [customerParam, setCustomerParam] = useState({filter: {} })
   const [errorMessage, setErrorMessage] = useState('')
   const [isModalErrOpen, setIsModalErrOpen] = useState(false)
   const [bookingData, setBookingData] = useState({})
-  const [listPlate, setListPlate] = useState([])
+  const [localBookingData, setLocalBookingData] = useState(dataLocal)
   const [listStation, setListStation] = useState([])
   const [listBookingTime, setListBookingTime] = useState([])
   const [listStationArea, setListStationArea] = useState([])
@@ -46,6 +36,10 @@ function BookingPartnerForm({form, setTabKey}) {
   const [disableBookingDate, setDisableBookingDate] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedBookingStation, setSelectedBookingStation] = useState(false)
+  const [selectedBookingDate, setSelectedBookingDate] = useState(false)
+  const [selectedBookingHour, setSelectedBookingHour] = useState(false)
+  const [isLoadDataLocal, setIsLoadDataLocal] = useState(false)
   const [vehicleSubCategoryOptions, setVehicleSubCategoryOptions] = useState([])
   const [dateFilter, setDateFilter] = useState({
     stationsId: null,
@@ -58,20 +52,27 @@ function BookingPartnerForm({form, setTabKey}) {
     dateSchedule: false,
     time: false
   })
-  const [dataBookingParam, setDataBookingParam] = useState({
-    licensePlates: params.get('licenseplates'),
-    phone: params.get('phone'),
-    fullnameSchedule: params.get('name'),
-    email: params.get('email'),
-    dateSchedule: params.get('dateschedule'),
-    time: params.get('time'),
-    stationsId: params.get('stationsid'),
-    vehicleType:params.get('vehicletype'),
-    licensePlateColor: params.get('licenseplatecolor'),
-    scheduleType: params.get('scheduletype'),
-    vehicleSubType: params.get('vehiclesubtype'),
-    vehicleSubCategory: params.get('vehiclesubcategory'),
-  })
+  //lấy data từ local nếu ko có thì lấy từ param
+  const [dataBookingParam, setDataBookingParam] = useState({})
+  const getDataLocal=()=>{
+    setIsLoadDataLocal(false)
+    setDataBookingParam({
+      licensePlates: localBookingData?.licensePlates || params.get('licenseplates'),
+      phone: localBookingData?.phone || params.get('phone'),
+      fullnameSchedule: localBookingData?.fullnameSchedule || params.get('name'),
+      email: localBookingData?.email || params.get('email'),
+      dateSchedule: localBookingData?.dateSchedule || params.get('dateschedule'),
+      time: localBookingData?.time?.scheduleTime || params.get('time'),
+      stationsId: localBookingData?.stationsId?.stationsId || params.get('stationsid'),
+      vehicleType: localBookingData?.vehicleType ||params.get('vehicletype'),
+      licensePlateColor: localBookingData?.licensePlateColor || params.get('licenseplatecolor'),
+      scheduleType: localBookingData?.scheduleType || params.get('scheduletype'),
+      vehicleSubType: localBookingData?.vehicleSubType || params.get('vehiclesubtype'),
+      vehicleSubCategory: localBookingData?.vehicleSubCategory || params.get('vehiclesubcategory'),
+      vntId: localBookingData?.vntId || params.get('vntid'),
+    })
+    setIsLoadDataLocal(true)
+  }
   const customStyles = {
     control: (base) => ({
       ...base,
@@ -82,12 +83,13 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   function getBookingHours(params) {
     setIsVisible((prev) => ({ ...prev, time: true }))
+    setSelectedBookingHour(false)
     BookingService.getBookingHours(params)
       .then((data) => {
         let tmp = data || []
         if (tmp.length > 0) {
           tmp.forEach((element) => {
-            if(bookingData.stationsId.stationStatus){
+            if(bookingData?.stationsId?.stationStatus){
               element.disabled = element.scheduleTimeStatus == 0
             }
             element.label = (
@@ -101,11 +103,11 @@ function BookingPartnerForm({form, setTabKey}) {
             element.value = element.value
           })
           setListBookingTime(tmp)
+          setSelectedBookingHour(true)
         }
       })
       .catch(() => {
-        // notification.error('Lấy thông tin thất bại')
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin giờ hẹn thất bại.')
         setIsModalErrOpen(true)
       })
       .finally(() => {
@@ -127,13 +129,126 @@ function BookingPartnerForm({form, setTabKey}) {
         setIsLoading(false)
       })
       .catch(() => {
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin khu vực thất bại.')
         setIsModalErrOpen(true)
         setIsLoading(false)
       })
   }
+  //func lấy trung tâm nếu lấy được khu vực theo IP
+  const getStationBooking=()=>{
+    //kiểm tra đã có trung tâm từ local chưa
+      if(!localBookingData?.stationsId){
+        //thực hiện for để lấy giá trị thỏa mãn
+        for(let i =0;i<listStation?.length;i++){
+          if(listStation[i].stationStatus){
+            setBookingData((prev)=>({
+              ...prev,
+              stationsId:listStation[i],
+            }))
+            form.setFieldsValue({
+              stationsId:listStation[i].stationsId,
+            })
+            //lưu dữ liệu thỏa mãn vào local
+            saveDataLocal('stationsId',listStation[i])
+            setDateFilter({
+              ...dateFilter,
+              stationsId: listStation[i].stationsId,
+            })
+            return
+          }
+        }
+      }
+    
+  }
+  //function lấy ngày hẹn đầu tiên nếu lấy được trung tâm theo IP
+  const getDateBooking=()=>{
+    //kiểm tra đã có dữ liệu ngày hẹn từ local chưa
+      if(!localBookingData?.dateSchedule){
+        for(let i =0;i<listBookingDate?.length;i++){
+          if(listBookingDate[i].scheduleDateStatus){
+            setBookingData((prev)=>({
+              ...prev,
+              dateSchedule:listBookingDate[i].scheduleDate,
+            }))
+            form.setFieldsValue({
+              dateSchedule:listBookingDate[i].scheduleDate,
+            })
+            //lưu dữ liệu thỏa mãn vào local
+            saveDataLocal('dateSchedule',listBookingDate[i].scheduleDate)
+            const  stationsId  = bookingData?.stationsId?.stationsId
+            //gọi api lấy giờ hẹn
+            if (stationsId && bookingData) {
+              getBookingHours({
+                stationsId: stationsId,
+                date: listBookingDate[i].scheduleDate,
+                vehicleType: bookingData.vehicleType
+              })
+            }
+            return
+          }
+        }
+      }
+    
+  }
+  //function lấy giờ hẹn đầu tiên nếu lấy được ngày hẹn theo IP
+  const getHoursBooking=()=>{
+    //kiểm tra đã có dữ liệu giờ hẹn từ local chưa
+      if(!localBookingData?.time){
+        for(let i =0;i<listBookingTime?.length;i++){
+          if(listBookingTime[i].scheduleTime){
+            setBookingData((prev)=>({
+              ...prev,
+              time:listBookingTime[i].scheduleTime,
+            }))
+            form.setFieldsValue({
+              time:listBookingTime[i],
+            })
+            //lưu dữ liệu thỏa mãn vào local
+            saveDataLocal('time',listBookingTime[i].scheduleTime)
+            return
+          }
+        }
+      }
+    
+  }
+  //func lấy khu vực theo IP
+  const getAreaByIP = () => {
+    AreaByIP.getAreaByIP().then((result) => {
+      const { statusCode,data } = result
+      if (statusCode == 200) {
+        //kiểm tra có lấy được khu vực ko
+        if(data.stationArea){
+          setBookingData((prev)=>({
+            ...prev,
+            vntId:data.stationArea,
+          }))
+          form.setFieldsValue({
+            vntId:data.stationArea,
+          })
+          getStations({
+            filter: {
+              stationArea: data.stationArea
+            }
+          })
+          //lưu khu vực vừa lấy được vào local
+          saveDataLocal('vntId',data.stationArea)
+        }
+      }
+      return result
+    })
+  }
+  useEffect(()=>{
+    getHoursBooking()
+  },[selectedBookingHour])
+  useEffect(()=>{
+    getDateBooking()
+  },[selectedBookingDate])
+  useEffect(()=>{
+    getStationBooking()
+  },[selectedBookingStation])
 
   const onFinish = (values) => {
+    console.log("onFinish ~ values:", values)
     setIsVisible(false)
     const newData = {
       licensePlates: values.licensePlates.toUpperCase(),
@@ -149,7 +264,7 @@ function BookingPartnerForm({form, setTabKey}) {
       scheduleType: values.scheduleType,
       vehicleSubCategory:values.vehicleSubCategory,
       vehicleSubType:values.vehicleSubType,
-      certificateSeries:values.certificateSeries,
+      // certificateSeries:values.certificateSeries,
     }
 
     BookingService.createSchedule(newData).then((result) => {
@@ -164,8 +279,7 @@ function BookingPartnerForm({form, setTabKey}) {
       setIsVisible(false)
       } else {
         setIsModalOpen(true)
-        localStorage.setItem('phoneNumber', values.phone)
-
+        localStorage.removeItem(addKeyLocalStorage('bookingData'))
         setTimeout(() => {
           setBookingData({})
           form.resetFields();
@@ -187,7 +301,10 @@ function BookingPartnerForm({form, setTabKey}) {
       getBookingDate()
     }
   }, [dateFilter])
+
+  //func chạy api lấy ngày hẹn sau khi chọn trạm
   function getBookingDate() {
+    setSelectedBookingDate(false)
     setIsVisible((prev) => ({ ...prev, dateSchedule: true }))
     BookingService.getBookingDate(dateFilter)
       .then((data) => {
@@ -212,6 +329,7 @@ function BookingPartnerForm({form, setTabKey}) {
               element.value = element.scheduleDate
             })
             setListBookingDate(tmp)
+            setSelectedBookingDate(true)
           }
         }else{
         setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
@@ -225,21 +343,17 @@ function BookingPartnerForm({form, setTabKey}) {
         }
       })
       .catch(() => {
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin ngày hẹn thất bại.')
         setIsModalErrOpen(true)
-        // notification.error('Lấy thông tin thất bại')
       })
       .finally(() => {
         setIsVisible((prev) => ({ ...prev, dateSchedule: false }))
       })
   }
 
-  useEffect(() => {
-    const dataCompleteForm = getContentAutoFill()
-    if (customerParam.filter && _.isEmpty(dataCompleteForm)) getStations()
-  }, [customerParam])
 
   function getStations(filter = null, callback = null) {
+    setSelectedBookingStation(false)
     filter = filter ? filter : customerParam
     setIsVisible((prev) => ({ ...prev, stationsId: true }))
     BookingService.getStationList(filter)
@@ -287,21 +401,20 @@ function BookingPartnerForm({form, setTabKey}) {
               }
             }
           })
-
-        if (!callback) return setListStation(tmp)
-        callback(tmp)
+          setSelectedBookingStation(true)
+          if (!callback) return setListStation(tmp)
+          callback(tmp)
       })
       .catch(() => {
         setIsVisible((prev) => ({ ...prev, stationsId: false }))
-        setErrorMessage('Lấy thông tin thất bại.')
+        setErrorMessage('Lấy thông tin trung tâm thất bại.')
         setIsModalErrOpen(true)
-        // notification.error('Lấy thông tin thất bại')
       })
-  }
-  const handleCategory = (evt,vehicleSubCategory) => {
-    const categoryOptionsMap = {
-      [VEHICLE_SUB_CATEGORY.CAR]: VIHCLE_CATEGORY_OTO,
-      [VEHICLE_SUB_CATEGORY.PASSENGER]: VIHCLE_CATEGORY_BUS,
+    }
+    const handleCategory = (evt,vehicleSubCategory) => {
+      const categoryOptionsMap = {
+        [VEHICLE_SUB_CATEGORY.CAR]: VIHCLE_CATEGORY_OTO,
+        [VEHICLE_SUB_CATEGORY.PASSENGER]: VIHCLE_CATEGORY_BUS,
       [VEHICLE_SUB_CATEGORY.TRUCKER]: VIHCLE_CATEGORY_TRUCK,
       [VEHICLE_SUB_CATEGORY.GROUP]: VIHCLE_CATEGORY_GROUP,
       [VEHICLE_SUB_CATEGORY.ROMOOCL]: VIHCLE_CATEGORY_MOOC,
@@ -315,63 +428,78 @@ function BookingPartnerForm({form, setTabKey}) {
         ...prev,
         vehicleSubCategory: vehicleSubCategory||options[0].value,
       }));
-      form.setFieldsValue({
-        vehicleSubCategory: vehicleSubCategory||options[0].value,
-      })
+      saveDataLocal('vehicleSubCategory',dataBookingParam?.vehicleSubCategory || vehicleSubCategory||options[0].value)
+      if(!dataBookingParam.vehicleSubCategory){
+        form.setFieldsValue({
+          vehicleSubCategory: vehicleSubCategory||options[0].value,
+        })
+      }
     }
       setVehicleSubCategoryOptions(options);
   }
+  const saveDataLocal=(key,value)=>{
+    let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+    let localData={
+      ...data,
+      [key]:value
+    }
+    localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+  }
+  const handleFillData=()=>{
+    console.log("handleFillData ~ isLoadDataLocal:", isLoadDataLocal)
+    const newData={
+      ...bookingData,
+      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
+      phone:dataBookingParam?.phone|| undefined,
+      scheduleType:Number(dataBookingParam?.scheduleType)||  SCHEDULE_TYPE[0].value,
+      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
+      licensePlates:dataBookingParam?.licensePlates|| undefined,
+      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
+      vntId: dataBookingParam?.vntId|| undefined,
+      stationsId: dataBookingParam?.stationsId|| undefined,
+      dateSchedule: dataBookingParam?.dateSchedule?.scheduleDate|| undefined,
+      time: dataBookingParam?.time || undefined,
+      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
+    }
+    setBookingData(newData)
+    form.setFieldsValue(newData)
+    console.log("handleFillData ~ form.setFieldsValue:", form.getFieldsValue())
+  }
 
   useEffect(() => {
+    getDataLocal()
+    getAreaByIP()
+    if(localBookingData?.vntId){
+      getStations({
+        filter: {
+          stationArea: localBookingData?.vntId
+        }
+      })
+    }
     if (!bookingData?.vntId && !bookingData?.stationsId && !bookingData?.dateSchedule && !bookingData?.time) {
       getStationAreas()
     } else {
       setBookingData({ ...bookingData })
     }
   }, [])
-
+  useEffect(()=>{
+    handleFillData()
+  },[isLoadDataLocal])
+  
   useEffect(() => {
     if(!dataBookingParam.vehicleSubType){
       handleCategory(VEHICLE_SUB_TYPE[0].value)
+    }else{
+      handleCategory(dataBookingParam.vehicleSubType)
     }
-    const dataCompleteForm = getContentAutoFill()
-    if (
-      !_.isEmpty(dataCompleteForm) &&
-      !bookingData?.vntId &&
-      !bookingData?.stationsId &&
-      !bookingData?.dateSchedule &&
-      !bookingData?.time
-    ) {
-      Promise.all([
-        getStationAreas(),
-        getStations({
-          filter: {
-            stationArea: dataCompleteForm.stationArea || undefined
-          }
-        }),
-        setDateFilter({
-          ...dateFilter,
-          stationsId: dataCompleteForm.stationsId,
-        }),
-        dataCompleteForm.scheduleDate &&
-          getBookingHours({
-            stationsId: dataCompleteForm.stationsId,
-            date: dataCompleteForm.scheduleDate,
-            vehicleType: bookingData.vehicleType
-          })
-      ]).then(() => {
-        setBookingData({
-          vntId: dataCompleteForm.stationArea,
-          stationsId: dataCompleteForm.stationsId,
-          dateSchedule: dataCompleteForm.scheduleDate
-        })
-        form.setFieldsValue({
-          vntId: dataCompleteForm.stationArea,
-          stationsId: dataCompleteForm.stationsId,
-          dateSchedule: dataCompleteForm.scheduleDate
-        })
-      })
-    }
+      let localData={
+        ...localBookingData,
+        vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
+        vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
+        vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
+      }
+      localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
   }, [])
 
   // fix antd select label
@@ -389,61 +517,27 @@ function BookingPartnerForm({form, setTabKey}) {
     }
   }, [listStation])
   useEffect(()=>{
-    setBookingData({
-      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
-      phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)|| SCHEDULE_TYPE[0].value,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
-      licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
-      vntId: dataBookingParam?.vntId|| undefined,
-      stationsId: dataBookingParam?.stationsId|| undefined,
-      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-      time: dataBookingParam?.time || undefined,
-      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
-      ...bookingData,
-    })
     setDateFilter({
-      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
       ...dateFilter,
+      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
+      stationsId: dataBookingParam?.stationsId || undefined,
     })
-    form.setFieldsValue({
-      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
-      phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)||  SCHEDULE_TYPE[0].value,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
-      licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
-      vntId: dataBookingParam?.vntId|| undefined,
-      stationsId: dataBookingParam?.stationsId|| undefined,
-      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-      time: dataBookingParam?.time || undefined,
-      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
-    })
+    if (dataBookingParam.stationsId && bookingData) {
+      getBookingHours({
+        stationsId: dataBookingParam?.stationsId,
+        date: dataBookingParam?.dateSchedule,
+        vehicleType: dataBookingParam?.vehicleType
+      })
+    }
   },[])
 
   return (
     <Form
       name="booking"
       layout="vertical"
-      initialValues={{
-        // fullname:dataBookingParam?.fullnameSchedule|| undefined,
-        // phone:dataBookingParam?.phone|| undefined,
-        // scheduleType:Number(dataBookingParam?.scheduleType)|| undefined,
-        // licensePlateColor:dataBookingParam?.licensePlateColor|| undefined,
-        // licensePlates:dataBookingParam?.licensePlates|| undefined
-        // vehicleType: dataBookingParam?.vehicleType|| undefined,
-        // vntId: dataBookingParam?.vntId|| undefined,
-        // stationsId: dataBookingParam?.stationsId|| undefined,
-        // dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-        // time: dataBookingParam?.time || undefined,
-      }}
+      initialValues={{}}
       form={form}
-      onFinish={(values) => {
-        onFinish(values)
-      }}>
+      onFinish={(values) => {onFinish(values)}}>
       <Form.Item
         name="fullnameSchedule"
         label="Họ và tên chủ xe"
@@ -454,7 +548,14 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.fullnameSchedule|| undefined} className="login__input booking-input" placeholder="Nguyễn Văn a" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.fullnameSchedule|| dataLocal?.fullnameSchedule}
+            className="login__input booking-input"
+            placeholder="Nguyễn Văn a" 
+            type="text" 
+            size="large"
+            onInput={(e) => {
+              saveDataLocal('fullnameSchedule',e.target.value)
+            }} />
         </div>
       </Form.Item>
       <Form.Item
@@ -479,7 +580,14 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.phone|| undefined} className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.phone|| dataLocal?.phone} 
+            className="login__input booking-input" 
+            placeholder="Nhập số điện thoại" 
+            type="text" 
+            size="large"
+            onInput={(e)=>{
+              saveDataLocal('phone',e.target.value)
+            }} />
         </div>
       </Form.Item>
 
@@ -499,32 +607,19 @@ function BookingPartnerForm({form, setTabKey}) {
             placeholder="Vui lòng chọn mục đích đặt lịch"
             styles={customStyles}
             options={scheduleTypes}
-            defaultValue={Number(dataBookingParam?.scheduleType)|| undefined}
+            defaultValue={Number(dataBookingParam?.scheduleType)|| SCHEDULE_TYPE[0].value}
             menuPlacement="top"
             isOptionDisabled={(option) => option.disabled}
             value={bookingData.scheduleType}
             // disabled={!bookingData.stationsId}
             onChange={(values) => {
+              saveDataLocal('scheduleType',values)
               form.setFieldsValue({
                 scheduleType:values,
-                licensePlateColor:null,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
               setBookingData({
                 ...bookingData,
                 scheduleType:values,
-                licensePlateColor:null,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
             }}
           />
@@ -540,7 +635,15 @@ function BookingPartnerForm({form, setTabKey}) {
             }
           ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || undefined} className="login__input booking-input" style={{textTransform:'uppercase'}} placeholder="59B16856" type="text" size="large" />
+          <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || dataLocal?.licensePlates?.toUpperCase()} 
+            className="login__input booking-input" 
+            style={{textTransform:'uppercase'}} 
+            placeholder="59B16856" 
+            type="text" 
+            size="large"
+            onInput={(e)=>{
+              saveDataLocal('licensePlates',e.target.value)
+            }} />
         </div>
       </Form.Item>
       <Form.Item
@@ -561,28 +664,16 @@ function BookingPartnerForm({form, setTabKey}) {
             options={licensePlateColor}
             value={bookingData.licensePlateColor}
             menuPlacement="top"
-            defaultValue={Number(dataBookingParam?.licensePlateColor)|| undefined}
+            defaultValue={Number(dataBookingParam?.licensePlateColor) || PLATE_COLOR[0].value}
             isOptionDisabled={(option) => option.disabled}
-            // disabled={!bookingData?.scheduleType}
             onChange={(values) => {
+              saveDataLocal('licensePlateColor',values)
               form.setFieldsValue({
               licensePlateColor:values,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
               setBookingData({
                 ...bookingData,
                 licensePlateColor:values,
-                vehicleType: null,
-                vntId: null,
-                area: null,
-                stationsId: null,
-                dateSchedule: null,
-                time: null
               })
             }}
           />
@@ -603,8 +694,14 @@ function BookingPartnerForm({form, setTabKey}) {
             <SelectAntd
                 className='cs-select ant-custom booking-input'
                 options={VEHICLE_SUB_TYPE}
-                defaultValue={Number(dataBookingParam?.vehicleSubType)|| undefined}
+                defaultValue={Number(dataBookingParam?.vehicleSubType)|| VEHICLE_SUB_TYPE[0].value}
                 onChange={(values,vehicletype) => {
+                  let localData={
+                    ...localBookingData,
+                    vehicleSubType:values,
+                    vehicleType: vehicletype.vehicleType,
+                  }
+                  localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
                   handleCategory(values,null)
                   form.setFieldsValue({
                     vehicleType: vehicletype.vehicleType,
@@ -635,6 +732,7 @@ function BookingPartnerForm({form, setTabKey}) {
               options={vehicleSubCategoryOptions}
               defaultValue={Number(dataBookingParam?.vehicleSubCategory)|| undefined}
               onChange={(values) => {
+                saveDataLocal('vehicleSubCategory',values)
                 form.setFieldsValue({
                     vehicleSubCategory: values,
                   })
@@ -672,7 +770,7 @@ function BookingPartnerForm({form, setTabKey}) {
           type="text"
           size="large"
           onInput={(event) => {
-            event.target.value = event.target.value.toUpperCase()
+            saveDataLocal('certificateSeries',event.target.value)
           }}
         />
       </Form.Item>
@@ -684,7 +782,14 @@ function BookingPartnerForm({form, setTabKey}) {
           }}
           showSearch
           disabled={!bookingData.vehicleSubType}
+          defaultValue={dataBookingParam?.vntId || dataLocal?.vntId}
           onChange={(values) => {
+            let localData={
+              ...localBookingData,
+              vntId:values,
+              stationsId: null,
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             form.setFieldsValue({
               stationsId: null,
               dateSchedule: null,
@@ -740,7 +845,8 @@ function BookingPartnerForm({form, setTabKey}) {
             }}
             options={listStation}
             menuPlacement="top"
-            disabled={!bookingData.vntId || isVisible.stationsId}
+            disabled={!bookingData?.vntId || isVisible.stationsId}
+            defaultValue={dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId}
             onChange={(values) => {
               form.setFieldsValue({
                 dateSchedule: null,
@@ -752,6 +858,7 @@ function BookingPartnerForm({form, setTabKey}) {
                 stationsId: values,
               })
               const stationSelected = listStation?.find((e) => e.stationsId == values)
+              saveDataLocal('stationsId',stationSelected)
               setBookingData({
                 ...bookingData,
                 stationsId: stationSelected,
@@ -783,6 +890,7 @@ function BookingPartnerForm({form, setTabKey}) {
           isOptionDisabled={(option) => option.disabled}
           disabled={!bookingData.stationsId || isVisible.dateSchedule}
           onChange={(values) => {
+            saveDataLocal('dateSchedule',values)
             form.setFieldsValue({
               time: null
             })
@@ -821,14 +929,14 @@ function BookingPartnerForm({form, setTabKey}) {
           )}
           isDisabled={!bookingData.dateSchedule || isVisible.time}
           styles={customStyles}
-          defaultValue={bookingData?.time?.scheduleTime}
           options={listBookingTime}
           getOptionValue={(option) => option.label}
           menuPlacement="top"
           onChange={(values) => {
-            // form.setFieldsValue({
-            //   time: values.scheduleTime
-            // })
+            form.setFieldsValue({
+              time: values
+            })
+            saveDataLocal('time',values)
             setBookingData({
               ...bookingData,
               time: values.scheduleTime
@@ -842,9 +950,9 @@ function BookingPartnerForm({form, setTabKey}) {
           Đặt lịch
         </Button>
       </div>
-      <BookingSuccess isModalOpen={isModalOpen} setTabKey={setTabKey} setIsModalOpen={setIsModalOpen} onClose={() => setIsModalOpen(false)}></BookingSuccess>
+      <BookingSuccess isModalOpen={isModalOpen} setTabKey={setTabKey} setIsModalOpen={setIsModalOpen} onClose={() => {setIsModalOpen(false);window.location.reload()}}></BookingSuccess>
       {isModalErrOpen &&
-      <PopupMessage isModalOpen={isModalErrOpen} onClose={() => {setIsModalErrOpen(false)}} text={errorMessage} ></PopupMessage>
+        <PopupMessage isModalOpen={isModalErrOpen} onClose={() => {setIsModalErrOpen(false)}} text={errorMessage} ></PopupMessage>
       }
     </Form>
   )
