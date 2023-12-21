@@ -45,7 +45,7 @@ function BookingPartnerForm({form, setTabKey}) {
     stationsId: null,
     startDate: moment().format(DATE_DISPLAY_FORMAT),
     endDate:moment().add(30, 'days').format(DATE_DISPLAY_FORMAT),
-    vehicleType: 1
+    vehicleType: null
   })
   const [isVisible, setIsVisible] = useState({
     stationsId: false,
@@ -221,17 +221,51 @@ function BookingPartnerForm({form, setTabKey}) {
           setBookingData((prev)=>({
             ...prev,
             vntId:data.stationArea,
+            stationsId:null,
+            dateSchedule: null,
+            time: null,
           }))
+          let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+          let localData={
+            ...data,
+            stationsId:null,
+            dateSchedule: null,
+            time: null,
+          }
+          localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
           form.setFieldsValue({
             vntId:data.stationArea,
+            stationsId:null,
+            dateSchedule: null,
+            time: null,
           })
           getStations({
             filter: {
-              stationArea: data.stationArea
+              stationArea:data.stationArea
             }
           })
           //lưu khu vực vừa lấy được vào local
           saveDataLocal('vntId',data.stationArea)
+        }else{
+          setBookingData((prev)=>({
+            ...prev,
+            stationsId:null,
+            dateSchedule: null,
+            time: null,
+          }))
+          let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+          let localData={
+            ...data,
+            stationsId:null,
+            dateSchedule: null,
+            time: null,
+          }
+          localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+          form.setFieldsValue({
+            stationsId:null,
+            dateSchedule: null,
+            time: null,
+          })
         }
       }
       return result
@@ -248,7 +282,6 @@ function BookingPartnerForm({form, setTabKey}) {
   },[selectedBookingStation])
 
   const onFinish = (values) => {
-    console.log("onFinish ~ values:", values)
     setIsVisible(false)
     const newData = {
       licensePlates: values.licensePlates.toUpperCase(),
@@ -446,7 +479,6 @@ function BookingPartnerForm({form, setTabKey}) {
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
   }
   const handleFillData=()=>{
-    console.log("handleFillData ~ isLoadDataLocal:", isLoadDataLocal)
     const newData={
       ...bookingData,
       fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
@@ -464,7 +496,6 @@ function BookingPartnerForm({form, setTabKey}) {
     }
     setBookingData(newData)
     form.setFieldsValue(newData)
-    console.log("handleFillData ~ form.setFieldsValue:", form.getFieldsValue())
   }
 
   useEffect(() => {
