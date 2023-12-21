@@ -5,6 +5,7 @@ import BookingPartnerHistory from './bookingPartnerHistory'
 import BookingPartnerForm from './bookingPartnerForm'
 import { useLocation } from 'react-router-dom'
 import LoadFormBookingFailed from '../../components/BasicComponent/LoadFormBookingFailed'
+import { CheckApiKey } from '../../helper/CheckApiKey'
 
 function BookingPartner() {
   const [isVisible, setIsVisible] = useState(false)
@@ -14,13 +15,13 @@ function BookingPartner() {
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
-  const apiKey = params.get('apikey') || undefined
+  let apikey = CheckApiKey()
   const handCreateSchedule=()=>{
 
   }
   return (
     <>
-    {apiKey ? 
+    {apikey ? 
       (
         <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 480, margin: 'auto',padding:'10px' }}>
         {isVisible && (
