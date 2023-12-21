@@ -228,6 +228,7 @@ function BookingPartnerForm({form, setTabKey}) {
           let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
           let localData={
             ...data,
+            vntId:data.stationArea,
             stationsId:null,
             dateSchedule: null,
             time: null,
