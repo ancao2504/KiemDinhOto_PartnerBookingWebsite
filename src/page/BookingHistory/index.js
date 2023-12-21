@@ -7,6 +7,7 @@ import { useState } from 'react'
 import DefaultButton from './../../components/elements/button'
 import { useLocation } from "react-router-dom";
 import addKeyLocalStorage from './../../helper/localStorage'
+import { CheckApiKey } from '../../helper/CheckApiKey'
 const Notification = ({ history }) => {
   const location = useLocation();
   const [search, setSearch] = useState(undefined)
@@ -14,7 +15,7 @@ const Notification = ({ history }) => {
   const params = new URLSearchParams(searchparam)
   const phoneNumber = params.get('phone') || ''
   const fullName = params.get('name') || ''
-  const apiKey = params.get('apikey') || ''
+  let apikey = CheckApiKey()
   const handleSearch = (value) => {
     if (!value) {
       setSearch(undefined)
@@ -32,7 +33,7 @@ const Notification = ({ history }) => {
             colorType="dark"
             title="+ Đặt lịch hẹn"
             action={() => {
-              history.push(`/booking-partner-iframe?apikey=${apiKey}&name=${fullName}&phone=${phoneNumber}`)
+              history.push(`/booking-partner-iframe?apikey=${apikey}&name=${fullName}&phone=${phoneNumber}`)
             }}
           />
           <div style={{ height: '40px' }} />

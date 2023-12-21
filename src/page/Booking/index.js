@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom'
 import _ from 'lodash'
 import BookingPartnerForm from './BookingPartnerForm'
 import LoadFormBookingFailed from '../../components/BasicComponent/LoadFormBookingFailed'
+import { CheckApiKey } from '../../helper/CheckApiKey'
 
 const BookingCar = React.lazy(() => import('./BookingCar'))
 const BookingDriving = React.lazy(() => import('./BookingDriving'))
@@ -34,7 +35,7 @@ const StepBooking = ({ history, intl }) => {
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
-  const apiKey = params.get('apikey') || undefined
+  let apikey = CheckApiKey()
 
   const { state: dataCompleteForm, search } = useLocation();
   const [step, setStep] = useState('Service')
@@ -172,7 +173,7 @@ const StepBooking = ({ history, intl }) => {
 
   return (
     <>
-      {apiKey ? 
+      {apikey ? 
         (
           <div style={{ maxWidth: 600, margin: 'auto' }}>
             <div className="stepBooking-header">

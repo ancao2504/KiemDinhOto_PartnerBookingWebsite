@@ -5,15 +5,11 @@ import successImage from '../../../src/assets/icons/popup-success.png'
 import BookingService from './../../services/addBookingService'
 import { STATION_SESSION_KEY } from './../../constants/schedule'
 import { useLocation } from 'react-router-dom'
+import { CheckApiKey } from '../../helper/CheckApiKey'
 
 const BookingSuccess = ({ isModalOpen, onClose, history, scheduleId,setStep,setIsModalOpen }) => {
   const [isStationEnablePayment, setIsStationEnablePayment] = useState(false)
-  const location = useLocation();
-  const searchparam = location.search
-  const params = new URLSearchParams(searchparam)
-  const phoneNumber = params.get('phone') || ''
-  const fullName = params.get('name') || ''
-  const apiKey = params.get('apikey') || ''
+  let apikey = CheckApiKey()
   const handleClose = () => {
     setIsModalOpen(false)
     window.location.reload()

@@ -3,15 +3,10 @@ import { SCHEDULE_DATA,SCHEDULE_TYPE } from './../../constants/serviceOption'
 import { debounce } from 'lodash'
 import { Steps,Button } from 'antd'
 import { useHistory, useLocation } from 'react-router-dom'
+import { CheckApiKey } from '../../helper/CheckApiKey'
 
 function BookingService({ setStep, setData, step }) {
-  const location = useLocation();
-  const searchparam = location.search
-  const params = new URLSearchParams(searchparam)
-  const phoneNumber = params.get('phone') || ''
-  const fullName = params.get('name') || ''
-  const apiKey = params.get('apikey') || ''
-  const history=useHistory()
+  let apikey = CheckApiKey()
   const handleClick = useCallback(
     debounce((_item) => {
       if (_item.disabled) return
