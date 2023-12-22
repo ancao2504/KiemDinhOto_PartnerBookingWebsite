@@ -559,7 +559,7 @@ function BookingPartnerForm({form, setTabKey}) {
     setDateFilter({
       ...dateFilter,
       vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
-      stationsId: dataBookingParam?.stationsId || undefined,
+      stationsId: dataBookingParam?.stationsId || localBookingData?.stationsId?.stationsId,
     })
     if (dataBookingParam.stationsId && bookingData) {
       getBookingHours({

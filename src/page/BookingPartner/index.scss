@@ -271,6 +271,9 @@
 .ant-tabs > .ant-tabs-nav .ant-tabs-nav-wrap, .ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-wrap {
   overflow: unset;
 }
+:where(.css-6j9yrn).ant-modal .ant-modal-content{
+  padding: 0 !important;
+}
 @media (max-width: 350px) {
   .paging{
     .ant-pagination-item,.ant-pagination-prev{
