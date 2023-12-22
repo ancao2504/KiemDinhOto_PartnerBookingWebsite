@@ -265,6 +265,19 @@ function BookingPartnerForm({form, setTabKey}) {
               dateSchedule: null,
               time: null,
             })
+          }else{
+            setBookingData((prev)=>({
+              ...prev,
+              vntId:dataLocal?.vntId,
+            }))
+            let localData={
+              ...dataLocal,
+              vntId:dataLocal?.vntId,
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            form.setFieldsValue({
+              vntId:dataLocal?.vntId,
+            })
           }
         }
       }
