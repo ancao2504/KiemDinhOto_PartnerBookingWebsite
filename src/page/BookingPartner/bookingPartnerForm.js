@@ -684,6 +684,7 @@ function BookingPartnerForm({form, setTabKey}) {
             type="text" 
             size="large"
             onInput={(e)=>{
+              e.target.value = e.target.value.toUpperCase().replace(/\s/g, '')
               saveDataLocal('licensePlates',e.target.value)
             }} />
         </div>

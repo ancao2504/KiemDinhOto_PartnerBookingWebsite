@@ -16,6 +16,7 @@ export const SCHEDULE_ERROR = {
   BOOKING_MAX_LIMITED: 'Danh sách lịch hẹn đã đầy. Vui lòng chọn trung tâm khác hoặc thời gian khác',
   UNCONFIRMED_BOOKING_EXISTED: 'Phương tiện của quý khách đã có lịch hẹn. Vui lòng kiểm tra lại!',
   INVALID_DATE: 'Ngày hẹn không hợp lệ',
+  INVALID_BOOKING_DATE:'Ngày hẹn không hợp lệ',
   BLOCK_USER_BOOKING_SCHEDULE: 'Người dùng bị khóa đặt lịch',
   BOOKING_ON_DAY_OFF: 'Ngày hẹn không đúng',
   BOOKING_ON_SUNDAY: 'Sai thông tin ngày hẹn',
