@@ -48,7 +48,7 @@ function BookingPartnerForm({form, setTabKey}) {
     stationsId: null,
     startDate: moment().format(DATE_DISPLAY_FORMAT),
     endDate:moment().add(30, 'days').format(DATE_DISPLAY_FORMAT),
-    vehicleType: null
+    vehicleType: null,
   })
   const [isVisible, setIsVisible] = useState({
     stationsId: false,
