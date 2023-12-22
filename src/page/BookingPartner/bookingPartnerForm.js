@@ -16,6 +16,7 @@ import BookingSuccess from './BookingSuccessModal'
 import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
+import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 
 function BookingPartnerForm({form, setTabKey}) {
   const location = useLocation();
@@ -680,10 +681,12 @@ function BookingPartnerForm({form, setTabKey}) {
       <Form.Item name="licensePlates" 
         label="Biển số xe"
         rules={[
-            {
-              required: true,
-              message: 'Vui lòng nhập biển số xe'
+          {
+            required: true,
+            validator(_, value) {
+              return validatorPlateNumber(value)
             }
+          }
           ]}>
         <div className="login__input__icon">
           <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || dataLocal?.licensePlates?.toUpperCase()} 
@@ -693,6 +696,7 @@ function BookingPartnerForm({form, setTabKey}) {
             type="text" 
             size="large"
             onInput={(e)=>{
+              e.target.value = e.target.value.toUpperCase().replace(/\s/g, '')
               saveDataLocal('licensePlates',e.target.value)
             }} />
         </div>
