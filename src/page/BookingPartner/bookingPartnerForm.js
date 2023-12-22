@@ -217,6 +217,7 @@ function BookingPartnerForm({form, setTabKey}) {
       const { statusCode,data } = result
       if (statusCode == 200) {
         //kiểm tra có lấy được khu vực ko
+        let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
         if(data.stationArea){
           setBookingData((prev)=>({
             ...prev,
@@ -225,7 +226,6 @@ function BookingPartnerForm({form, setTabKey}) {
             dateSchedule: null,
             time: null,
           }))
-          let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
           let localData={
             ...data,
             vntId:data.stationArea,
@@ -245,28 +245,28 @@ function BookingPartnerForm({form, setTabKey}) {
               stationArea:data.stationArea
             }
           })
-          //lưu khu vực vừa lấy được vào local
-          saveDataLocal('vntId',data.stationArea)
         }else{
-          setBookingData((prev)=>({
-            ...prev,
-            stationsId:null,
-            dateSchedule: null,
-            time: null,
-          }))
-          let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
-          let localData={
-            ...data,
-            stationsId:null,
-            dateSchedule: null,
-            time: null,
+          if(!data.vntId){
+            setBookingData((prev)=>({
+              ...prev,
+              stationsId:null,
+              dateSchedule: null,
+              time: null,
+            }))
+            let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+            let localData={
+              ...data,
+              stationsId:null,
+              dateSchedule: null,
+              time: null,
+            }
+            localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+            form.setFieldsValue({
+              stationsId:null,
+              dateSchedule: null,
+              time: null,
+            })
           }
-          localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-          form.setFieldsValue({
-            stationsId:null,
-            dateSchedule: null,
-            time: null,
-          })
         }
       }
       return result
@@ -363,17 +363,19 @@ function BookingPartnerForm({form, setTabKey}) {
               element.value = element.scheduleDate
             })
             setListBookingDate(tmp)
-            setSelectedBookingDate(true)
+            setTimeout(() => {
+              setSelectedBookingDate(true)
+            }, 500);
           }
         }else{
-        setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
-        setIsModalErrOpen(true)
-        setBookingData({
-          ...bookingData,
-          stationsId: null,
-          dateSchedule: null,
-          time: null
-        })
+          setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
+          setIsModalErrOpen(true)
+          setBookingData({
+            ...bookingData,
+            stationsId: null,
+            dateSchedule: null,
+            time: null
+          })
         }
       })
       .catch(() => {
@@ -435,8 +437,13 @@ function BookingPartnerForm({form, setTabKey}) {
               }
             }
           })
-          setSelectedBookingStation(true)
-          if (!callback) return setListStation(tmp)
+          
+          if (!callback) return (
+            setListStation(tmp),
+            setTimeout(() => {
+              setSelectedBookingStation(true)
+            }, 500)
+            )
           callback(tmp)
       })
       .catch(() => {
@@ -820,6 +827,8 @@ function BookingPartnerForm({form, setTabKey}) {
               ...localBookingData,
               vntId:values,
               stationsId: null,
+              dateSchedule: null,
+              time: null
             }
             localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             form.setFieldsValue({
