@@ -735,8 +735,9 @@ function BookingPartnerForm({form, setTabKey}) {
                 options={VEHICLE_SUB_TYPE}
                 defaultValue={Number(dataBookingParam?.vehicleSubType)|| VEHICLE_SUB_TYPE[0].value}
                 onChange={(values,vehicletype) => {
+                  let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
                   let localData={
-                    ...localBookingData,
+                    ...data,
                     vehicleSubType:values,
                     vehicleType: vehicletype.vehicleType,
                   }
@@ -823,8 +824,9 @@ function BookingPartnerForm({form, setTabKey}) {
           disabled={!bookingData.vehicleSubType}
           defaultValue={dataBookingParam?.vntId || dataLocal?.vntId}
           onChange={(values) => {
+            let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
             let localData={
-              ...localBookingData,
+              ...data,
               vntId:values,
               stationsId: null,
               dateSchedule: null,
