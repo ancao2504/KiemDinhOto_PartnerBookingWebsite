@@ -935,7 +935,7 @@ function BookingPartnerForm({form, setTabKey}) {
             form.setFieldsValue({
               time: null
             })
-            const  stationsId  = bookingData.stationsId.stationsId
+            const  stationsId  = bookingData.stationsId.stationsId || localBookingData?.stationsId?.stationsId
             if (stationsId && bookingData) {
               getBookingHours({
                 stationsId: stationsId,
