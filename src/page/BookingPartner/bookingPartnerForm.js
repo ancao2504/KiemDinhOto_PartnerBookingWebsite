@@ -217,7 +217,7 @@ function BookingPartnerForm({form, setTabKey}) {
       const { statusCode,data } = result
       if (statusCode == 200) {
         //kiểm tra có lấy được khu vực ko
-        let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+        let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
         if(data.stationArea){
           setBookingData((prev)=>({
             ...prev,
@@ -227,7 +227,7 @@ function BookingPartnerForm({form, setTabKey}) {
             time: null,
           }))
           let localData={
-            ...data,
+            ...dataLocal,
             vntId:data.stationArea,
             stationsId:null,
             dateSchedule: null,
@@ -246,16 +246,15 @@ function BookingPartnerForm({form, setTabKey}) {
             }
           })
         }else{
-          if(!data.vntId){
+          if(!dataLocal.vntId){
             setBookingData((prev)=>({
               ...prev,
               stationsId:null,
               dateSchedule: null,
               time: null,
             }))
-            let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
             let localData={
-              ...data,
+              ...dataLocal,
               stationsId:null,
               dateSchedule: null,
               time: null,
