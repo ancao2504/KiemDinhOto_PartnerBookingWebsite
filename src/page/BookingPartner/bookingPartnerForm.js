@@ -41,6 +41,8 @@ function BookingPartnerForm({form, setTabKey}) {
   const [selectedBookingDate, setSelectedBookingDate] = useState(false)
   const [selectedBookingHour, setSelectedBookingHour] = useState(false)
   const [isLoadDataLocal, setIsLoadDataLocal] = useState(false)
+  const [disableBookingHour, setDisableBookingHour] = useState(false)
+  const [bookingConfig, setBookingConfig] = useState({})
   const [vehicleSubCategoryOptions, setVehicleSubCategoryOptions] = useState([])
   const [dateFilter, setDateFilter] = useState({
     stationsId: null,
@@ -90,14 +92,20 @@ function BookingPartnerForm({form, setTabKey}) {
         let tmp = data || []
         if (tmp.length > 0) {
           tmp.forEach((element) => {
-            if(bookingData?.stationsId?.stationStatus){
+            if(bookingData.stationsId.stationStatus){
               element.disabled = element.scheduleTimeStatus == 0
+            };
+            const enableBookingHandler = bookingConfig.some((item) => {
+              return item?.enableBooking
+            })
+            if(!disableBookingHour && !enableBookingHandler){
+              element.disabled = 0
             }
             element.label = (
               <div className="d-flex ai-c j-sb w-100">
                 <span>{changeTime(element.scheduleTime)}</span>
                   <span className="text-primary">
-                  {element.scheduleTimeStatus  == 0 ? (element?.totalBookingSchedule ? `${element?.totalBookingSchedule}` : '') : (element?.totalBookingSchedule || element?.totalSchedule ? `${element?.totalBookingSchedule || 0}/${element?.totalSchedule}` : '')}
+                    {getDisplayTextByScheduleTimeStatus(element)}
                   </span>
               </div>
             )
@@ -114,6 +122,108 @@ function BookingPartnerForm({form, setTabKey}) {
       .finally(() => {
         setIsVisible((prev) => ({ ...prev, time: false }))
       })
+  }
+  const getDisplayTextByScheduleTimeStatus=(element) => {
+    let fullSchedule =false
+    if(element?.totalSchedule > 0){
+      if(element?.totalBookingSchedule >= element?.totalSchedule){
+        fullSchedule=true
+      }else{
+        fullSchedule=false
+      }
+    }else{
+      fullSchedule =false
+    }
+    if(disableBookingHour){
+      if(element.scheduleTimeStatus  == 0){
+        if(fullSchedule){
+          return(
+            <div style={{color:'var(--error-btn-color)'}}>Đã đầy</div>
+          )
+        }else{
+          if(element?.totalBookingSchedule){
+          return(
+            `${element?.totalBookingSchedule}`
+          )
+          }else{
+          return(
+            <div style={{color:'var(--error-btn-color)'}}>Ngưng nhận lịch</div>
+          )
+          }
+        }
+      }else{
+        if(element?.totalBookingSchedule || element?.totalSchedule){
+          return(
+            `${element?.totalBookingSchedule || 0}/${element?.totalSchedule}`
+          )
+        }else{
+          return ''
+        }
+      }
+    }else{
+      const enableBookingHandler = bookingConfig.some((item) => {
+        return item?.enableBooking
+      })
+      if(enableBookingHandler){
+        return(
+          <div style={{color:'var(--error-btn-color) '}}>Ngưng nhận lịch</div>
+        )
+      }else{
+        return(
+          `${element?.totalBookingSchedule || 0} Lịch đang chờ`
+        )
+      }
+    }
+
+  }
+
+  const getDisplayTextByScheduleDateStatus=(element) => {
+    let fullSchedule =false
+    if(element?.totalSchedule > 0){
+      if(element?.totalBookingSchedule >= element?.totalSchedule){
+        fullSchedule=true
+      }else{
+        fullSchedule=false
+      }
+    }else{
+      fullSchedule =false
+    }
+    const enableBookingHandler = bookingConfig.some((item) => {
+      return item?.enableBooking
+    })
+    if(element.scheduleDateStatus == 0){
+      if(fullSchedule){
+        return(
+          <div style={{color:'var(--error-btn-color)'}}>Đã đầy</div>
+        )
+      }else{
+        if(element?.totalBookingSchedule){
+          if(enableBookingHandler){
+            return(
+              `${element?.totalBookingSchedule}`
+            )
+          }else{
+            return(
+              `${element?.totalBookingSchedule} Lịch đang chờ`
+            )
+          }
+        }else{
+          return(
+            (enableBookingHandler ? '' : '0 Lịch đang chờ')
+          )
+        }
+      }
+    }else{
+      if(element?.totalBookingSchedule || element?.totalSchedule){
+        return(
+          `${element?.totalBookingSchedule || 0}/${element?.totalSchedule}`
+        )
+      }else{
+        return(
+          ''
+        )
+      }
+    }
   }
 
   function getStationAreas() {
@@ -149,6 +259,8 @@ function BookingPartnerForm({form, setTabKey}) {
             form.setFieldsValue({
               stationsId:listStation[i].stationsId,
             })
+            const stationSelected = listStation[i]
+            setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
             //lưu dữ liệu thỏa mãn vào local
             saveDataLocal('stationsId',listStation[i])
             setDateFilter({
@@ -157,6 +269,12 @@ function BookingPartnerForm({form, setTabKey}) {
             })
             return
           }
+        }
+      }else{
+        let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+        if(dataLocal?.stationsId){
+          const stationSelected = localBookingData?.stationsId
+          setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
         }
       }
     
@@ -361,15 +479,17 @@ function BookingPartnerForm({form, setTabKey}) {
             tmp.forEach((element) => {
               if (element.scheduleDateStatus == 0) {
                 setDisableBookingDate(false)
+                setDisableBookingHour(false)
                 element.disabled = false
               }else{
+                setDisableBookingHour(true)
                 setDisableBookingDate(true)
               }
               element.label = (
                 <div className="d-flex ai-c j-sb w-100">
                   <span>{element.scheduleDate}</span>
                     <span className="text-primary">
-                    {element.scheduleDateStatus == 0 ? (element?.totalBookingSchedule ? `${element?.totalBookingSchedule}` : '') : (element?.totalBookingSchedule || element?.totalSchedule ? `${element?.totalBookingSchedule || 0}/${element?.totalSchedule}` : '')}
+                      {getDisplayTextByScheduleDateStatus(element)}
                     </span>
                 </div>
               )
@@ -411,7 +531,7 @@ function BookingPartnerForm({form, setTabKey}) {
         let tmp = data?.data || []
         if (tmp.length > 0)
           tmp.forEach((element) => {
-            const name = `${element.stationCode} - ${element.stationsName}`
+            const name = `${element.stationCode} - ${element.stationsAddress || element.stationsName}`
 
             element.label = <div className="text-station-select">{name}</div>
             element.value = element.stationsId
@@ -482,12 +602,10 @@ function BookingPartnerForm({form, setTabKey}) {
         ...prev,
         vehicleSubCategory: vehicleSubCategory||options[0].value,
       }));
-      saveDataLocal('vehicleSubCategory',dataBookingParam?.vehicleSubCategory || vehicleSubCategory||options[0].value)
-      if(!dataBookingParam.vehicleSubCategory){
-        form.setFieldsValue({
-          vehicleSubCategory: vehicleSubCategory||options[0].value,
-        })
-      }
+      saveDataLocal('vehicleSubCategory',vehicleSubCategory ||options[0].value)
+      form.setFieldsValue({
+        vehicleSubCategory: vehicleSubCategory||options[0].value,
+      })
     }
       setVehicleSubCategoryOptions(options);
   }
@@ -540,18 +658,19 @@ function BookingPartnerForm({form, setTabKey}) {
   },[isLoadDataLocal])
   
   useEffect(() => {
-    if(!dataBookingParam.vehicleSubType){
+    let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+    if(!data?.vehicleSubType){
       handleCategory(VEHICLE_SUB_TYPE[0].value)
-    }else{
-      handleCategory(dataBookingParam.vehicleSubType)
-    }
       let localData={
-        ...localBookingData,
+        ...data,
         vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
         vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
         vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
       }
       localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+    }else{
+      handleCategory(data?.vehicleSubType)
+    }
   }, [])
 
   // fix antd select label
@@ -917,6 +1036,7 @@ function BookingPartnerForm({form, setTabKey}) {
                 stationsId: values,
               })
               const stationSelected = listStation?.find((e) => e.stationsId == values)
+              setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
               saveDataLocal('stationsId',stationSelected)
               setBookingData({
                 ...bookingData,
@@ -983,9 +1103,11 @@ function BookingPartnerForm({form, setTabKey}) {
           className="cs-select schedule-hour booking-input"
           isSearchable={true}
           placeholder="Chọn khung giờ"
-          isOptionDisabled={(option) => (
-            !disableBookingDate ? '': option.disabled
-          )}
+          isOptionDisabled={(option) => {
+            return(
+               option.disabled || !option.scheduleTimeStatus
+            )
+          }}
           isDisabled={!bookingData.dateSchedule || isVisible.time}
           styles={customStyles}
           options={listBookingTime}
