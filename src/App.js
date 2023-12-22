@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 import { Spin } from 'antd'
 import "./assets/scss/index.scss"
@@ -44,6 +44,12 @@ function App() {
   useEffect(() => {
     setThemeApp()
   }, [])
+  useLayoutEffect(() => {
+    const loadingScreen = document.querySelector('.splash-screen-loading');
+    if (loadingScreen) {
+      loadingScreen.style.display = 'none';
+    }
+  }, []);
   return (
     <>
       <Router export basename={baseName}>
