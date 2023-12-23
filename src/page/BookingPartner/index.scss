@@ -214,6 +214,9 @@
     border-radius: 5.65838px;
   }
 }
+:where(.css-dev-only-do-not-override-6j9yrn).ant-form-vertical .ant-form-item-label, :where(.css-dev-only-do-not-override-6j9yrn).ant-col-24.ant-form-item-label, :where(.css-dev-only-do-not-override-6j9yrn).ant-col-xl-24.ant-form-item-label{
+  padding: 0 !important;
+}
 .login__button.df {
   height: 46px;
   border-radius: 8px !important;

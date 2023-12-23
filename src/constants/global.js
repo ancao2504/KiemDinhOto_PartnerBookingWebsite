@@ -497,7 +497,7 @@ export const VIHCLE_CATEGORY_GROUP = [
 
 export const VIHCLE_CATEGORY_MOOC = [
   {
-    label: 'Xe ro_mooc',
+    label: 'Xe rơ moóc',
     value: 3000,
     maxWeight:99999,
     minWeight:0,
