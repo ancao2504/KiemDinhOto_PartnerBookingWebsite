@@ -123,7 +123,7 @@ export default class BookingService {
         if (statusCode === 200) {
           return resolve(data)
         } else {
-          return resolve({})
+          resolve(result)
         }
       })
     })
@@ -140,7 +140,7 @@ export default class BookingService {
         if (statusCode === 200) {
           return resolve(data)
         } else {
-          return resolve({})
+          resolve(result)
         }
       })
     })
@@ -156,7 +156,7 @@ export default class BookingService {
         if (statusCode === 200) {
           return resolve(result)
         } else {
-          return resolve({})
+          return resolve(result)
         }
       })
     })
