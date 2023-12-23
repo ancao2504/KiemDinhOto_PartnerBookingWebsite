@@ -230,14 +230,20 @@ function BookingPartnerForm({form, setTabKey}) {
     setIsLoading(true)
     BookingService.getStationAreaList()
       .then((data) => {
-        let tmp = data.data || []
-        if (tmp.length > 0)
-          tmp.forEach((element) => {
-            element.label = <div style={{ fontWeight: 'normal' }}>{element.value}</div>
-            element.value = element.value
-          })
-        setListStationArea(tmp)
-        setIsLoading(false)
+        if(data.statusCode == 505){
+          setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
+          setIsModalErrOpen(true)
+          setIsLoading(false)
+        }else{
+          let tmp = data.data || []
+          if (tmp.length > 0)
+            tmp.forEach((element) => {
+              element.label = <div style={{ fontWeight: 'normal' }}>{element.value}</div>
+              element.value = element.value
+            })
+          setListStationArea(tmp)
+          setIsLoading(false)
+        }
       })
       .catch(() => {
         setErrorMessage('Lấy thông tin khu vực thất bại.')
