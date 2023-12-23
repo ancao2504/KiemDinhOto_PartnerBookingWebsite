@@ -89,30 +89,36 @@ function BookingPartnerForm({form, setTabKey}) {
     setSelectedBookingHour(false)
     BookingService.getBookingHours(params)
       .then((data) => {
-        let tmp = data || []
-        if (tmp.length > 0) {
-          tmp.forEach((element) => {
-            if(bookingData.stationsId.stationStatus){
-              element.disabled = element.scheduleTimeStatus == 0
-            };
-            const enableBookingHandler = bookingConfig.some((item) => {
-              return item?.enableBooking
+        if(data.statusCode == 505){
+          setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
+          setIsModalErrOpen(true)
+          setIsLoading(false)
+        }else{
+          let tmp = data || []
+          if (tmp.length > 0) {
+            tmp.forEach((element) => {
+              if(bookingData.stationsId.stationStatus){
+                element.disabled = element.scheduleTimeStatus == 0
+              };
+              const enableBookingHandler = bookingConfig.some((item) => {
+                return item?.enableBooking
+              })
+              if(!disableBookingHour && !enableBookingHandler){
+                element.disabled = 0
+              }
+              element.label = (
+                <div className="d-flex ai-c j-sb w-100">
+                  <span>{changeTime(element.scheduleTime)}</span>
+                    <span className="text-primary">
+                      {getDisplayTextByScheduleTimeStatus(element)}
+                    </span>
+                </div>
+              )
+              element.value = element.value
             })
-            if(!disableBookingHour && !enableBookingHandler){
-              element.disabled = 0
-            }
-            element.label = (
-              <div className="d-flex ai-c j-sb w-100">
-                <span>{changeTime(element.scheduleTime)}</span>
-                  <span className="text-primary">
-                    {getDisplayTextByScheduleTimeStatus(element)}
-                  </span>
-              </div>
-            )
-            element.value = element.value
-          })
-          setListBookingTime(tmp)
-          setSelectedBookingHour(true)
+            setListBookingTime(tmp)
+            setSelectedBookingHour(true)
+          }
         }
       })
       .catch(() => {
@@ -234,6 +240,8 @@ function BookingPartnerForm({form, setTabKey}) {
           setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
           setIsLoading(false)
+          let localData={}
+          localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
         }else{
           let tmp = data.data || []
           if (tmp.length > 0)
@@ -479,42 +487,48 @@ function BookingPartnerForm({form, setTabKey}) {
     setIsVisible((prev) => ({ ...prev, dateSchedule: true }))
     BookingService.getBookingDate(dateFilter)
       .then((data) => {
-        if(data.length > 0){
-          let tmp = data || []
-          if (tmp.length > 0) {
-            tmp.forEach((element) => {
-              if (element.scheduleDateStatus == 0) {
-                setDisableBookingDate(false)
-                setDisableBookingHour(false)
-                element.disabled = false
-              }else{
-                setDisableBookingHour(true)
-                setDisableBookingDate(true)
-              }
-              element.label = (
-                <div className="d-flex ai-c j-sb w-100">
-                  <span>{element.scheduleDate}</span>
-                    <span className="text-primary">
-                      {getDisplayTextByScheduleDateStatus(element)}
-                    </span>
-                </div>
-              )
-              element.value = element.scheduleDate
-            })
-            setListBookingDate(tmp)
-            setTimeout(() => {
-              setSelectedBookingDate(true)
-            }, 500);
-          }
-        }else{
-          setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
+        if(data.statusCode == 505){
+          setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
-          setBookingData({
-            ...bookingData,
-            stationsId: null,
-            dateSchedule: null,
-            time: null
-          })
+          setIsLoading(false)
+        }else{
+          if(data.length > 0){
+            let tmp = data || []
+            if (tmp.length > 0) {
+              tmp.forEach((element) => {
+                if (element.scheduleDateStatus == 0) {
+                  setDisableBookingDate(false)
+                  setDisableBookingHour(false)
+                  element.disabled = false
+                }else{
+                  setDisableBookingHour(true)
+                  setDisableBookingDate(true)
+                }
+                element.label = (
+                  <div className="d-flex ai-c j-sb w-100">
+                    <span>{element.scheduleDate}</span>
+                      <span className="text-primary">
+                        {getDisplayTextByScheduleDateStatus(element)}
+                      </span>
+                  </div>
+                )
+                element.value = element.scheduleDate
+              })
+              setListBookingDate(tmp)
+              setTimeout(() => {
+                setSelectedBookingDate(true)
+              }, 500);
+            }
+          }else{
+            setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
+            setIsModalErrOpen(true)
+            setBookingData({
+              ...bookingData,
+              stationsId: null,
+              dateSchedule: null,
+              time: null
+            })
+          }
         }
       })
       .catch(() => {
