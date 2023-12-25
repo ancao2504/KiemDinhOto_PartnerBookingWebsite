@@ -402,15 +402,15 @@ function BookingPartnerForm({form, setTabKey}) {
         stationArea:data.stationArea
       }
     })
+    let localData={
+      ...dataLocal,
+      vntId:data.stationArea,
+      stationsId:null,
+      dateSchedule: null,
+      time: null,
+    }
+    localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
   }
-  let localData={
-    ...dataLocal,
-    vntId:data.stationArea,
-    stationsId:null,
-    dateSchedule: null,
-    time: null,
-  }
-  localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
   const handleFillDataArea=(data)=>{
     setBookingData((prev)=>({
       ...prev,
