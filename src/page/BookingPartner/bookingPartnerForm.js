@@ -72,9 +72,9 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   //lấy data từ local nếu ko có thì lấy từ param
   const [dataBookingParam, setDataBookingParam] = useState(getParamData)
-  const getDataLocal= async()=>{
+  const getDataLocal= ()=>{
     setIsLoadDataLocal(false)
-    await setDataBookingParam({
+    setDataBookingParam({
       ...bookingData,
       licensePlates: localBookingData?.licensePlates || params.get('licenseplates'),
       phone: localBookingData?.phone || params.get('phone'),
@@ -286,7 +286,7 @@ function BookingPartnerForm({form, setTabKey}) {
       ...dateFilter,
       stationsId: null,
     })
-    if(dataLocal.stationsId){
+    if(dataLocal?.stationsId){
       const stationSelected = dataLocal?.stationsId
       setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
     }
@@ -385,7 +385,7 @@ function BookingPartnerForm({form, setTabKey}) {
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
     if(listBookingTime?.length > 0){
       for(let i =0;i<listBookingTime?.length;i++){
-        if(listBookingTime[i].scheduleTime){
+        if(!listBookingTime[i].disabled){
           handleFillValues('time',listBookingTime[i].scheduleTime,listBookingTime[i])
           //lưu dữ liệu thỏa mãn vào local
           saveDataLocal('time',listBookingTime[i].scheduleTime)
@@ -935,17 +935,23 @@ function BookingPartnerForm({form, setTabKey}) {
                     ...data,
                     vehicleSubType:values,
                     vehicleType: vehicletype.vehicleType,
+                    dateSchedule:null,
+                    time:null,
                   }
                   localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
                   handleCategory(values,null)
                   form.setFieldsValue({
                     vehicleType: vehicletype.vehicleType,
                     vehicleSubType: values,
+                    dateSchedule:null,
+                    time:null,
                   })
                   setBookingData({
                     ...bookingData,
                     vehicleType: vehicletype.vehicleType,
                     vehicleSubType: values,
+                    dateSchedule:null,
+                    time:null,
                   })
                   setDateFilter({
                     ...dateFilter,
@@ -970,10 +976,14 @@ function BookingPartnerForm({form, setTabKey}) {
                 saveDataLocal('vehicleSubCategory',values)
                 form.setFieldsValue({
                     vehicleSubCategory: values,
+                    dateSchedule:null,
+                    time:null,
                   })
                   setBookingData({
                     ...bookingData,
                     vehicleSubCategory: values,
+                    dateSchedule:null,
+                    time:null,
                   })
               }}
             />

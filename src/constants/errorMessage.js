@@ -13,6 +13,7 @@ export const USER_VEHICLE_ERROR = {
 export const SCHEDULE_ERROR = {
   INVALID_STATION: 'Thiếu thông tin trạm',
   INVALID_BOOKING_CONFIG: 'Lịch hẹn đã đầy',
+  MAX_OWNER_VEHICLE: 'Vượt quá số lượng xe cho phép',
   BOOKING_MAX_LIMITED: 'Danh sách lịch hẹn đã đầy. Vui lòng chọn trung tâm khác hoặc thời gian khác',
   UNCONFIRMED_BOOKING_EXISTED: 'Phương tiện của quý khách đã có lịch hẹn. Vui lòng kiểm tra lại!',
   INVALID_DATE: 'Ngày hẹn không hợp lệ',
