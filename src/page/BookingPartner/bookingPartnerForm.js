@@ -55,8 +55,23 @@ function BookingPartnerForm({form, setTabKey}) {
     dateSchedule: false,
     time: false
   })
+  const getdata={
+    licensePlates:params.get('licenseplates'),
+    phone:params.get('phone'),
+    fullnameSchedule:params.get('name'),
+    email:params.get('email'),
+    dateSchedule:params.get('dateschedule'),
+    time: params.get('time'),
+    stationsId: params.get('stationsid'),
+    vehicleType:params.get('vehicletype'),
+    licensePlateColor:params.get('licenseplatecolor'),
+    scheduleType:params.get('scheduletype'),
+    vehicleSubType:params.get('vehiclesubtype'),
+    vehicleSubCategory: params.get('vehiclesubcategory'),
+    vntId: params.get('vntid'),
+  }
   //lấy data từ local nếu ko có thì lấy từ param
-  const [dataBookingParam, setDataBookingParam] = useState({})
+  const [dataBookingParam, setDataBookingParam] = useState(getdata)
   const getDataLocal=()=>{
     setIsLoadDataLocal(false)
     setDataBookingParam({
@@ -97,7 +112,7 @@ function BookingPartnerForm({form, setTabKey}) {
           let tmp = data || []
           if (tmp.length > 0) {
             tmp.forEach((element) => {
-              if(bookingData.stationsId.stationStatus){
+              if(dataLocal.stationsId.stationStatus){
                 element.disabled = element.scheduleTimeStatus == 0
               };
               const enableBookingHandler = bookingConfig.some((item) => {
@@ -117,7 +132,10 @@ function BookingPartnerForm({form, setTabKey}) {
               element.value = element.value
             })
             setListBookingTime(tmp)
-            setSelectedBookingHour(true)
+            //timeout setState để lấy giờ hẹn đầu tiên
+            setTimeout(() => {
+              setSelectedBookingHour(true)
+            }, 500);
           }
         }
       })
@@ -151,7 +169,7 @@ function BookingPartnerForm({form, setTabKey}) {
           return(
             `${element?.totalBookingSchedule}`
           )
-          }else{
+        }else{
           return(
             <div style={{color:'var(--error-btn-color)'}}>Ngưng nhận lịch</div>
           )
@@ -277,6 +295,7 @@ function BookingPartnerForm({form, setTabKey}) {
             setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
             //lưu dữ liệu thỏa mãn vào local
             saveDataLocal('stationsId',listStation[i])
+            //setDateFilter để chạy api lấy ngày đầu tiên
             setDateFilter({
               ...dateFilter,
               stationsId: listStation[i].stationsId,
@@ -311,6 +330,7 @@ function BookingPartnerForm({form, setTabKey}) {
             const  stationsId  = bookingData?.stationsId?.stationsId
             //gọi api lấy giờ hẹn
             if (stationsId && bookingData) {
+              //chạy api lấy danh sách giờ hẹn
               getBookingHours({
                 stationsId: stationsId,
                 date: listBookingDate[i].scheduleDate,
@@ -373,6 +393,7 @@ function BookingPartnerForm({form, setTabKey}) {
             dateSchedule: null,
             time: null,
           })
+          //thực hiện lấy danh sách trạm nếu lấy được khu vực
           getStations({
             filter: {
               stationArea:data.stationArea
@@ -418,12 +439,15 @@ function BookingPartnerForm({form, setTabKey}) {
     })
   }
   useEffect(()=>{
+    //chạy function lấy giờ hẹn đầu tiên sau khi lấy được ngày hẹn
     getHoursBooking()
   },[selectedBookingHour])
   useEffect(()=>{
+    //chạy function lấy ngày hẹn đầu tiên sau khi lấy được trung tâm
     getDateBooking()
   },[selectedBookingDate])
   useEffect(()=>{
+    //chạy function lấy trạm đầu tiên sau khi lấy được khu vực theo IP
     getStationBooking()
   },[selectedBookingStation])
 
@@ -477,6 +501,7 @@ function BookingPartnerForm({form, setTabKey}) {
 
   useEffect(() => {
     if (dateFilter.vehicleType && dateFilter.stationsId) {
+      //chạy api lấy ngày khi state dateFilter thay đổi
       getBookingDate()
     }
   }, [dateFilter])
@@ -515,6 +540,7 @@ function BookingPartnerForm({form, setTabKey}) {
                 element.value = element.scheduleDate
               })
               setListBookingDate(tmp)
+              //timeout setState để chạy func lấy ngày đầu tiên
               setTimeout(() => {
                 setSelectedBookingDate(true)
               }, 500);
@@ -593,6 +619,7 @@ function BookingPartnerForm({form, setTabKey}) {
           
           if (!callback) return (
             setListStation(tmp),
+            //timeout setState để thực hiện lấy trạm đầu tiên
             setTimeout(() => {
               setSelectedBookingStation(true)
             }, 500)
@@ -647,8 +674,8 @@ function BookingPartnerForm({form, setTabKey}) {
       licensePlates:dataBookingParam?.licensePlates|| undefined,
       vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
       vntId: dataBookingParam?.vntId|| undefined,
-      stationsId: dataBookingParam?.stationsId|| undefined,
-      dateSchedule: dataBookingParam?.dateSchedule?.scheduleDate|| undefined,
+      stationsId: dataBookingParam?.stationsId || undefined,
+      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
       time: dataBookingParam?.time || undefined,
       vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
       vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
@@ -721,6 +748,15 @@ function BookingPartnerForm({form, setTabKey}) {
       })
     }
   },[])
+  useEffect(()=>{
+    if (dataBookingParam.stationsId && bookingData) {
+      getBookingHours({
+        stationsId: dataBookingParam?.stationsId,
+        date: dataBookingParam?.dateSchedule,
+        vehicleType: dataBookingParam?.vehicleType
+      })
+    }
+  },[dataBookingParam])
 
   return (
     <Form
@@ -739,7 +775,8 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         ]}>
         <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.fullnameSchedule|| dataLocal?.fullnameSchedule}
+          <Input 
+            defaultValue={dataBookingParam?.fullnameSchedule || dataLocal?.fullnameSchedule}
             className="login__input booking-input"
             placeholder="Nguyễn Văn a" 
             type="text" 
@@ -983,12 +1020,13 @@ function BookingPartnerForm({form, setTabKey}) {
             let localData={
               ...data,
               vntId:values,
-              stationsId: null,
-              dateSchedule: null,
-              time: null
+              stationsId: undefined,
+              dateSchedule: undefined,
+              time: undefined
             }
             localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
             form.setFieldsValue({
+              vntId:values,
               stationsId: null,
               dateSchedule: null,
               time: null
@@ -1086,6 +1124,7 @@ function BookingPartnerForm({form, setTabKey}) {
           styles={customStyles}
           options={listBookingDate}
           menuPlacement="top"
+          defaultValue={dataLocal?.dateSchedule}
           isOptionDisabled={(option) => option.disabled}
           disabled={!bookingData.stationsId || isVisible.dateSchedule}
           onChange={(values) => {
@@ -1123,14 +1162,13 @@ function BookingPartnerForm({form, setTabKey}) {
           className="cs-select schedule-hour booking-input"
           isSearchable={true}
           placeholder="Chọn khung giờ"
-          isOptionDisabled={(option) => {
-            return(
-               option.disabled || !option.scheduleTimeStatus
-            )
-          }}
-          isDisabled={!bookingData.dateSchedule || isVisible.time}
+          isOptionDisabled={(option) => (
+              option.disabled
+            )}
+          isDisabled={!bookingData.dateSchedule}
           styles={customStyles}
           options={listBookingTime}
+          defaultValue={dataBookingParam?.time || dataLocal?.time?.scheduleTime}
           getOptionValue={(option) => option.label}
           menuPlacement="top"
           onChange={(values) => {
