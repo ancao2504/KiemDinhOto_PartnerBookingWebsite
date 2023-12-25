@@ -280,20 +280,7 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   //func lấy trung tâm nếu lấy được khu vực theo IP
   const getStationBooking=()=>{
-        let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
-        let localData={
-          ...dataLocal,
-          stationsId: undefined,
-          dateSchedule: undefined,
-          time: undefined
-        }
-        localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-        form.setFieldsValue({
-          stationsId: null,
-          dateSchedule: null,
-          time: null
-        })
-        //kiểm tra đã có trung tâm từ local chưa
+      //kiểm tra đã có trung tâm từ local chưa
       if(!localBookingData?.stationsId){
         //thực hiện for để lấy giá trị thỏa mãn
         for(let i =0;i<listStation?.length;i++){
@@ -322,19 +309,8 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   //function lấy ngày hẹn đầu tiên nếu lấy được trung tâm theo IP
   const getDateBooking=()=>{
-    let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
-        let localData={
-          ...dataLocal,
-          dateSchedule: null,
-          time: null
-        }
-        localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-        form.setFieldsValue({
-          dateSchedule: null,
-          time: null
-        })
     //kiểm tra đã có dữ liệu ngày hẹn từ local chưa
-      if(!dataLocal?.dateSchedule && dataLocal?.stationsId){
+      if(!localBookingData?.dateSchedule){
         for(let i =0;i<listBookingDate?.length;i++){
           if(listBookingDate[i].scheduleDateStatus){
             handleFillValues('dateSchedule',listBookingDate[i].scheduleDate,listBookingDate[i].scheduleDate)
@@ -367,15 +343,6 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   //function lấy giờ hẹn đầu tiên nếu lấy được ngày hẹn theo IP
   const getHoursBooking=()=>{
-    let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
-    let localData={
-      ...dataLocal,
-      time: null
-    }
-    localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-    form.setFieldsValue({
-      time: null
-    })
     //kiểm tra đã có dữ liệu giờ hẹn từ local chưa
       if(!localBookingData?.time){
         for(let i =0;i<listBookingTime?.length;i++){
