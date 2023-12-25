@@ -63,18 +63,19 @@ function BookingPartnerForm({form, setTabKey}) {
     dateSchedule:params.get('dateschedule'),
     time: params.get('time'),
     stationsId: params.get('stationsid'),
-    vehicleType:params.get('vehicletype'),
-    licensePlateColor:params.get('licenseplatecolor'),
-    scheduleType:params.get('scheduletype'),
-    vehicleSubType:params.get('vehiclesubtype'),
-    vehicleSubCategory: params.get('vehiclesubcategory'),
+    vehicleType:VEHICLE_SUB_TYPE[0].vehicleType,
+    licensePlateColor:Number(params.get('licenseplatecolor')) || PLATE_COLOR[0].value,
+    scheduleType:Number(params.get('scheduletype')) || SCHEDULE_TYPE[0].value,
+    vehicleSubType:VEHICLE_SUB_TYPE[0].value,
+    vehicleSubCategory:VIHCLE_CATEGORY_OTO[0].value,
     vntId: params.get('vntid'),
   }
   //lấy data từ local nếu ko có thì lấy từ param
   const [dataBookingParam, setDataBookingParam] = useState(getParamData)
-  const getDataLocal=()=>{
+  const getDataLocal= async()=>{
     setIsLoadDataLocal(false)
-    setDataBookingParam({
+    await setDataBookingParam({
+      ...bookingData,
       licensePlates: localBookingData?.licensePlates || params.get('licenseplates'),
       phone: localBookingData?.phone || params.get('phone'),
       fullnameSchedule: localBookingData?.fullnameSchedule || params.get('name'),
@@ -82,11 +83,11 @@ function BookingPartnerForm({form, setTabKey}) {
       dateSchedule: localBookingData?.dateSchedule || params.get('dateschedule'),
       time: localBookingData?.time?.scheduleTime || params.get('time'),
       stationsId: localBookingData?.stationsId?.stationsId || params.get('stationsid'),
-      vehicleType: localBookingData?.vehicleType ||params.get('vehicletype'),
-      licensePlateColor: localBookingData?.licensePlateColor || params.get('licenseplatecolor'),
-      scheduleType: localBookingData?.scheduleType || params.get('scheduletype'),
-      vehicleSubType: localBookingData?.vehicleSubType || params.get('vehiclesubtype'),
-      vehicleSubCategory: localBookingData?.vehicleSubCategory || params.get('vehiclesubcategory'),
+      vehicleType: Number(dataBookingParam?.vehicleType) || VEHICLE_SUB_TYPE[0].vehicleType,
+      licensePlateColor: Number(dataBookingParam?.licensePlateColor) || Number(params.get('licenseplatecolor')),
+      scheduleType: Number(dataBookingParam?.scheduleType) || Number(params.get('scheduletype')),
+      vehicleSubType: localBookingData?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
+      vehicleSubCategory: localBookingData?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
       vntId: localBookingData?.vntId || params.get('vntid'),
     })
     setIsLoadDataLocal(true)
@@ -280,57 +281,88 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   //func lấy trung tâm nếu lấy được khu vực theo IP
   const getStationBooking=()=>{
-      //kiểm tra đã có trung tâm từ local chưa
-      if(!localBookingData?.stationsId){
-        //thực hiện for để lấy giá trị thỏa mãn
-        for(let i =0;i<listStation?.length;i++){
-          if(listStation[i].stationStatus){
-            handleFillValues('stationsId',listStation[i],listStation[i].stationsId)
-            const stationSelected = listStation[i]
-            setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
-            //lưu dữ liệu thỏa mãn vào local
-            saveDataLocal('stationsId',listStation[i])
-            //setDateFilter để chạy api lấy ngày đầu tiên
-            setDateFilter({
-              ...dateFilter,
-              stationsId: listStation[i].stationsId,
-            })
-            return
-          }
-        }
-      }else{
-        let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
-        if(dataLocal?.stationsId){
-          const stationSelected = localBookingData?.stationsId
-          setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
-        }
+    //kiểm tra đã có trung tâm từ local chưa
+    setDateFilter({
+      ...dateFilter,
+      stationsId: null,
+    })
+    if(dataLocal.stationsId){
+      const stationSelected = dataLocal?.stationsId
+      setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
+    }
+    setListBookingDate([])
+    let localData={
+      ...dataLocal,
+      stationsId:null,
+      dateSchedule:  null,
+      time: null
+    }
+    localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+    form.setFieldsValue({
+      stationsId:null,
+      dateSchedule:  null,
+      time: null
+    })
+    setBookingData((prev)=>({
+      ...prev,
+      stationsId:null,
+      dateSchedule: null,
+      time: null
+    }))
+    //thực hiện for để lấy giá trị thỏa mãn
+    for(let i =0;i<listStation?.length;i++){
+      if(listStation[i].stationStatus){
+        handleFillValues('stationsId',listStation[i],listStation[i].stationsId)
+        const stationSelected = listStation[i]
+        setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
+        //lưu dữ liệu thỏa mãn vào local
+        saveDataLocal('stationsId',listStation[i])
+        //setDateFilter để chạy api lấy ngày đầu tiên
+        setDateFilter({
+          ...dateFilter,
+          stationsId: listStation[i].stationsId,
+        })
+        return
       }
-    
+    }
   }
   //function lấy ngày hẹn đầu tiên nếu lấy được trung tâm theo IP
   const getDateBooking=()=>{
-    //kiểm tra đã có dữ liệu ngày hẹn từ local chưa
-      if(!localBookingData?.dateSchedule){
-        for(let i =0;i<listBookingDate?.length;i++){
-          if(listBookingDate[i].scheduleDateStatus){
-            handleFillValues('dateSchedule',listBookingDate[i].scheduleDate,listBookingDate[i].scheduleDate)
-            //lưu dữ liệu thỏa mãn vào local
-            saveDataLocal('dateSchedule',listBookingDate[i].scheduleDate)
-            const  stationsId  = bookingData?.stationsId?.stationsId
-            //gọi api lấy giờ hẹn
-            if (stationsId && bookingData) {
-              //chạy api lấy danh sách giờ hẹn
-              getBookingHours({
-                stationsId: stationsId,
-                date: listBookingDate[i].scheduleDate,
-                vehicleType: bookingData.vehicleType
-              })
-            }
-            return
+    let localData={
+      ...dataLocal,
+      dateSchedule: null,
+      time: null
+    }
+    localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+    form.setFieldsValue({
+      dateSchedule: null,
+      time: null
+    })
+    setBookingData((prev)=>({
+      ...prev,
+      dateSchedule: null,
+      time: null
+    }))
+    if(listBookingDate?.length > 0 && dataLocal.stationsId){
+      for(let i =0;i<listBookingDate?.length;i++){
+        if(listBookingDate[i].scheduleDateStatus){
+          handleFillValues('dateSchedule',listBookingDate[i].scheduleDate,listBookingDate[i].scheduleDate)
+          //lưu dữ liệu thỏa mãn vào local
+          saveDataLocal('dateSchedule',listBookingDate[i].scheduleDate)
+          const  stationsId  = bookingData?.stationsId?.stationsId
+          //gọi api lấy giờ hẹn
+          if (stationsId && bookingData) {
+            //chạy api lấy danh sách giờ hẹn
+            getBookingHours({
+              stationsId: stationsId,
+              date: listBookingDate[i].scheduleDate,
+              vehicleType: bookingData.vehicleType
+            })
           }
+          return
         }
       }
-    
+    }
   }
   const handleFillValues=(key,bookingData,fieldValue)=>{
     setBookingData((prev)=>({
@@ -343,21 +375,27 @@ function BookingPartnerForm({form, setTabKey}) {
   }
   //function lấy giờ hẹn đầu tiên nếu lấy được ngày hẹn theo IP
   const getHoursBooking=()=>{
-    //kiểm tra đã có dữ liệu giờ hẹn từ local chưa
-      if(!localBookingData?.time){
-        for(let i =0;i<listBookingTime?.length;i++){
-          if(listBookingTime[i].scheduleTime){
-            handleFillValues('time',listBookingTime[i].scheduleTime,listBookingTime[i])
-            //lưu dữ liệu thỏa mãn vào local
-            saveDataLocal('time',listBookingTime[i].scheduleTime)
-            return
-          }
+    let localData={
+      ...dataLocal,
+      time: null
+    }
+    localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+    form.setFieldsValue({
+      time: null
+    })
+    if(listBookingTime?.length > 0){
+      for(let i =0;i<listBookingTime?.length;i++){
+        if(listBookingTime[i].scheduleTime){
+          handleFillValues('time',listBookingTime[i].scheduleTime,listBookingTime[i])
+          //lưu dữ liệu thỏa mãn vào local
+          saveDataLocal('time',listBookingTime[i].scheduleTime)
+          return
         }
       }
+    }
     
   }
   const handleSaveArea=(data)=>{
-    let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
     let localData={
       ...dataLocal,
       vntId:data.stationArea,
@@ -389,9 +427,8 @@ function BookingPartnerForm({form, setTabKey}) {
     })
   }
   //func lấy khu vực theo IP
-  const getAreaByIP = () => {
-    AreaByIP.getAreaByIP().then((result) => {
-    let dataLocal = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
+  const getAreaByIP = async() => {
+    await AreaByIP.getAreaByIP().then((result) => {
       const { statusCode,data } = result
       if (statusCode == 200) {
         //kiểm tra có lấy được khu vực ko
@@ -651,21 +688,7 @@ function BookingPartnerForm({form, setTabKey}) {
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
   }
   const handleFillData=()=>{
-    const newData={
-      ...bookingData,
-      fullnameSchedule:dataBookingParam?.fullnameSchedule|| undefined,
-      phone:dataBookingParam?.phone|| undefined,
-      scheduleType:Number(dataBookingParam?.scheduleType)||  SCHEDULE_TYPE[0].value,
-      licensePlateColor:Number(dataBookingParam?.licensePlateColor)|| PLATE_COLOR[0].value,
-      licensePlates:dataBookingParam?.licensePlates|| undefined,
-      vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
-      vntId: dataBookingParam?.vntId|| undefined,
-      stationsId: dataBookingParam?.stationsId || undefined,
-      dateSchedule: dataBookingParam?.dateSchedule|| undefined,
-      time: dataBookingParam?.time || undefined,
-      vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
-    }
+    const newData=dataBookingParam
     setBookingData(newData)
     form.setFieldsValue(newData)
   }
@@ -685,26 +708,34 @@ function BookingPartnerForm({form, setTabKey}) {
     } else {
       setBookingData({ ...bookingData })
     }
-  }, [])
-  useEffect(()=>{
-    handleFillData()
-  },[isLoadDataLocal])
-  
-  useEffect(() => {
-    let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
-    if(!data?.vehicleSubType){
+    setDateFilter({
+      ...dateFilter,
+      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
+      stationsId: dataBookingParam?.stationsId || localBookingData?.stationsId?.stationsId,
+    })
+    if (dataBookingParam.stationsId && bookingData) {
+      getBookingHours({
+        stationsId: dataBookingParam?.stationsId,
+        date: dataBookingParam?.dateSchedule,
+        vehicleType: dataBookingParam?.vehicleType
+      })
+    }
+    if(!dataLocal?.vehicleSubType){
       handleCategory(VEHICLE_SUB_TYPE[0].value)
       let localData={
-        ...data,
+        ...dataLocal,
         vehicleSubCategory:dataBookingParam?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
         vehicleSubType:dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
         vehicleType: Number(dataBookingParam?.vehicleType)|| VEHICLE_SUB_TYPE[0].vehicleType,
       }
       localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
     }else{
-      handleCategory(data?.vehicleSubType)
+      handleCategory(dataLocal?.vehicleSubType)
     }
   }, [])
+  useEffect(()=>{
+    handleFillData()
+  },[isLoadDataLocal])
 
   // fix antd select label
   useEffect(() => {
@@ -720,20 +751,6 @@ function BookingPartnerForm({form, setTabKey}) {
       }
     }
   }, [listStation])
-  useEffect(()=>{
-    setDateFilter({
-      ...dateFilter,
-      vehicleType: Number(dataBookingParam?.vehicleType)||  VEHICLE_SUB_TYPE[0].vehicleType,
-      stationsId: dataBookingParam?.stationsId || localBookingData?.stationsId?.stationsId,
-    })
-    if (dataBookingParam.stationsId && bookingData) {
-      getBookingHours({
-        stationsId: dataBookingParam?.stationsId,
-        date: dataBookingParam?.dateSchedule,
-        vehicleType: dataBookingParam?.vehicleType
-      })
-    }
-  },[])
   useEffect(()=>{
     if (dataBookingParam.stationsId && bookingData) {
       getBookingHours({
