@@ -913,7 +913,7 @@ function BookingPartnerForm({form, setTabKey}) {
           />
         </div>
       </Form.Item>
-      <Row className='vehicleType'>
+      <Row className='vehicleType mt-3'>
         <Col className='mWidth-100' span={11}>
           <Form.Item
             className="radio-label ps-23"
@@ -1006,7 +1006,7 @@ function BookingPartnerForm({form, setTabKey}) {
             </span>
           </div>
           }
-        className="ps-40"
+        className="ps-40 mt-3"
         rules={[
         ]}>
         <Input
