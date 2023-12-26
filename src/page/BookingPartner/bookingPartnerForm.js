@@ -695,7 +695,9 @@ function BookingPartnerForm({form, setTabKey}) {
 
   useEffect(() => {
     getDataLocal()
-    getAreaByIP()
+    setTimeout(() => {
+      getAreaByIP()
+    }, 500);
     if(localBookingData?.vntId){
       getStations({
         filter: {
@@ -704,7 +706,9 @@ function BookingPartnerForm({form, setTabKey}) {
       })
     }
     if (!bookingData?.vntId && !bookingData?.stationsId && !bookingData?.dateSchedule && !bookingData?.time) {
-      getStationAreas()
+      setTimeout(() => {
+        getStationAreas()
+      }, 500);
     } else {
       setBookingData({ ...bookingData })
     }
