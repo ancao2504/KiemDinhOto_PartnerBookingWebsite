@@ -566,7 +566,7 @@ function BookingPartnerForm({form, setTabKey}) {
               //timeout setState để chạy func lấy ngày đầu tiên
               setTimeout(() => {
                 setSelectedBookingDate(true)
-              }, 500);
+              }, 1000);
             }
           }else{
             setErrorMessage('Không tìm thấy ngày hẹn thích hợp.<br>Vui lòng chọn trạm khác.')
@@ -1006,7 +1006,7 @@ function BookingPartnerForm({form, setTabKey}) {
             </span>
           </div>
           }
-        className="ps-40 mt-3"
+        className="ps-40"
         rules={[
         ]}>
         <Input
