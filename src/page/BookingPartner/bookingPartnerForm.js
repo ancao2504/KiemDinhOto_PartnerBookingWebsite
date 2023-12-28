@@ -33,7 +33,7 @@ function BookingPartnerForm({form, setTabKey}) {
   const [listStationArea, setListStationArea] = useState([])
   const [listBookingDate, setListBookingDate] = useState([])
   const [licensePlateColor, setLicensePlateColor] = useState(PLATE_COLOR)
-  const [scheduleTypes, setScheduleTypes] = useState(SCHEDULE_TYPE)
+  const [scheduleTypes, setScheduleTypes] = useState([])
   const [disableBookingDate, setDisableBookingDate] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -106,7 +106,7 @@ function BookingPartnerForm({form, setTabKey}) {
     BookingService.getBookingHours(params)
       .then((data) => {
         if(data.statusCode == 505){
-          setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
+          setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
           setIsLoading(false)
         }else{
@@ -257,7 +257,7 @@ function BookingPartnerForm({form, setTabKey}) {
     BookingService.getStationAreaList()
       .then((data) => {
         if(data.statusCode == 505){
-          setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
+          setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
           setIsLoading(false)
           let localData={}
@@ -461,6 +461,30 @@ function BookingPartnerForm({form, setTabKey}) {
       return result
     })
   }
+  const getMetaData = async() => {
+    await BookingService.getMetaData().then((result) => {
+      const { statusCode,data } = result
+      if(statusCode==200){
+      let newValues=[]
+      Object.values(data.SCHEDULE_TYPE).map(item=>{
+        let value = {
+          value:item.scheduleType,
+          disabled:item.scheduleTypeEnable ? false :true,
+          label:(
+          <div className="d-flex ai-c j-sb w-100">
+              <span className={item.scheduleTypeEnable ? '' : 'disable-item'}>
+                {item.scheduleTypeName}
+              </span>
+          </div>),
+        }
+        newValues.push(value)
+        setScheduleTypes(newValues)
+      })
+      }else{
+        setScheduleTypes(SCHEDULE_TYPE)
+      }
+    })
+  }
   useEffect(()=>{
     //chạy function lấy giờ hẹn đầu tiên sau khi lấy được ngày hẹn
     getHoursBooking()
@@ -536,7 +560,7 @@ function BookingPartnerForm({form, setTabKey}) {
     BookingService.getBookingDate(dateFilter)
       .then((data) => {
         if(data.statusCode == 505){
-          setErrorMessage('Sai thông tin kết nối.Vui lòng kiểm tra lại')
+          setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
           setIsLoading(false)
         }else{
@@ -696,6 +720,7 @@ function BookingPartnerForm({form, setTabKey}) {
   useEffect(() => {
     getDataLocal()
     setTimeout(() => {
+      getMetaData()
       getAreaByIP()
     }, 500);
     if(localBookingData?.vntId){
@@ -844,7 +869,6 @@ function BookingPartnerForm({form, setTabKey}) {
             options={scheduleTypes}
             defaultValue={Number(dataBookingParam?.scheduleType)|| SCHEDULE_TYPE[0].value}
             menuPlacement="top"
-            isOptionDisabled={(option) => option.disabled}
             value={bookingData.scheduleType}
             // disabled={!bookingData.stationsId}
             onChange={(values) => {
