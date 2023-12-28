@@ -214,6 +214,9 @@
     border-radius: 5.65838px;
   }
 }
+.disable-item{
+  opacity: 0.7;
+}
 :where(.css-dev-only-do-not-override-6j9yrn).ant-form-vertical .ant-form-item-label, :where(.css-dev-only-do-not-override-6j9yrn).ant-col-24.ant-form-item-label, :where(.css-dev-only-do-not-override-6j9yrn).ant-col-xl-24.ant-form-item-label{
   padding: 0 0 2px !important;
 }

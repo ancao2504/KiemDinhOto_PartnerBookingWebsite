@@ -128,7 +128,22 @@ export default class BookingService {
       })
     })
   }
-
+  static async getMetaData(data = {}) {
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/SystemConfigurations/getMetaData',
+        data: data
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(result)
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  }
   static async getBookingDate(data = {}) {
     return new Promise((resolve) => {
       Request.send({
