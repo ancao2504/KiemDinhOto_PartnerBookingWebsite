@@ -15,11 +15,21 @@
 .ant-input-number {
   border-radius: 4px;
 }
-
+.text-station-select {
+  font-weight: normal;
+  white-space: pre-wrap;
+  text-align: justify;
+  overflow-wrap: break-word;
+  line-height: 20px;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .ant-select-item-option-content,
 .ant-select-selection-item {
   text-align: left;
-  font: normal normal 600 14px/20px sans-serif;
   letter-spacing: 0px;
   color: $--unnamed-color-24242600;
 }

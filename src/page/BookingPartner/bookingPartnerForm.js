@@ -669,7 +669,7 @@ function BookingPartnerForm({form, setTabKey}) {
             //timeout setState để thực hiện lấy trạm đầu tiên
             setTimeout(() => {
               setSelectedBookingStation(true)
-            }, 500)
+            }, 1000)
             )
           callback(tmp)
       })
