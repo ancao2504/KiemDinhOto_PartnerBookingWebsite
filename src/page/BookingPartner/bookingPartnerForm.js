@@ -1031,7 +1031,7 @@ function BookingPartnerForm({form, setTabKey}) {
         extra={'Nhập số seri GCN để được tự động kiểm tra phạt nguội'}
         label={
           <div>
-            Số tem GCN mới nhất
+            Số seri GCN mới nhất
             <span
               className="text-important text-very-small text-primary"
               onClick={() =>{
