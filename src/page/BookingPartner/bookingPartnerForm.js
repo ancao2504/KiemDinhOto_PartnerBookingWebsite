@@ -161,7 +161,7 @@ function BookingPartnerForm({form, setTabKey}) {
       fullSchedule =false
     }
     if(disableBookingHour){
-      if(element.scheduleTimeStatus  == 0){
+      if(element.scheduleTimeStatus == 0){
         if(fullSchedule){
           return(
             <div style={{color:'var(--error-btn-color)'}}>Đã đầy</div>
@@ -178,7 +178,7 @@ function BookingPartnerForm({form, setTabKey}) {
           }
         }
       }else{
-        if(element?.totalBookingSchedule || element?.totalSchedule){
+        if(element?.totalSchedule || element?.totalBookingSchedule){
           return(
             `${element?.totalBookingSchedule || 0}/${element?.totalSchedule}`
           )
@@ -240,7 +240,7 @@ function BookingPartnerForm({form, setTabKey}) {
         }
       }
     }else{
-      if(element?.totalBookingSchedule || element?.totalSchedule){
+      if(element?.totalSchedule || element?.totalBookingSchedule){
         return(
           `${element?.totalBookingSchedule || 0}/${element?.totalSchedule}`
         )
@@ -625,8 +625,16 @@ function BookingPartnerForm({form, setTabKey}) {
         if (tmp.length > 0)
           tmp.forEach((element) => {
             const name = `${element.stationCode} - ${element.stationsAddress || element.stationsName}`
-
-            element.label = <div className="text-station-select">{name}</div>
+            if(element?.enablePriorityMode){
+              element.label =<div className="text-station-select" style={{display:'flex',flexWrap:'wrap' }}>
+                  {name}
+                  <div className="ai-c" style={{ display: 'inline-flex',paddingLeft:'5px' }}>
+                    <span className='priority-mode'>Được ưu tiên</span>
+                  </div>
+                </div>
+            }else{
+              element.label = <div className="text-station-select">{name}</div>
+            }
             element.value = element.stationsId
             const textParse = JSON.parse(element?.stationBookingConfig)
             const enableBookingHandler = textParse.some((item) => {
