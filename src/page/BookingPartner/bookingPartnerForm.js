@@ -69,6 +69,7 @@ function BookingPartnerForm({form, setTabKey}) {
     vehicleSubType:VEHICLE_SUB_TYPE[0].value,
     vehicleSubCategory:VIHCLE_CATEGORY_OTO[0].value,
     vntId: params.get('vntid'),
+    certificateSeries: params.get('gcn'),
   }
   //lấy data từ local nếu ko có thì lấy từ param
   const [dataBookingParam, setDataBookingParam] = useState(getParamData)
@@ -89,6 +90,7 @@ function BookingPartnerForm({form, setTabKey}) {
       vehicleSubType: localBookingData?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
       vehicleSubCategory: localBookingData?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
       vntId: localBookingData?.vntId || params.get('vntid'),
+      certificateSeries: localBookingData?.certificateSeries || params.get('gcn'),
     })
     setIsLoadDataLocal(true)
   }
@@ -1051,6 +1053,7 @@ function BookingPartnerForm({form, setTabKey}) {
           type="text"
           size="large"
           onInput={(event) => {
+            event.target.value = event.target.value.toUpperCase().replace(/\s/g, '')
             saveDataLocal('certificateSeries',event.target.value)
           }}
         />
