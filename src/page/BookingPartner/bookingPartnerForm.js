@@ -56,20 +56,20 @@ function BookingPartnerForm({form, setTabKey}) {
     time: false
   })
   const getParamData ={
-    licensePlates:params.get('licenseplates'),
+    licensePlates:params.get('licensePlates'),
     phone:params.get('phone'),
     fullnameSchedule:params.get('name'),
     email:params.get('email'),
-    dateSchedule:params.get('dateschedule'),
+    dateSchedule:params.get('dateSchedule'),
     time: params.get('time'),
-    stationsId: params.get('stationsid'),
+    stationsId: params.get('stationsId'),
     vehicleType:VEHICLE_SUB_TYPE[0].vehicleType,
-    licensePlateColor:Number(dataLocal?.licensePlateColor) || Number(params.get('licenseplatecolor')) || PLATE_COLOR[0].value,
-    scheduleType:Number(dataLocal?.scheduleType) ||Number(params.get('scheduletype')) || SCHEDULE_TYPE[0].value,
+    licensePlateColor:Number(dataLocal?.licensePlateColor) || Number(params.get('licensePlateColor')) || PLATE_COLOR[0].value,
+    scheduleType:Number(dataLocal?.scheduleType) ||Number(params.get('scheduleType')) || SCHEDULE_TYPE[0].value,
     vehicleSubType:VEHICLE_SUB_TYPE[0].value,
     vehicleSubCategory:VIHCLE_CATEGORY_OTO[0].value,
-    vntId: params.get('vntid'),
-    certificateSeries: params.get('gcn'),
+    vntId: params.get('vntId'),
+    certificateSeries: params.get('certificateSeries'),
   }
   //lấy data từ local nếu ko có thì lấy từ param
   const [dataBookingParam, setDataBookingParam] = useState(getParamData)
@@ -77,20 +77,20 @@ function BookingPartnerForm({form, setTabKey}) {
     setIsLoadDataLocal(false)
     setDataBookingParam({
       ...bookingData,
-      licensePlates: localBookingData?.licensePlates || params.get('licenseplates'),
+      licensePlates: localBookingData?.licensePlates || params.get('licensePlates'),
       phone: localBookingData?.phone || params.get('phone'),
       fullnameSchedule: localBookingData?.fullnameSchedule || params.get('name'),
       email: localBookingData?.email || params.get('email'),
-      dateSchedule: localBookingData?.dateSchedule || params.get('dateschedule'),
+      dateSchedule: localBookingData?.dateSchedule || params.get('dateSchedule'),
       time: localBookingData?.time?.scheduleTime || params.get('time'),
-      stationsId: localBookingData?.stationsId?.stationsId || params.get('stationsid'),
+      stationsId: localBookingData?.stationsId?.stationsId || params.get('stationsId'),
       vehicleType: Number(dataBookingParam?.vehicleType) || VEHICLE_SUB_TYPE[0].vehicleType,
-      licensePlateColor: Number(dataBookingParam?.licensePlateColor) || Number(params.get('licenseplatecolor')),
-      scheduleType: Number(dataBookingParam?.scheduleType) || Number(params.get('scheduletype')),
+      licensePlateColor: Number(dataBookingParam?.licensePlateColor) || Number(params.get('licensePlateColor')),
+      scheduleType: Number(dataBookingParam?.scheduleType) || Number(params.get('scheduleType')),
       vehicleSubType: localBookingData?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
       vehicleSubCategory: localBookingData?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vntId: localBookingData?.vntId || params.get('vntid'),
-      certificateSeries: localBookingData?.certificateSeries || params.get('gcn'),
+      vntId: localBookingData?.vntId || params.get('vntId'),
+      certificateSeries: localBookingData?.certificateSeries || params.get('certificateSeries'),
     })
     setIsLoadDataLocal(true)
   }
@@ -438,10 +438,17 @@ function BookingPartnerForm({form, setTabKey}) {
           handleFillDataArea(data.stationArea)
           handleSaveArea(data)
         }else{
+          let vntId = params.get('vntId')
+          handleFillDataArea(vntId)
+          getStations({
+            filter: {
+              stationArea:vntId
+            }
+          })
           if(!dataLocal?.vntId){
-            handleFillDataArea()
             let localData={
               ...dataLocal,
+              vntId:vntId,
               stationsId:null,
               dateSchedule: null,
               time: null,
@@ -450,11 +457,11 @@ function BookingPartnerForm({form, setTabKey}) {
           }else{
             setBookingData((prev)=>({
               ...prev,
-              vntId:dataLocal?.vntId,
+              vntId:vntId || dataLocal?.vntId,
             }))
             let localData={
               ...dataLocal,
-              vntId:dataLocal?.vntId,
+              vntId:vntId || dataLocal?.vntId,
             }
             localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
           }
@@ -1051,6 +1058,7 @@ function BookingPartnerForm({form, setTabKey}) {
           className="login__input"
           placeholder="Ví dụ: KA-7461980"
           type="text"
+          style={{textTransform:'uppercase'}}
           size="large"
           onInput={(event) => {
             event.target.value = event.target.value.toUpperCase().replace(/\s/g, '')
@@ -1176,7 +1184,7 @@ function BookingPartnerForm({form, setTabKey}) {
           styles={customStyles}
           options={listBookingDate}
           menuPlacement="top"
-          defaultValue={dataLocal?.dateSchedule}
+          defaultValue={dataBookingParam?.dateSchedule || dataLocal?.dateSchedule}
           isOptionDisabled={(option) => option.disabled}
           disabled={!bookingData.stationsId || isVisible.dateSchedule}
           onChange={(values) => {
