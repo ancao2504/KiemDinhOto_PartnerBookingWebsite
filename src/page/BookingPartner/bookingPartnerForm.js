@@ -439,7 +439,7 @@ function BookingPartnerForm({form, setTabKey}) {
           handleFillDataArea(data.stationArea)
           handleSaveArea(data)
         }else{
-          let vntId = params.get('vntId')
+          let vntId = params.get('vntId') || dataLocal?.vntId
           handleFillDataArea(vntId)
           getStations({
             filter: {
@@ -640,10 +640,10 @@ function BookingPartnerForm({form, setTabKey}) {
             const name = `${element.stationCode} - ${element.stationsAddress || element.stationsName}`
             if(element?.enablePriorityMode){
               element.label =<div className="text-station-select" style={{display:'flex',flexWrap:'wrap' }}>
-                  {name}
-                  <div className="ai-c" style={{ display: 'inline-flex',paddingLeft:'5px' }}>
+                  <div className="ai-c" style={{ display: 'inline-flex',paddingRight:'4px' }}>
                     <span className='priority-mode'>Được ưu tiên</span>
                   </div>
+                  {name}
                 </div>
             }else{
               element.label = <div className="text-station-select">{name}</div>
@@ -666,10 +666,10 @@ function BookingPartnerForm({form, setTabKey}) {
               element.disabled = true
               element.label = (
                 <div className="text-station-select" style={{ color: 'var(--error-btn-color)',display:'flex',flexWrap:'wrap' }}>
-                  {name}
-                  <div className="ai-c disable-station" style={{ display: 'inline-flex' }}>
-                    <WarningOutlined style={{ margin: '0 5px' }} /> <span>Ngưng hoạt động</span>
+                  <div className="ai-c disable-station" style={{ display: 'inline-flex',border: '1px solid var(--error-btn-color)',borderRadius: '4px',paddingRight:'4px' }}>
+                    <span style={{padding:'0 2px'}}>Ngưng hoạt động</span>
                   </div>
+                  {name}
                 </div>
               )
               return
