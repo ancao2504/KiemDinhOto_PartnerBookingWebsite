@@ -14,6 +14,7 @@ import './main.scss'
 import './dropDownCommon.scss'
 import { IS_ZALO_MINI_APP } from './constants/global';
 import Layout from './components/Layout';
+import { ReactComponent as LogoTTDK } from './assets/icons/Logo.svg'
 import Logo from './assets/MAINLOGO.png'
 const BookingPartner = React.lazy(() => import('./page/BookingPartner/index'))
 const BookingPartnerIframe = React.lazy(() => import('./page/Booking/index'))
@@ -77,7 +78,7 @@ function App() {
       </Router>
       <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
         <div style={{display:'flex',justifyContent:'center'}}>
-          <img style={{maxWidth:'40px'}} src={Logo} alt="" />
+          <LogoTTDK></LogoTTDK>
         </div>
         <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
       </div>
