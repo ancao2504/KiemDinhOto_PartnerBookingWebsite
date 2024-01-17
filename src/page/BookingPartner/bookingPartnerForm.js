@@ -17,7 +17,7 @@ import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo3.svg'
+import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 
 function BookingPartnerForm({form, setTabKey}) {
   const location = useLocation();
