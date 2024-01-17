@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
+import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 
 function BookingPartnerForm({form, setTabKey}) {
   const location = useLocation();
@@ -509,6 +510,7 @@ function BookingPartnerForm({form, setTabKey}) {
 
   const onFinish = (values) => {
     setIsVisible(false)
+    setIsLoading(true)
     const newData = {
       licensePlates: values.licensePlates.toUpperCase(),
       phone: values.phone,
@@ -536,6 +538,7 @@ function BookingPartnerForm({form, setTabKey}) {
           setErrorMessage(SCHEDULE_ERROR.INVALID_REQUEST)
         }
       setIsVisible(false)
+      setIsLoading(false)
       } else {
         setIsModalOpen(true)
         localStorage.removeItem(addKeyLocalStorage('bookingData'))
@@ -552,6 +555,7 @@ function BookingPartnerForm({form, setTabKey}) {
       }
     })
     setIsVisible(true)
+    setIsLoading(false)
   }
 
 
@@ -1253,6 +1257,14 @@ function BookingPartnerForm({form, setTabKey}) {
       {isModalErrOpen &&
         <PopupMessage isModalOpen={isModalErrOpen} onClose={() => {setIsModalErrOpen(false)}} text={errorMessage} ></PopupMessage>
       }
+      {isLoading && (
+        <div className="loading">
+          <div>
+            <LogoTTDK></LogoTTDK>
+            <Spin style={{width:'100%'}} />
+          </div>
+        </div>
+      )}
     </Form>
   )
 }
