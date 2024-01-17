@@ -17,7 +17,7 @@ import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
-import Logo from './../../assets/MAINLOGO.png'
+import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo3.svg'
 
 function BookingPartnerForm({form, setTabKey}) {
   const location = useLocation();
@@ -1260,7 +1260,7 @@ function BookingPartnerForm({form, setTabKey}) {
       {isLoading && (
         <div className="loading">
           <div>
-            <img style={{maxWidth:'40px',marginBottom:'10px'}} src={Logo} alt="" />
+            <LogoTTDK></LogoTTDK>
             <Spin style={{width:'100%'}} />
           </div>
         </div>
