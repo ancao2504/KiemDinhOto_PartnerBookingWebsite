@@ -19,7 +19,7 @@ import addKeyLocalStorage from '../../helper/localStorage'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 
-function BookingPartnerForm({form, setTabKey}) {
+function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
@@ -56,10 +56,10 @@ function BookingPartnerForm({form, setTabKey}) {
     dateSchedule: false,
     time: false
   })
-  const getParamData ={
+  let getParamData ={
     licensePlates:params.get('licensePlates'),
-    phone:params.get('phone'),
-    fullnameSchedule:params.get('name'),
+    phone:zaloUserPhone || params.get('phone'),
+    fullnameSchedule:zaloUserName || params.get('name'),
     email:params.get('email'),
     dateSchedule:params.get('dateSchedule'),
     time: params.get('time'),
@@ -90,7 +90,7 @@ function BookingPartnerForm({form, setTabKey}) {
       scheduleType: Number(dataBookingParam?.scheduleType) || Number(params.get('scheduleType')),
       vehicleSubType: localBookingData?.vehicleSubType || VEHICLE_SUB_TYPE[0].value,
       vehicleSubCategory: localBookingData?.vehicleSubCategory || VIHCLE_CATEGORY_OTO[0].value,
-      vntId: localBookingData?.vntId || params.get('vntId'),
+      // vntId: localBookingData?.vntId || params.get('vntId'),
       certificateSeries: localBookingData?.certificateSeries || params.get('certificateSeries'),
     })
     setIsLoadDataLocal(true)
@@ -111,7 +111,6 @@ function BookingPartnerForm({form, setTabKey}) {
         if(data.statusCode == 505){
           setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
-          setIsLoading(false)
         }else{
           let tmp = data || []
           if (tmp.length > 0) {
@@ -256,13 +255,11 @@ function BookingPartnerForm({form, setTabKey}) {
   }
 
   function getStationAreas() {
-    setIsLoading(true)
     BookingService.getStationAreaList()
       .then((data) => {
         if(data.statusCode == 505){
           setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
-          setIsLoading(false)
           let localData={}
           localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
         }else{
@@ -273,13 +270,11 @@ function BookingPartnerForm({form, setTabKey}) {
               element.value = element.value
             })
           setListStationArea(tmp)
-          setIsLoading(false)
         }
       })
       .catch(() => {
         setErrorMessage('Lấy thông tin khu vực thất bại.')
         setIsModalErrOpen(true)
-        setIsLoading(false)
       })
   }
   //func lấy trung tâm nếu lấy được khu vực theo IP
@@ -346,7 +341,7 @@ function BookingPartnerForm({form, setTabKey}) {
       time: null
     }
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-    if(listBookingDate?.length > 0 && dataLocal.stationsId){
+    if(listBookingDate?.length > 0 && dataLocal?.stationsId){
       for(let i =0;i<listBookingDate?.length;i++){
         if(listBookingDate[i].scheduleDateStatus){
           handleFillValues('dateSchedule',listBookingDate[i].scheduleDate,listBookingDate[i].scheduleDate)
@@ -439,13 +434,15 @@ function BookingPartnerForm({form, setTabKey}) {
           handleFillDataArea(data.stationArea)
           handleSaveArea(data)
         }else{
-          let vntId = params.get('vntId') || dataLocal?.vntId
+          let vntId = params.get('vntId') || dataLocal?.vntId || undefined
           handleFillDataArea(vntId)
-          getStations({
-            filter: {
-              stationArea:vntId
-            }
-          })
+          if(vntId){
+            getStations({
+              filter: {
+                stationArea:vntId
+              }
+            })
+          }
           if(!dataLocal?.vntId){
             let localData={
               ...dataLocal,
@@ -538,8 +535,13 @@ function BookingPartnerForm({form, setTabKey}) {
           setErrorMessage(SCHEDULE_ERROR.INVALID_REQUEST)
         }
       setIsVisible(false)
-      setIsLoading(false)
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 500);
       } else {
+        setTimeout(() => {
+          setIsLoading(false)
+        }, 500);
         setIsModalOpen(true)
         localStorage.removeItem(addKeyLocalStorage('bookingData'))
         setTimeout(() => {
@@ -555,7 +557,6 @@ function BookingPartnerForm({form, setTabKey}) {
       }
     })
     setIsVisible(true)
-    setIsLoading(false)
   }
 
 
@@ -575,7 +576,6 @@ function BookingPartnerForm({form, setTabKey}) {
         if(data.statusCode == 505){
           setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
           setIsModalErrOpen(true)
-          setIsLoading(false)
         }else{
           if(data.length > 0){
             let tmp = data || []
@@ -666,7 +666,7 @@ function BookingPartnerForm({form, setTabKey}) {
               element.disabled = true
               element.label = (
                 <div className="text-station-select" style={{ color: 'var(--error-btn-color)',display:'flex',flexWrap:'wrap' }}>
-                  <div className="ai-c disable-station" style={{ display: 'inline-flex',border: '1px solid var(--error-btn-color)',borderRadius: '4px',paddingRight:'4px' }}>
+                  <div className="ai-c disable-station" style={{ display: 'inline-flex',border: '1px solid var(--error-btn-color)',borderRadius: '4px',marginRight:'4px' }}>
                     <span style={{padding:'0 2px'}}>Ngưng hoạt động</span>
                   </div>
                   {name}
@@ -737,11 +737,11 @@ function BookingPartnerForm({form, setTabKey}) {
     setBookingData(newData)
     form.setFieldsValue(newData)
   }
-
+  
   useEffect(() => {
     getDataLocal()
+    getMetaData()
     setTimeout(() => {
-      getMetaData()
       getAreaByIP()
     }, 500);
     if(localBookingData?.vntId){
@@ -1078,7 +1078,7 @@ function BookingPartnerForm({form, setTabKey}) {
           }}
           showSearch
           disabled={!bookingData.vehicleSubType}
-          defaultValue={dataBookingParam?.vntId || dataLocal?.vntId}
+          // defaultValue={dataBookingParam?.vntId || dataLocal?.vntId}
           onChange={(values) => {
             let data = JSON.parse(localStorage.getItem(addKeyLocalStorage('bookingData')))
             let localData={
