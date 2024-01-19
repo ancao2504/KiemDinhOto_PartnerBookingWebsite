@@ -510,7 +510,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     setIsLoading(true)
     const newData = {
       licensePlates: values.licensePlates.toUpperCase(),
-      phone: values.phone,
+      phone: values.phone.trim(),
       fullnameSchedule: values.fullnameSchedule,
       email: values.email,
       dateSchedule: values.dateSchedule,
@@ -522,7 +522,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       scheduleType: values.scheduleType,
       vehicleSubCategory:values.vehicleSubCategory,
       vehicleSubType:values.vehicleSubType,
-      // certificateSeries:values.certificateSeries,
+      certificateSeries:values.certificateSeries,
     }
 
     BookingService.createSchedule(newData).then((result) => {
@@ -845,10 +845,10 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         rules={[
           {
             required: true,
-            message: 'VD: 0957473xxx'
+            message: 'Vui lòng nhập số điện thoại'
           },
           {
-            pattern: new RegExp(/(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/),
+            pattern: new RegExp(/^[0-9]*$/),
             message: 'Số điện thoại không hợp lệ'
           },
           {
