@@ -511,7 +511,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     const newData = {
       licensePlates: values.licensePlates.toUpperCase(),
       phone: values.phone.trim(),
-      fullnameSchedule: values.fullnameSchedule,
+      fullnameSchedule: values.fullnameSchedule.trim(),
       email: values.email,
       dateSchedule: values.dateSchedule,
       time: values.time.scheduleTime,
@@ -825,6 +825,10 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           {
             required: true,
             message: 'Vui lòng nhập tên'
+          },
+          {
+            message: 'Vui lòng nhập tên',
+            pattern: new RegExp(/^\S/)
           }
         ]}>
         <div className="login__input__icon">
@@ -848,8 +852,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             message: 'Vui lòng nhập số điện thoại'
           },
           {
-            pattern: new RegExp(/^[0-9]*$/),
-            message: 'Số điện thoại không hợp lệ'
+            message: 'Số điện thoại không hợp lệ',
+            pattern: new RegExp(/^(03|05|07|08|09|01[2|6|8|9])+([0-9])*$\b/),
           },
           {
             min: 10,

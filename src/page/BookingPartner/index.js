@@ -7,6 +7,7 @@ import BookingPartnerForm from './bookingPartnerForm'
 import { useLocation } from 'react-router-dom'
 import LoadFormBookingFailed from '../../components/BasicComponent/LoadFormBookingFailed'
 import { CheckApiKey } from '../../helper/CheckApiKey'
+import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import api from "zmp-sdk";
 function BookingPartner() {
   const [isVisible, setIsVisible] = useState(false)
@@ -39,7 +40,6 @@ function BookingPartner() {
     api.getUserInfo({
       success: (data) => {
         const { userInfo } = data;
-        console.log("getZaloUserName ~ data:", data)
         if(userInfo){
           if(userInfo.name=='User Name'){
             setZaloUserName('')
@@ -72,38 +72,54 @@ function BookingPartner() {
             <Spin style={{width:'100%'}} />
           </div>
         ):(
-          <div
-            className={`
-              partner-container 
-              ${nextTab === 'partner' ? 'small' : 'full'}
-              ${nextTab === 'success' ? 'd-flex justify-content-center align-items-center' : ''}
-              `}>
-            {/* <Tabs activeKey={nextTab}>
-              <Tabs.TabPane tab="" key="partner">
-                <div className="h-100">
-                  <div className="partner-select">
-                    <Tabs activeKey={tabKey}>
-                      <Tabs.TabPane tab="Đặt lịch" key="booking"> */}
-                      <div className='booking-title title-small'>ĐẶT LỊCH ĐĂNG KIỂM</div>
-                      <div className='mt-4'>
-                        <BookingPartnerForm zaloUserPhone={zaloUserPhone} zaloUserName={zaloUserName} setTabKey={setTabKey} form={form} />
-                      </div>
-                      {/* </Tabs.TabPane>
-                      <Tabs.TabPane tab="Lịch hẹn" key="bookingList">
-                        <BookingPartnerHistory setTabKey={setTabKey} tabKey={tabKey} form={form} />
-                      </Tabs.TabPane>
-                    </Tabs>
+          <>
+            <div
+              className={`
+                partner-container 
+                ${nextTab === 'partner' ? 'small' : 'full'}
+                ${nextTab === 'success' ? 'd-flex justify-content-center align-items-center' : ''}
+                `}>
+              {/* <Tabs activeKey={nextTab}>
+                <Tabs.TabPane tab="" key="partner">
+                  <div className="h-100">
+                    <div className="partner-select">
+                      <Tabs activeKey={tabKey}>
+                        <Tabs.TabPane tab="Đặt lịch" key="booking"> */}
+                        <div className='booking-title title-small'>ĐẶT LỊCH ĐĂNG KIỂM</div>
+                        <div className='mt-4'>
+                          <BookingPartnerForm zaloUserPhone={zaloUserPhone} zaloUserName={zaloUserName} setTabKey={setTabKey} form={form} />
+                        </div>
+                        {/* </Tabs.TabPane>
+                        <Tabs.TabPane tab="Lịch hẹn" key="bookingList">
+                          <BookingPartnerHistory setTabKey={setTabKey} tabKey={tabKey} form={form} />
+                        </Tabs.TabPane>
+                      </Tabs>
+                    </div>
                   </div>
-                </div>
-              </Tabs.TabPane>
-            </Tabs> */}
-          </div>
+                </Tabs.TabPane>
+              </Tabs> */}
+            </div>
+            <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
+              <div style={{display:'flex',justifyContent:'center'}}>
+                <LogoTTDK></LogoTTDK>
+              </div>
+              <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
+            </div>
+          </>
         )
         }
       </div>
       ):
       (
-        <LoadFormBookingFailed></LoadFormBookingFailed>
+        <>
+          <LoadFormBookingFailed></LoadFormBookingFailed>
+          <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
+            <div style={{display:'flex',justifyContent:'center'}}>
+              <LogoTTDK></LogoTTDK>
+            </div>
+            <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
+          </div>
+        </>
       )
     }
     </>
