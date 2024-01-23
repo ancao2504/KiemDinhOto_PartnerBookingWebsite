@@ -1062,7 +1062,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         className=""
         rules={[
           {
-            message: 'Số điện thoại không hợp lệ',
+            message: 'Số seri GCN không hợp lệ',
             pattern: new RegExp(/^[a-zA-Z0-9-]*$/),
           },
         ]}>
