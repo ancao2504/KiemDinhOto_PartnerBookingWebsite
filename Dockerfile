@@ -12,9 +12,10 @@ FROM cache-image as builder
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 
+#read REACT_APP_THEME_NAME from system environment
 #replace "public" folder based on Theme name from REACT_APP_THEME_NAME system environment
-# ARG REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
-# ENV REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
+ARG REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
+ENV REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
 # COPY ./public/${REACT_APP_THEME_NAME}/* /usr/src/app/public/
 
 #replace new build version

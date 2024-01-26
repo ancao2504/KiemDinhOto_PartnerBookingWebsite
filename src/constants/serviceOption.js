@@ -1,5 +1,3 @@
-import { IS_ZALO_MINI_APP } from './global'
-
 export const SCHEDULE_TYPE = {
   VEHICLE_INSPECTION: 1, // Đăng kiểm xe cũ
   NEW_VEHICLE_INSPECTION: 2, // đăng kiểm xe mới
