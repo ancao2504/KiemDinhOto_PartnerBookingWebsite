@@ -56,7 +56,7 @@ function BookingPartner() {
   };
   useEffect(()=>{
     setIsVisible(true)
-    if(process.env.ZALO_AUTH_ENABLE){
+    if(process.env.ZALO_AUTH_ENABLE == 1){
       getZaloUserPhone()
       getZaloUserName()
     }
