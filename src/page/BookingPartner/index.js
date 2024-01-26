@@ -56,8 +56,10 @@ function BookingPartner() {
   };
   useEffect(()=>{
     setIsVisible(true)
-    getZaloUserPhone()
-    getZaloUserName()
+    if(process.env.ZALO_AUTH_ENABLE == 1){
+      getZaloUserPhone()
+      getZaloUserName()
+    }
     setTimeout(() => {
       setIsVisible(false)
     }, 800);
