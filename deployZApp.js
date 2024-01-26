@@ -1,5 +1,7 @@
 const fs = require('fs')
 const axios = require('axios').default
+const moment = require('moment')
+
 const loginToZaloFunction = require('./node_modules/zmp-cli/login')
 const deployToZaloFunction = require('./node_modules/zmp-cli/deploy')
 const zmpCliConstant = require('./node_modules/zmp-cli/utils/constants')
@@ -103,7 +105,7 @@ async function deployToZalo() {
     quit: false,
     outputDir: 'build',
     versionStatus: zmpCliConstant.versionStatus.TESTING,
-    desc: 'script automatically deploys app',
+    desc: `TTDK v4.1.0.${moment().format('YYYYMMDDHHmm') - 1}`,
     customProject: true
   }
   await deployToZaloFunction(deployConfigOptions, logger)
