@@ -25,9 +25,9 @@ function BookingPartner() {
     api.getPhoneNumber({
       success: (data) => {
         // xử lý khi gọi api thành công
-        const { token,number } = data;
-        if(number){
-          setZaloUserPhone(number)
+        const { token } = data;
+        if(token){
+          handleGetPhoneNumber(token)
         }
       },
       fail: (error) => {
@@ -36,6 +36,23 @@ function BookingPartner() {
       }
     });
   };
+  const handleGetPhoneNumber = async(token) => {
+    const accessToken = await api.getAccessToken();
+    let headers = {
+      access_token: accessToken,
+      code: token,
+      secret_key: 'Y8vfyoJc7nUtmw72TUOx',
+    }
+    await BookingService.getZaloUserPhoneNumber(headers).then((result) => {
+      console.log("awaitBookingService.getZaloUserPhoneNumber ~ result:", result)
+      const { error,data } = result
+      if(error){
+        console.log('lỗi')
+      }else{
+        setZaloUserPhone(data?.number)
+      }
+    })
+  }
   const getZaloUserName=()=>{
     api.getUserInfo({
       success: (data) => {
@@ -56,13 +73,13 @@ function BookingPartner() {
   };
   useEffect(()=>{
     setIsVisible(true)
-    if(process.env.ZALO_AUTH_ENABLE == 1){
+    if(process.env.REACT_APP_ZALO_AUTH_ENABLE == 1){
       getZaloUserPhone()
       getZaloUserName()
     }
     setTimeout(() => {
       setIsVisible(false)
-    }, 800);
+    }, 1000);
   },[])
   return (
     <>

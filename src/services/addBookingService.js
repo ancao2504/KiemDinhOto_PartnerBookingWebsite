@@ -112,6 +112,23 @@ export default class BookingService {
       })
     })
   }
+  static async getZaloUserPhoneNumber(headers) {
+    return new Promise((resolve) => {
+      console.log("BookingService ~ returnnewPromise ~ headers:", headers)
+      Request.sendZaloMiniApp({
+        method: 'GET',
+        headers: headers
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        console.log("BookingService ~ returnnewPromise ~ result:", result)
+        if (statusCode === 200) {
+          return resolve(result)
+        } else {
+          return resolve(result)
+        }
+      })
+    })
+  }
   static async getBookingHours(data = {}) {
     return new Promise((resolve) => {
       Request.send({
