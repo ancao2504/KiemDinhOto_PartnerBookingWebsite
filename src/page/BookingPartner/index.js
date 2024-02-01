@@ -141,8 +141,7 @@ function BookingPartner() {
           <LoadFormBookingFailed></LoadFormBookingFailed>
           <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
             <div style={{display:'flex',justifyContent:'center'}}>
-                <LogoTTDK></LogoTTDK>
-                {TTDK_PARTNER.partner}
+              <LogoTTDK></LogoTTDK>
             </div>
             <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
           </div>
