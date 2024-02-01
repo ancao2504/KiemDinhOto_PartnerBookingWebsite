@@ -22,7 +22,7 @@
     "sass": "^1.69.5",
     "web-vitals": "^2.1.4",
     "zmp-cli": "^3.15.3",
-    "zmp-sdk": "^2.35.1"
+    "zmp-sdk": "^2.35.3"
   },
   "devDependencies": {
     "copyright-header": "^0.4.6",

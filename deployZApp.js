@@ -67,27 +67,11 @@ async function deployToZalo() {
   }
 
   configFile()
-  const REACT_APP_API_URL = "https://zalo.ttdkapi.ttdk.com.vn"
 
-  let accessToken = await axios({
-    method: 'GET',
-    url: `${REACT_APP_API_URL}/ZaloAPI/robot/getOAAccessToken`,
-    headers: {
-      authorization: envConfig['GET_ZALO_USER_ACCESS_TOKEN_API_KEY']
-    }
-  })
-    .then((res) => {
-      if (res.status === 200) {
-        return res.data
-      }
-    })
-    .catch((err) => {
-      console.log(err)
-      return undefined
-    })
+  let accessToken = envConfig['ZALO_USER_TOKEN'] || "";
 
   if (!accessToken) {
-    console.error('get zalo user accessToken from', REACT_APP_API_URL, 'failed')
+    console.error('Invalid ZALO User token')
     return
   }
 
