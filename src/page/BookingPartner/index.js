@@ -143,7 +143,13 @@ function BookingPartner() {
           <LoadFormBookingFailed></LoadFormBookingFailed>
           <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
             <div style={{display:'flex',justifyContent:'center'}}>
-              <LogoTTDK></LogoTTDK>
+              {TTDK_PARTNER.map(item => {
+                if (item.name == partner) {
+                  return (<div style={{maxHeight:'58px',maxWidth:'58px'}}>
+                    {item.icon}
+                  </div> )
+                }
+              })}
             </div>
             <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
           </div>
