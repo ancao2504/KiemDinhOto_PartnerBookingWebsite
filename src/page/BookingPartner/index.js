@@ -20,7 +20,7 @@ function BookingPartner() {
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
-  let partner =params.get('partner')
+  let partner =params.get('partner')?.toLowerCase()
   let apikey = CheckApiKey()
 
   const getZaloUserPhone=()=>{
