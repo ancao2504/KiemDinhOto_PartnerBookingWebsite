@@ -125,7 +125,9 @@ function BookingPartner() {
                 <LogoTTDK></LogoTTDK>
                 {TTDK_PARTNER.map(item => {
                   if (item.name == partner) {
-                    return item.icon
+                    return (<div style={{maxHeight:'58px',maxWidth:'58px'}}>
+                      {item.icon}
+                    </div> )
                   }
                 })}
               </div>
