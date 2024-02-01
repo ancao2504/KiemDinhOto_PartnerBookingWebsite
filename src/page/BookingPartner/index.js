@@ -9,6 +9,7 @@ import LoadFormBookingFailed from '../../components/BasicComponent/LoadFormBooki
 import { CheckApiKey } from '../../helper/CheckApiKey'
 import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import api from "zmp-sdk";
+import { TTDK_PARTNER } from '../../components/BasicComponent/CheckLogoPartner'
 function BookingPartner() {
   const [isVisible, setIsVisible] = useState(false)
   const [nextTab, setNextTab] = useState('partner')
@@ -19,6 +20,7 @@ function BookingPartner() {
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
+  let partner =params.get('partner')
   let apikey = CheckApiKey()
 
   const getZaloUserPhone=()=>{
@@ -119,8 +121,15 @@ function BookingPartner() {
               </Tabs> */}
             </div>
             <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
-              <div style={{display:'flex',justifyContent:'center'}}>
+              <div style={{display:'flex',justifyContent:'center',gap:'20px'}}>
                 <LogoTTDK></LogoTTDK>
+                {TTDK_PARTNER.map(item => {
+                  if (item.name == partner) {
+                    return (<div style={{maxHeight:'58px',maxWidth:'58px'}}>
+                      {item.icon}
+                    </div> )
+                  }
+                })}
               </div>
               <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
             </div>
@@ -134,7 +143,13 @@ function BookingPartner() {
           <LoadFormBookingFailed></LoadFormBookingFailed>
           <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0',textAlign:'center' }}>
             <div style={{display:'flex',justifyContent:'center'}}>
-              <LogoTTDK></LogoTTDK>
+              {TTDK_PARTNER.map(item => {
+                if (item.name == partner) {
+                  return (<div style={{maxHeight:'58px',maxWidth:'58px'}}>
+                    {item.icon}
+                  </div> )
+                }
+              })}
             </div>
             <div style={{color:'var(--primary-button-color)',marginTop:'0.5rem'}}>Powered by TTDK</div>
           </div>
