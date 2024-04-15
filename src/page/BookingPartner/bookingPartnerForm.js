@@ -20,6 +20,7 @@ import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 
 function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
+  const isZaloApp = process.env.REACT_APP_ZALO_AUTH_ENABLE === "1"
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
@@ -79,8 +80,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     setDataBookingParam({
       ...bookingData,
       licensePlates: localBookingData?.licensePlates || params.get('licensePlates'),
-      phone: localBookingData?.phone || params.get('phone'),
-      fullnameSchedule: localBookingData?.fullnameSchedule || params.get('name'),
+      phone: zaloUserPhone || localBookingData?.phone || params.get('phone'),
+      fullnameSchedule: zaloUserName || localBookingData?.fullnameSchedule || params.get('name'),
       email: localBookingData?.email || params.get('email'),
       dateSchedule: localBookingData?.dateSchedule || params.get('dateSchedule'),
       time: localBookingData?.time?.scheduleTime || params.get('time'),
@@ -341,13 +342,13 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       time: null
     }
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-    if(listBookingDate?.length > 0 && dataLocal?.stationsId){
-      for(let i =0;i<listBookingDate?.length;i++){
-        if(listBookingDate[i].scheduleDateStatus){
-          handleFillValues('dateSchedule',listBookingDate[i].scheduleDate,listBookingDate[i].scheduleDate)
+    if (listBookingDate?.length > 0 && dataLocal?.stationsId) {
+      for (let i = 0; i < listBookingDate?.length; i++) {
+        if (listBookingDate[i].scheduleDateStatus) {
+          handleFillValues('dateSchedule', listBookingDate[i].scheduleDate, listBookingDate[i].scheduleDate)
           //lưu dữ liệu thỏa mãn vào local
-          saveDataLocal('dateSchedule',listBookingDate[i].scheduleDate)
-          const  stationsId  = bookingData?.stationsId?.stationsId
+          saveDataLocal('dateSchedule', listBookingDate[i].scheduleDate)
+          const stationsId = bookingData?.stationsId?.stationsId
           //gọi api lấy giờ hẹn
           if (stationsId && bookingData) {
             //chạy api lấy danh sách giờ hẹn
@@ -381,10 +382,10 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       time: null
     }
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-    if(listBookingTime?.length > 0){
-      for(let i =0;i<listBookingTime?.length;i++){
-        if(!listBookingTime[i].disabled){
-          handleFillValues('time',listBookingTime[i].scheduleTime,listBookingTime[i])
+    if (listBookingTime?.length > 0) {
+      for (let i = 0; i < listBookingTime?.length; i++) {
+        if (!listBookingTime[i].disabled) {
+          handleFillValues('time', listBookingTime[i].scheduleTime, listBookingTime[i])
           //lưu dữ liệu thỏa mãn vào local
           saveDataLocal('time',listBookingTime[i].scheduleTime)
           return
@@ -510,19 +511,19 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     setIsLoading(true)
     const newData = {
       licensePlates: values.licensePlates.toUpperCase(),
-      phone: values.phone.trim(),
+      phone: values.phone,
       fullnameSchedule: values.fullnameSchedule.trim(),
       email: values.email,
       dateSchedule: values.dateSchedule,
       time: values.time.scheduleTime,
       stationsId: values.stationsId,
-      vehicleType:bookingData.vehicleType,
+      vehicleType: bookingData.vehicleType,
       licensePlateColor: values.licensePlateColor,
       notificationMethod: 'SMS',
       scheduleType: values.scheduleType,
-      vehicleSubCategory:values.vehicleSubCategory,
-      vehicleSubType:values.vehicleSubType,
-      certificateSeries:values.certificateSeries,
+      vehicleSubCategory: values.vehicleSubCategory,
+      vehicleSubType: values.vehicleSubType,
+      certificateSeries: values.certificateSeries,
     }
 
     BookingService.createSchedule(newData).then((result) => {
@@ -811,13 +812,31 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     }
   },[dataBookingParam])
 
+  useEffect(() => {
+    if (isZaloApp) {
+      form.setFieldsValue({
+        "phone": zaloUserPhone,
+      })
+      saveDataLocal('phone', zaloUserPhone)
+    }
+  }, [zaloUserPhone, form])
+
+  useEffect(() => {
+    if (isZaloApp) {
+      form.setFieldsValue({
+        "fullnameSchedule": zaloUserName,
+      })
+      saveDataLocal('fullnameSchedule', zaloUserName)
+    }
+  }, [zaloUserName, form])
+
   return (
     <Form
       name="booking"
       layout="vertical"
       initialValues={{}}
       form={form}
-      onFinish={(values) => {onFinish(values)}}>
+      onFinish={(values) => { onFinish(values) }}>
       <Form.Item
         name="fullnameSchedule"
         label="Họ và tên chủ xe"
@@ -830,25 +849,25 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             message: 'Vui lòng nhập tên',
             pattern: new RegExp(/^\S/)
           }
-        ]}>
-        <div className="login__input__icon">
-          <Input 
-            defaultValue={dataBookingParam?.fullnameSchedule || dataLocal?.fullnameSchedule}
-            className="login__input booking-input"
-            placeholder="Nguyễn Văn a" 
-            type="text" 
-            size="large"
-            onInput={(e) => {
-              saveDataLocal('fullnameSchedule',e.target.value)
-            }} />
-        </div>
+        ]}
+      >
+        <Input
+          defaultValue={isZaloApp ? zaloUserName : dataBookingParam?.fullnameSchedule || dataLocal?.fullnameSchedule}
+          className="login__input booking-input"
+          placeholder="Nguyễn Văn a"
+          type="text"
+          size="large"
+          onInput={(e) => {
+            saveDataLocal('fullnameSchedule', e.target.value);
+          }}
+        />
       </Form.Item>
       <Form.Item
         name="phone"
         label="Số điện thoại"
         rules={[
           {
-            required: true,
+            required: !isZaloApp,
             message: 'Vui lòng nhập số điện thoại'
           },
           {
@@ -863,17 +882,18 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             max: 11,
             message: 'Số điện thoại quá dài'
           }
-        ]}>
-        <div className="login__input__icon">
-          <Input defaultValue={dataBookingParam?.phone|| dataLocal?.phone} 
-            className="login__input booking-input" 
-            placeholder="Nhập số điện thoại" 
-            type="text" 
-            size="large"
-            onInput={(e)=>{
-              saveDataLocal('phone',e.target.value)
-            }} />
-        </div>
+        ]}
+      >
+        <Input
+          defaultValue={isZaloApp ? zaloUserPhone : dataBookingParam?.phone || dataLocal?.phone}
+          className="login__input booking-input"
+          placeholder="Nhập số điện thoại"
+          type="text"
+          size="large"
+          disabled={isZaloApp}
+          onInput={(e) => {
+            saveDataLocal('phone', e.target.value)
+          }} />
       </Form.Item>
 
       <Form.Item

@@ -16,31 +16,15 @@ import { IS_ZALO_MINI_APP } from './constants/global';
 import Layout from './components/Layout';
 import { ReactComponent as LogoTTDK } from './assets/icons/Logo.svg'
 import Logo from './assets/MAINLOGO.png'
-const BookingPartner = React.lazy(() => import('./page/BookingPartner/index'))
-const BookingPartnerIframe = React.lazy(() => import('./page/Booking/index'))
-const BookingHistory = React.lazy(() => import('./page/BookingHistory/index'))
-
-export const routes = {
-  home: {
-    path: '/',
-    component: BookingPartner
-  },
-  bookingPartnerIframe: {
-    path: '/booking-partner-iframe',
-    component: BookingPartnerIframe
-  },
-  // bookingHistory: {
-  //   path: '/booking-history',
-  //   component: BookingHistory
-  // },
-}
-
+import { PATH } from './constants/router';
+import { GlobalProvider } from './context/GlobalContext';
+import { fillterRoutes } from './router';
 export const baseName = IS_ZALO_MINI_APP ? `/zapps/${process.env.REACT_APP_ZMP_APP_ID}` : '/'
 
 function App() {
-  const themeApp=process.env.REACT_APP_THEME_NAME
-  const setThemeApp=()=>{
-    document.querySelector('body').setAttribute('data-theme',themeApp)
+  const themeApp = process.env.REACT_APP_THEME_NAME
+  const setThemeApp = () => {
+    document.querySelector('body').setAttribute('data-theme', themeApp)
   }
   useEffect(() => {
     setThemeApp()
@@ -52,15 +36,15 @@ function App() {
     }
   }, []);
   return (
-    <>
+    <GlobalProvider>
       <Router export basename={baseName}>
         <Switch>
-          {Object.keys(routes).map((key) => {
+          {Object.keys(fillterRoutes).map((key) => {
             return (
               <Route
                 key={Math.random()}
                 exact
-                path={routes[key].path}
+                path={fillterRoutes[key].path}
                 component={(props) => (
                   <React.Suspense
                     fallback={
@@ -68,15 +52,16 @@ function App() {
                         <Spin />
                       </div>
                     }>
-                    <Layout {...props} Component={routes[key].component} hideMobileMenu={routes[key].hideMobileMenu} />
+                    <Layout {...props} Component={fillterRoutes[key].component} hideMobileMenu={fillterRoutes[key].hideMobileMenu} />
                   </React.Suspense>
                 )}
               />
             )
           })}
+          <Redirect to={PATH.HOME} />
         </Switch>
       </Router>
-    </>
+    </GlobalProvider>
   );
 }
 

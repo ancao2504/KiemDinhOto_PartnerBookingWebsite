@@ -357,9 +357,7 @@ a.menu-item {
     cursor: pointer;
   }
 }
-:where(.css-dev-only-do-not-override-6j9yrn).ant-modal .ant-modal-content{
-  padding: 0;
-}
+
 .register-container .ant-tabs-nav {
   display: none;
 }
@@ -911,4 +909,9 @@ a.menu-item {
 
 .ant-space {
   display: block;
+}
+.my-modal{
+  .ant-modal-content{
+    padding: 20px 24px !important;
+  }
 }
