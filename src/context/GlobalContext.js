@@ -55,7 +55,7 @@ export const GlobalProvider = ({ children }) => {
     }
 
     const handleGetUserPhone = async () => {
-        if (process.env.REACT_APP_ZALO_AUTH_ENABLE == 1) {
+        if (process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1) {
             try {
                 if (!globalState.phoneNumber) {
                     const phoneNumber = await getZaloUserPhone()
@@ -73,7 +73,7 @@ export const GlobalProvider = ({ children }) => {
     }
 
     const handleGetUserName = async () => {
-        if (process.env.REACT_APP_ZALO_AUTH_ENABLE == 1) {
+        if (process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1) {
             try {
                 if (!globalState.userName) {
                     const userName = await getZaloUserName()

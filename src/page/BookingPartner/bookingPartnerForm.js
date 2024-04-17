@@ -20,7 +20,7 @@ import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 
 function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
-  const isZaloApp = process.env.REACT_APP_ZALO_AUTH_ENABLE === "1"
+  const isZaloApp = (process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1)
   const location = useLocation();
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)

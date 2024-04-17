@@ -52,7 +52,7 @@ export const ROUTERS = {
     //     isZaloApp: false
     // },
 };
-const isZaloApp = process.env.REACT_APP_ZALO_AUTH_ENABLE
+const isZaloApp = process.env.REACT_APP_ZALO_AUTH_ENABLE * 1
 export const fillterRoutes = Object.entries(ROUTERS)
     .filter(([key, route]) => route.isZaloApp === isZaloApp)
     .reduce((obj, [key, route]) => {
