@@ -13,38 +13,38 @@ export const ROUTERS = {
     homePage: {
         path: PATH.HOME,
         component: HomePage,
-        isZaloApp: "1"
+        isZaloApp: 1
     },
     bookingDetail: {
         path: PATH.BOOKING_DETAIL,
         component: BookingDetail,
-        isZaloApp: "1"
+        isZaloApp: 1
     },
     booking: {
         path: PATH.BOOKING,
         component: BookingPartner,
-        isZaloApp: "1",
+        isZaloApp: 1,
     },
     myBookingHistory: {
         path: PATH.MY_BOOKING_HYSTORY,
         component: MyBookingHistory,
-        isZaloApp: "1",
+        isZaloApp: 1,
     },
     resetPassword: {
         path: PATH.RESET_PASSWORD,
         component: ResetPassword,
-        isZaloApp: "1"
+        isZaloApp: 1
     },
     //page on web
     bookingHome: {
         path: PATH.HOME,
         component: BookingPartner,
-        isZaloApp: "0",
+        isZaloApp: 0,
     },
     bookingHistory: {
         path: PATH.BOOKING_HYSTORY,
         component: BookingHistory,
-        isZaloApp: "0"
+        isZaloApp: 0
     },
     // bookingPartnerIframe: {
     //     path: PATH.BOOKING_PARTNER_IFRAME,
