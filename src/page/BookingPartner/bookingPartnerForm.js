@@ -1202,7 +1202,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="dateSchedule"
         label="Ngày hẹn"
-        extra="Khuyến cáo đặt lịch hẹn trước 3 ngày đến hạn kiểm định."
+        extra="Đặt lịch hẹn qua App để được nhắc hẹn tự động"
         rules={[
           {
             required: true,
