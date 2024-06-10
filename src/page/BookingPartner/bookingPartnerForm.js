@@ -1097,7 +1097,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         rules={[
           {
             message: 'Số seri GCN không hợp lệ',
-            pattern: new RegExp(/^[a-zA-Z0-9-]*$/),
+            pattern: new RegExp(/^([a-zA-Z]{2})+(-(?!-))+([0-9]{7}\b)$/),
           },
         ]}>
         <Input

@@ -37,6 +37,8 @@ export const SCHEDULE_ERROR = {
   BLOCK_BOOKING_BY_LICENSE_PLATE: 'Biển số xe đã bị khóa do đặt lịch quá nhiều',
   MAX_LIMIT_SCHEDULE_BY_VEHICLE_COUNT: 'Số lượng lịch vượt quá giới hạn',
   STATION_NOT_ACCEPT_VEHICLE:'trạm không nhận đặt lịch cho xe trên 16 chỗ',
+  STATION_NOT_ACCEPTED_VEHICLE_TYPE:'Trạm không nhận đặt lịch cho loại xe này. Vui lòng chọn trạm khác.',
+
 }
 
 export const LOGIN_ERROR = {
