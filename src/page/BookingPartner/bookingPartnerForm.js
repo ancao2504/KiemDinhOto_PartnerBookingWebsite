@@ -350,7 +350,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       time: null
     }
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
-    
+
     //thực hiện for để lấy giá trị thỏa mãn
     for(let i =0;i<listStation?.length;i++){
       if(listStation[i].stationStatus){
@@ -908,7 +908,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             pattern: new RegExp(/^\S/)
           }
         ]}
-        hidden={dataBookingParam?.visible_firstName === 'false' || dataBookingParam?.visible_firstName === null ? false : true}
+        hidden={dataBookingParam?.visible_firstName === 'true' || dataBookingParam?.visible_firstName === null ? false : true}
       >
         <Input
           defaultValue={isZaloApp ? zaloUserName : dataBookingParam?.fullnameSchedule || dataLocal?.fullnameSchedule}
@@ -924,7 +924,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="phone"
         label="Số điện thoại"
-        hidden={dataBookingParam?.visible_phoneNumber === 'false' || dataBookingParam?.visible_phoneNumber === null ? false : true}
+        hidden={dataBookingParam?.visible_phoneNumber === 'true' || dataBookingParam?.visible_phoneNumber === null ? false : true}
         rules={[
           {
             required: !isZaloApp,
@@ -996,7 +996,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
 
       <Form.Item name="licensePlates" 
         label="Biển số xe"
-        hidden={dataBookingParam?.visible_vehicleIdentity === 'false' || dataBookingParam?.visible_vehicleIdentity === null ? false : true}
+        hidden={dataBookingParam?.visible_vehicleIdentity === 'true' || dataBookingParam?.visible_vehicleIdentity === null ? false : true}
         rules={[
           {
             required: dataBookingParam?.require_vehicleIdentity === 'false' ? false : true,
@@ -1021,7 +1021,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="licensePlateColor"
         label="Màu biển số"
-        hidden={dataBookingParam?.visible_vehiclePlateColor === 'false' || dataBookingParam?.visible_vehiclePlateColor === null ? false : true}
+        hidden={dataBookingParam?.visible_vehiclePlateColor === 'true' || dataBookingParam?.visible_vehiclePlateColor === null ? false : true}
         rules={[
           {
             required: dataBookingParam?.require_vehiclePlateColor === 'false' ? false : true,
@@ -1058,7 +1058,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             className="radio-label"
             label="Loại phương tiện"
             name="vehicleSubType"
-            hidden={dataBookingParam?.visible_vehicleSubType === 'false' || dataBookingParam?.visible_vehicleSubType === null ? false : true}
+            hidden={dataBookingParam?.visible_vehicleSubType === 'true' || dataBookingParam?.visible_vehicleSubType === null ? false : true}
             rules={[
               {
                 required: dataBookingParam?.require_vehicleSubType === 'false' ? false : true,
@@ -1108,7 +1108,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             className="radio-label"
             label="Phân loại"
             name="vehicleSubCategory"
-            hidden={dataBookingParam?.visible_vehicleSubCategory === 'false' || dataBookingParam?.visible_vehicleSubCategory === null ? false : true}
+            hidden={dataBookingParam?.visible_vehicleSubCategory === 'true' || dataBookingParam?.visible_vehicleSubCategory === null ? false : true}
             rules={[
               {
                 required: dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false,
@@ -1142,7 +1142,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="certificateSeries"
         extra={'Nhập số seri GCN để được tự động kiểm tra phạt nguội'}
-        hidden={dataBookingParam?.visible_certificateSeries === 'false' || dataBookingParam?.visible_certificateSeries === null ? false : true}
+        hidden={dataBookingParam?.visible_certificateSeries === 'true' || dataBookingParam?.visible_certificateSeries === null ? false : true}
         label={
           <div>
             Số seri GCN mới nhất
@@ -1180,7 +1180,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           }}
         />
       </Form.Item>
-      <Form.Item label="Khu vực" name="vntId" rules={[]} hidden={dataBookingParam?.visible_StationArea === 'false' || dataBookingParam?.visible_StationArea === null ? false : true}>
+      <Form.Item label="Khu vực" name="vntId" rules={[]} hidden={dataBookingParam?.visible_StationArea === 'true' || dataBookingParam?.visible_StationArea === null ? false : true}>
         <SelectAntd
           className="cs-select ant-custom booking-input"
           filterOption={(input, option) => {
@@ -1242,7 +1242,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
               message: 'Vui lòng nhập'
             }
           ]}
-          hidden={dataBookingParam?.visible_StationsCode === 'false' || dataBookingParam?.visible_StationsCode === null ? false : true}
+          hidden={dataBookingParam?.visible_StationsCode === 'true' || dataBookingParam?.visible_StationsCode === null ? false : true}
           >
           <SelectAntd
             className="cs-select ant-custom booking-input"
