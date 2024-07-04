@@ -70,7 +70,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     email:params.get('email'),
     dateSchedule:params.get('dateSchedule'),
     time: params.get('time'),
-    stationsId: params.get('stationsId'),
+    stationsId: Number(params.get('stationsId')),
     vehicleType:VEHICLE_SUB_TYPE[0].vehicleType,
     licensePlateColor:Number(dataLocal?.licensePlateColor) || Number(params.get('licensePlateColor')) || PLATE_COLOR[0].value,
     scheduleType:Number(dataLocal?.scheduleType) ||Number(params.get('scheduleType')) || SCHEDULE_TYPE[0].value,
@@ -107,13 +107,13 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       email: localBookingData?.email || params.get('email'),
       dateSchedule: localBookingData?.dateSchedule || params.get('dateSchedule'),
       time: localBookingData?.time?.scheduleTime || params.get('time'),
-      stationsId: localBookingData?.stationsId?.stationsId || params.get('stationsId'),
+      stationsId: Number(params.get('stationsId')) || localBookingData?.stationsId?.stationsId ,
       vehicleType: Number(dataBookingParam?.vehicleType) || VEHICLE_SUB_TYPE[0].vehicleType,
       licensePlateColor: Number(dataBookingParam?.licensePlateColor) || Number(params.get('licensePlateColor')),
       scheduleType: Number(dataBookingParam?.scheduleType) || Number(params.get('scheduleType')),
       vehicleSubType: localBookingData?.vehicleSubType || Number(params.get('vehicleSubType')) || VEHICLE_SUB_TYPE[0].value,
       vehicleSubCategory: localBookingData?.vehicleSubCategory || Number(params.get('vehicleSubCategory')) || VIHCLE_CATEGORY_OTO[0].value,
-      // vntId: localBookingData?.vntId || params.get('vntId'),
+      vntId: localBookingData?.vntId || params.get('vntId'),
       certificateSeries: localBookingData?.certificateSeries || params.get('certificateSeries'),
       visible_StationArea : (params.get('visible_StationArea')),
       visible_StationsCode : (params.get('visible_StationsCode')),
@@ -350,10 +350,16 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       time: null
     }
     localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
+    
     //thực hiện for để lấy giá trị thỏa mãn
     for(let i =0;i<listStation?.length;i++){
       if(listStation[i].stationStatus){
-        handleFillValues('stationsId',listStation[i],listStation[i].stationsId)
+        if(params.get('stationsId') === null){
+         handleFillValues('stationsId',listStation[i],listStation[i].stationsId)
+        }
+        if(params.get('stationsId') !== null){
+         handleFillValues('stationsId',dataBookingParam?.stationsId,dataBookingParam?.stationsId)
+        }
         const stationSelected = listStation[i]
         setBookingConfig(JSON.parse(stationSelected?.stationBookingConfig))
         //lưu dữ liệu thỏa mãn vào local
@@ -887,6 +893,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       initialValues={{}}
       form={form}
       onFinish={(values) => { onFinish(values) }}>
+      {() => (
+         <div>
       <Form.Item
         name="fullnameSchedule"
         label="Họ và tên chủ xe"
@@ -900,7 +908,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             pattern: new RegExp(/^\S/)
           }
         ]}
-        hidden={dataBookingParam?.visible_firstName === 'true' ? true : false}
+        hidden={dataBookingParam?.visible_firstName === 'false' || dataBookingParam?.visible_firstName === null ? false : true}
       >
         <Input
           defaultValue={isZaloApp ? zaloUserName : dataBookingParam?.fullnameSchedule || dataLocal?.fullnameSchedule}
@@ -916,7 +924,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="phone"
         label="Số điện thoại"
-        hidden={dataBookingParam?.visible_phoneNumber === 'true' ? true : false}
+        hidden={dataBookingParam?.visible_phoneNumber === 'false' || dataBookingParam?.visible_phoneNumber === null ? false : true}
         rules={[
           {
             required: !isZaloApp,
@@ -988,7 +996,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
 
       <Form.Item name="licensePlates" 
         label="Biển số xe"
-        hidden={dataBookingParam?.visible_vehicleIdentity === 'true' ? true : false}
+        hidden={dataBookingParam?.visible_vehicleIdentity === 'false' || dataBookingParam?.visible_vehicleIdentity === null ? false : true}
         rules={[
           {
             required: dataBookingParam?.require_vehicleIdentity === 'false' ? false : true,
@@ -1013,7 +1021,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="licensePlateColor"
         label="Màu biển số"
-        hidden={dataBookingParam?.visible_vehiclePlateColor === 'true' ? true : false}
+        hidden={dataBookingParam?.visible_vehiclePlateColor === 'false' || dataBookingParam?.visible_vehiclePlateColor === null ? false : true}
         rules={[
           {
             required: dataBookingParam?.require_vehiclePlateColor === 'false' ? false : true,
@@ -1050,7 +1058,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             className="radio-label"
             label="Loại phương tiện"
             name="vehicleSubType"
-            hidden={dataBookingParam?.visible_vehicleSubType === 'true' ? true : false}
+            hidden={dataBookingParam?.visible_vehicleSubType === 'false' || dataBookingParam?.visible_vehicleSubType === null ? false : true}
             rules={[
               {
                 required: dataBookingParam?.require_vehicleSubType === 'false' ? false : true,
@@ -1100,7 +1108,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             className="radio-label"
             label="Phân loại"
             name="vehicleSubCategory"
-            hidden={dataBookingParam?.visible_vehicleSubCategory === 'true' ? true : false}
+            hidden={dataBookingParam?.visible_vehicleSubCategory === 'false' || dataBookingParam?.visible_vehicleSubCategory === null ? false : true}
             rules={[
               {
                 required: dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false,
@@ -1134,7 +1142,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
       <Form.Item
         name="certificateSeries"
         extra={'Nhập số seri GCN để được tự động kiểm tra phạt nguội'}
-        hidden={dataBookingParam?.visible_certificateSeries === 'true' ? true : false}
+        hidden={dataBookingParam?.visible_certificateSeries === 'false' || dataBookingParam?.visible_certificateSeries === null ? false : true}
         label={
           <div>
             Số seri GCN mới nhất
@@ -1172,7 +1180,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           }}
         />
       </Form.Item>
-      <Form.Item label="Khu vực" name="vntId" rules={[]} hidden={dataBookingParam?.visible_StationArea === 'true' ? true : false}>
+      <Form.Item label="Khu vực" name="vntId" rules={[]} hidden={dataBookingParam?.visible_StationArea === 'false' || dataBookingParam?.visible_StationArea === null ? false : true}>
         <SelectAntd
           className="cs-select ant-custom booking-input"
           filterOption={(input, option) => {
@@ -1234,7 +1242,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
               message: 'Vui lòng nhập'
             }
           ]}
-          hidden={dataBookingParam?.visible_StationsCode === 'true' ? true : false}
+          hidden={dataBookingParam?.visible_StationsCode === 'false' || dataBookingParam?.visible_StationsCode === null ? false : true}
           >
           <SelectAntd
             className="cs-select ant-custom booking-input"
@@ -1250,7 +1258,12 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             options={listStation}
             menuPlacement="top"
             disabled={!bookingData?.vntId || isVisible.stationsId}
-            defaultValue={dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId}
+            // value={listStation?.filter(op => op.stationsId === dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId)}
+            // value={73}
+            // defaultValue={{
+            //   label : "2914D",
+            //   value : 73
+            // }}
             onChange={(values) => {
               form.setFieldsValue({
                 dateSchedule: null,
@@ -1392,6 +1405,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           </div>
         </div>
       )}
+    </div>
+    )}
     </Form>
   )
 }
