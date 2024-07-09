@@ -96,10 +96,10 @@ export const PLATE_COLOR=[
     label: 'Vàng',
     value: 3,
   },
-  {
-    label: 'Đỏ',
-    value: 4,
-  },
+  // {
+  //   label: 'Đỏ',
+  //   value: 4,
+  // },
 ]
 export const SCHEDULE_TYPE = [
   {
