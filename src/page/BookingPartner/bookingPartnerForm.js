@@ -673,8 +673,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         }
       })
       .catch(() => {
-        setErrorMessage('Lấy thông tin ngày hẹn thất bại.')
-        setIsModalErrOpen(true)
+        // setErrorMessage('Lấy thông tin ngày hẹn thất bại.')
+        // setIsModalErrOpen(true)
         setLoadingDatePicker(false)
       })
       .finally(() => {
@@ -799,15 +799,17 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
   useEffect(() => {
     getDataLocal()
     getMetaData()
-    setTimeout(() => {
-      getAreaByIP()
-    }, 500);
+    // setTimeout(() => {
+    //   getAreaByIP()
+    // }, 500);
     if(localBookingData?.vntId){
       getStations({
         filter: {
           stationArea: localBookingData?.vntId
         }
       })
+    } else {
+      getAreaByIP()
     }
     if (!bookingData?.vntId && !bookingData?.stationsId && !bookingData?.dateSchedule && !bookingData?.time) {
       setTimeout(() => {
