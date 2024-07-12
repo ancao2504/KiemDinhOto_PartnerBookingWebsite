@@ -1264,7 +1264,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             options={listStation}
             menuPlacement="top"
             disabled={!bookingData?.vntId || isVisible.stationsId}
-            value={listStation?.filter(op => op.stationsId === dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId)}
+            value={listStation?.filter(op => op.stationsId == dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId)}
             // value={73}
             // defaultValue={{
             //   label : "2914D",
