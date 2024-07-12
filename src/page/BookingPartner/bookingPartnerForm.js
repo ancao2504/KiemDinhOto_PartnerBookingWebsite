@@ -802,10 +802,10 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     // setTimeout(() => {
     //   getAreaByIP()
     // }, 500);
-    if(localBookingData?.vntId){
+    if(dataBookingParam?.vntId){
       getStations({
         filter: {
-          stationArea: localBookingData?.vntId
+          stationArea: dataBookingParam?.vntId
         }
       })
     } else {
@@ -1264,7 +1264,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             options={listStation}
             menuPlacement="top"
             disabled={!bookingData?.vntId || isVisible.stationsId}
-            value={listStation?.filter(op => op.stationsId == dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId)}
+            // value={listStation?.filter(op => op.stationsId === dataBookingParam?.stationsId || dataLocal?.stationsId?.stationsId)}
             // value={73}
             // defaultValue={{
             //   label : "2914D",
