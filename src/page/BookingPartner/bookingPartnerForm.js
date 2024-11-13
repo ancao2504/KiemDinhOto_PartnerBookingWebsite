@@ -150,8 +150,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     BookingService.getBookingHours(params)
       .then((data) => {
         if(data.statusCode == 505){
-          setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
-          setIsModalErrOpen(true)
+          // setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
+          // setIsModalErrOpen(true)
         }else{
           let tmp = data || []
           if (tmp.length > 0) {
@@ -633,8 +633,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     BookingService.getBookingDate(dateFilter)
       .then((data) => {
         if(data.statusCode == 505){
-          setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
-          setIsModalErrOpen(true)
+          // setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
+          // setIsModalErrOpen(true)
         }else{
           if(data.length > 0){
             let tmp = data || []

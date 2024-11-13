@@ -193,8 +193,8 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
     BookingService.getStationAreaList()
       .then((data) => {
         if(data.statusCode == 505){
-          setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
-          setIsModalErrOpen(true)
+          // setErrorMessage('Sai thông tin kết nối. Vui lòng kiểm tra lại')
+          // setIsModalErrOpen(true)
           let localData={}
           localStorage.setItem(addKeyLocalStorage('bookingData'), JSON.stringify(localData))
         }else{
