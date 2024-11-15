@@ -1,0 +1,274 @@
+import { PageLayout } from './../../../components/PageLayout/PageLayout'
+import { SliderHome } from './../../../components/Slider/SliderHome'
+import React, { useMemo, useState } from 'react'
+import * as sc from './../HomeLayout.styled'
+import './../index.scss'
+import { useEffect } from 'react'
+import NewService from './../../../services/addBookingService'
+import HomePartner from './../HomePartner'
+import L2FunctionButtonList from './L2FunctionButtonList'
+import L2HotNew from './L2HotNew'
+import {BOOKING_LIST_BTN, BTN_LIST_SERVICE, CONVENIENCE_DRIVERS_BTN, GOVERNMENT_BTN} from '../../../constants/Layout2Constants'
+import { useHistory, useLocation } from 'react-router-dom'
+import HomeNew from '../HomeNew'
+import SystemConfigurationsService from '../../../services/SystemConfigurationsService'
+import { Button, Sheet, Text, Box, Page } from "zmp-ui";
+import "zmp-ui/zaui.min.css";
+const filter = {
+  limit: 5,
+  filter: {
+    stationStatus: 1,
+    stationType:1
+  }
+}
+const HomeLayout2 = (props) => {
+  const { introduction } = props
+  const history = useHistory();
+  const [hotNews, setHotNews] = useState([])
+  const [driverAmenities, setDriverAmenities] = useState([])
+  const [governmentAgency, setGovernmentAgency] = useState([])
+  const [stationNewsPartnerPromotion, setStationNewsPartnerPromotion] = useState([])
+  const [setting, setSetting] = useState([]);
+  const [paramsFilter, setParamsFilter] = useState({
+    filter: {
+      configCategory:1
+    },
+    skip: 0,
+    limit: 20
+  });
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [dataBtn, setDataBtn] = useState({
+    label: "Zalo",
+    link: "/"
+  });
+  const [isLoading , setIsLoading] = useState(false);
+  const [listNews , setListNews ] = useState([])
+
+  const fetchData = () => {
+    setIsLoading(true);
+    const clearBannerUrls = (banners) => {
+      let arr=[]
+      for (let i = 1; i <= 5; i++) {
+        let data={
+          systemPromoBannersId:i,
+          bannerImageUrl:banners['bannerUrl'+[i]],
+          bannerUrl:banners['linkBanner'+[i]]
+        }
+        arr.push(data)
+      }
+      return arr;
+    };
+    NewService.getBannerStationsList({
+      filter: {
+          bannerSection:10,
+      },
+    }).then(res =>{
+      const {data}=res
+      if(data?.length > 0){
+        setSetting(data);
+        setIsLoading(false);
+        return
+      }else{
+        SystemConfigurationsService.getPublicSystemConfigurations({}).then((res) => {
+          setSetting(clearBannerUrls(res));
+          setIsLoading(false);
+        })
+      }
+      setIsLoading(false);
+    })
+
+  }
+  const getStationNewsPartnerPromotion = async () =>{
+    await NewService.getPartnerPromotionNews({
+        "skip": 0,
+        "limit": 10,
+        "order": {
+          "key": "ordinalNumber",
+          "value": "asc"
+        }
+      }).then((result) => {
+      if (result) {
+        setStationNewsPartnerPromotion(result.data)
+      }
+    })
+  }
+  const renderSlider = useMemo(() => {
+    return <SliderHome setting={setting} isLoading={isLoading} />
+  }, [setting , isLoading])
+
+
+  const getNews = () =>{
+    setTimeout(() => {
+      NewService.userGetHotNewList().then((result) => {
+        if (result) {
+          setHotNews(result.data)
+        }
+      })
+    }, 500);
+  }
+  const getListNews = async () =>{
+    await NewService.userGetLatestNew().then((result) => {
+      if (result) {
+        setListNews(result.data)
+      }
+    })
+  }
+  const getHomePageConfig = async (params) => {
+    NewService.getList({
+      filter: {
+        configCategory:params
+      },
+      skip: 0,
+      limit: 20,
+    }).then((result) => {
+      const { statusCode, data, message } = result;
+      if (data?.data?.length >0) {
+        setParamsFilter({
+          filter: {
+            configCategory:params
+          },
+          skip: 0,
+          limit: 20,
+        });
+        switch (params) {
+          case 1:
+            setDriverAmenities(data?.data);
+            break;
+          case 2:
+            setGovernmentAgency(data?.data);
+            break;
+        }
+      } else {
+        switch (params) {
+          case 1:
+            setDriverAmenities(CONVENIENCE_DRIVERS_BTN);
+            break;
+          case 2:
+            setGovernmentAgency(GOVERNMENT_BTN);
+            break;
+        }
+      }
+    })
+  }
+
+  useEffect(() => {
+    getHomePageConfig(1)
+    getHomePageConfig(2)
+    fetchData()
+    getStationNewsPartnerPromotion()
+  }, [])
+
+  useEffect(() => {
+    getNews()
+    getListNews()
+  }, []);
+  const handleReturnLink=()=>{
+    if(dataBtn?.link){
+      return dataBtn?.link
+    }else{
+      if((dataBtn?.linkNavigation).slice(0, 7).includes("http") ){
+        return dataBtn?.linkNavigation
+      }else{
+        return `https://ttdk.com.vn${dataBtn?.linkNavigation}`
+      }
+    }
+  }
+
+  return (
+    <>
+      <sc.Container>
+        <PageLayout>{renderSlider}</PageLayout>
+        <div className="more mt-3">
+          <div style={{ maxWidth: 600, margin: 'auto' }}>
+            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={BOOKING_LIST_BTN} title={'Đặt lịch'}></L2FunctionButtonList>
+            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={BTN_LIST_SERVICE} title={'Điểm dịch vụ đề xuất'}></L2FunctionButtonList>
+            {hotNews?.length > 0 &&
+              <div style={{padding:'0 10px',marginBottom:'1.5rem'}}>
+                <div className="d-flex justify-content-between align-items-center news-center" >
+                  <div className='text-large title-homelayout'>Nổi bật</div>
+                  <div className="d-flex mb-0 justify-content-end home-link" onClick={() => history.push('/highlight-news')}>
+                    <a href="/" onClick={(e) => e.preventDefault()}>
+                      Xem tất cả
+                    </a>
+                  </div>
+                </div>
+                <L2HotNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} hotNew={hotNews} />
+              </div>
+            }
+            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={driverAmenities} title={'Tiện ích cho tài xế'}></L2FunctionButtonList>
+            <div>
+              {stationNewsPartnerPromotion?.length > 0 && (
+                <div className="home-container mb-5">
+                  <div className="d-flex justify-content-between align-items-center news-center" >
+                    <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Ưu đãi từ đối tác</div>
+                    <div className="d-flex mb-0 justify-content-end home-link" onClick={() => history.push(stationNewsPartnerPromotion.path)}>
+                      <a href="/" onClick={(e) => e.preventDefault()}>
+                        Xem tất cả
+                      </a>
+                    </div>
+                  </div>
+                  <div className='mobile-content'>
+                    <HomeNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={stationNewsPartnerPromotion} linkDirectDetail = {"station-news-Partner-promotion-post"} showEye={false}/>
+                  </div>
+                </div>
+              )}
+              {listNews?.length > 0 && (
+                <div className="home-container mb-5">
+                  <div className="d-flex justify-content-between align-items-center news-center" >
+                    <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Tin tức</div>
+                    <div className="d-flex mb-0 justify-content-end home-link" onClick={() => history.push('/new')}>
+                      <a href="/" onClick={(e) => e.preventDefault()}>
+                        Xem tất cả
+                      </a>
+                    </div>
+                  </div>
+                  <div className='mobile-content'>
+                    <HomeNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={listNews} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={governmentAgency} className='government-btn' title={'Cơ quan chính phủ'}></L2FunctionButtonList>
+              <div className='mb-5'>
+                <div className="home-container sation-slider">
+                  <div className="d-flex justify-content-between align-items-center news-center" >
+                    <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Đối tác</div>
+                    <div >
+                    </div>
+                  </div>
+                  <div className='mobile-content'>
+                    <HomePartner setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} />
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </sc.Container>
+      <div>
+        <Sheet
+          visible={sheetVisible}
+          onClose={() => setSheetVisible(false)}
+          autoHeight
+          mask={true}
+          swipeToClose
+        >
+          <Box p={4} className="custom-bottom-sheet" flex flexDirection="column">
+            <Box my={4}>
+              <Text.Title>{(dataBtn?.label)?.replaceAll('<br>','') || dataBtn?.title}</Text.Title>
+            </Box>
+            <Box className="bottom-sheet-body" style={{ overflowY: "auto"}}>
+              <iframe
+                src={handleReturnLink()}
+                width={"100%"}
+                style={{ minHeight: "60vh" }}
+                frameborder="0"
+              ></iframe>
+            </Box>
+          </Box>
+        </Sheet>
+      </div>
+
+    </>
+  )
+}
+export default HomeLayout2

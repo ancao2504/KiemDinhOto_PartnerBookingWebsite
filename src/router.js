@@ -6,7 +6,7 @@ const BookingInsurancePartner = React.lazy(() => import('./page/BookingInsurance
 const BookingInsuranceSaladin = React.lazy(() => import('./page/BookingInsuranceSaladin/index'))
 const BookingPartnerIframe = React.lazy(() => import('./page/Booking/index'))
 const BookingHistory = React.lazy(() => import('./page/BookingHistory/index'))
-const HomePage = React.lazy(() => import('./page/Home/index'))
+const HomePage = React.lazy(() => import('./page/Home/HomeLayout2/index'))
 const ResetPassword = React.lazy(() => import('./page/ResetPassword'))
 const MyBookingHistory = React.lazy(() => import('./page/MyBookingHistory/index'))
 const BookingDetail = React.lazy(() => import('./page/BookingDetail/index'))
@@ -21,7 +21,6 @@ const handleCheckPage=()=>{
             return (BookingInsurancePartner)
         case '2':
             return (BookingInsuranceSaladin)
-            
         default:
             return (BookingPartner)
     }

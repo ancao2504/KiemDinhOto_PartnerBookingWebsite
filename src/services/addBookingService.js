@@ -145,6 +145,65 @@ export default class BookingService {
       })
     })
   }
+  static async userGetHotNewList() {
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/StationNews/user/getHighLightNews',
+        data: {
+          skip: 0,
+          limit: 10,
+          order:{
+              key: 'ordinalNumber',
+              value:"asc"
+          }
+        }
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(data)
+        } else {
+          return resolve({})
+        }
+      })
+    })
+  }
+  static async userGetLatestNew(skip) {
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/StationNews/user/getNewestList',
+        data: {
+          skip: skip || 0,
+          limit: 10,
+          stationsUrl: window.origin.split('://')[1],
+        }
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(data)
+        } else {
+          return resolve({})
+        }
+      })
+    })
+  }
+  static async getPartnerPromotionNews(data={}) { // mặc định {} để có payload
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/StationNews/user/getPartnerPromotionNews',
+        data: data
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(data)
+        } else {
+          return resolve({})
+        }
+      })
+    })
+  }
   static async getZaloUserPhoneNumber(headers) {
     return new Promise((resolve) => {
       console.log("BookingService ~ returnnewPromise ~ headers:", headers)
@@ -210,7 +269,38 @@ export default class BookingService {
       })
     })
   }
-
+  static async getList(data) {
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/HomePageConfig/user/getList',
+        data: data
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(result)
+        } else {
+          return resolve(result)
+        }
+      })
+    })
+  }
+  static async getBannerStationsList(filter) {
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/SystemPromoBanners/user/getList',
+        data: filter
+      }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(data)
+        } else {
+          return resolve({})
+        }
+      })
+    })
+  }
   static async getStationAreaList() {
     return new Promise((resolve) => {
       Request.send({

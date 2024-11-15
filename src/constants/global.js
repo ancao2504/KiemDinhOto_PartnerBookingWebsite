@@ -74,7 +74,14 @@ export const CUSTOMER_RECEIPT_STATUS = {
   SUCCESS: 'Success',
   CANCELED: 'Canceled'
 }
-
+export const RATIO_IMG = {
+  DEFAULT:{
+    value: "16/9"
+  },
+  PROMOTIONNEW:{
+    value: "16/12"
+  }
+}
 export const CUSTOMER_RECEIPT_STATUS_TO_TEXT = {
   NEW: 'Mới',
   PROCESSING: 'Đang xử lý',
