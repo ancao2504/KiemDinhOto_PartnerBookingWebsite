@@ -45,7 +45,13 @@
 .layout2-hot-new-detail-btn{
   background-color: var(--primary-button-color) !important;
   color: var(--background-color) !important;
-  height: 35px !important;
+  height: 30px !important;
+  display: flex;
+  align-items: center;
+  span{
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
 }
 
 @media (max-width: 480px) {
