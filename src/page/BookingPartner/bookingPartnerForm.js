@@ -545,7 +545,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         }
         newValues.push(value)
         setScheduleTypes(newValues)
-        handleCheckReq(bookingData?.scheduleType || dataLocal?.scheduleType,newValues)
+        handleCheckReq(bookingData?.scheduleType || dataLocal?.scheduleType,newValues || Number(params.get('scheduleType')))
       })
       }else{
         setScheduleTypes(SCHEDULE_TYPE)
@@ -1007,7 +1007,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           placeholder="Nhập số điện thoại"
           type="text"
           size="large"
-          // disabled={isZaloApp}
+          disabled={isZaloApp}
           onInput={(e) => {
             saveDataLocal('phone', e.target.value)
           }} />
@@ -1034,7 +1034,9 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             value={bookingData.scheduleType}
             // disabled={!bookingData.stationsId}
             onChange={(values) => {
-              saveDataLocal('scheduleType',values)
+              if(!isZaloApp){
+                saveDataLocal('scheduleType',values)
+              }
               form.setFieldsValue({
                 scheduleType:values,
               })
