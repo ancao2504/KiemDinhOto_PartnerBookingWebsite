@@ -19,6 +19,7 @@ import HomeRecruitment from '../HomeRecruitment'
 import PartnerPromotionNew from '../PartnerPromotionNew'
 import useWindowDimensions from '../../../hooks/window-dimensions'
 import BookingService from './../../../services/addBookingService'
+import { type } from '@testing-library/user-event/dist/type'
 const filter = {
   limit: 5,
   filter: {
@@ -26,6 +27,7 @@ const filter = {
     stationType:1
   }
 }
+
 const HomeLayout2 = (props) => {
   const { introduction } = props
   const history = useHistory();
@@ -41,6 +43,7 @@ const HomeLayout2 = (props) => {
   const [bottomBanner, setBottomBanner] = useState([]);
   const { height, width } = useWindowDimensions()
   const mobile= width < 580
+
   const [paramsFilter, setParamsFilter] = useState({
     filter: {
       configCategory:1
@@ -56,12 +59,49 @@ const HomeLayout2 = (props) => {
   const [isLoading , setIsLoading] = useState(false);
   const [listNews , setListNews ] = useState([]) 
   const [hideNewsFromZaloMiniApp , setHideNewsFromZaloMiniApp ] = useState(true) 
+
+  const LAST_UPDATE_NEWS = {}
+  const lastUpdateNews = JSON.parse(localStorage.getItem('LAST_UPDATE_NEWS'))
+
+  const pushCacheDataIntoObj = (typeOfNews, lastId, obj) => {
+    const ids = JSON.parse(localStorage.getItem(`LAST_${typeOfNews}_NEWS_ID`)) || undefined
+    const shouldFetch = ids === undefined
+      ? false
+      : ids[0] !== lastId
+
+    obj[`${typeOfNews}_NEWS`] = { ids, shouldFetch }
+
+    localStorage.setItem(`LAST_UPDATE_NEWS`, JSON.stringify(obj))
+
+    return obj
+  }
+  const setLocalStorage = (typeOfNews, id, data) => {
+    localStorage.setItem(`LAST_${typeOfNews}_NEWS_ID`, JSON.stringify(id))
+    localStorage.setItem(`LAST_${typeOfNews}_NEWS_DATA`, JSON.stringify(data))
+  }
   const getMetaData = () => {
     BookingService.getMetaData({}).then((result) => {
       const { statusCode,data } = result
       if(statusCode==200){
-        console.log(data?.HIDE_NEWS_FROM_ZALO_MINIAPP);
+        const { LAST_UPDATE_DATA } = data
+        const { lastNews_1: generalNewsId, 
+                lastNews_2: highlightNewsId, 
+                lastNews_3: promotionNewsId,
+                lastNews_4: recruitmentNewsId,
+                lastNews_5: expertNewsId, 
+                lastNews_6: partnerPromotionNewsId, 
+                lastNews_7: partnerUtilityNewsId
+        } = LAST_UPDATE_DATA
+
         setHideNewsFromZaloMiniApp(data?.HIDE_NEWS_FROM_ZALO_MINIAPP ? true : false)
+
+        pushCacheDataIntoObj('GENERAL', generalNewsId, LAST_UPDATE_NEWS)
+        pushCacheDataIntoObj('HIGHLIGHTS', highlightNewsId, LAST_UPDATE_NEWS)
+        pushCacheDataIntoObj('PROMOTION', promotionNewsId, LAST_UPDATE_NEWS)
+        pushCacheDataIntoObj('RECRUITMENT', recruitmentNewsId, LAST_UPDATE_NEWS)
+        pushCacheDataIntoObj('EXPERT_NEWS', expertNewsId, LAST_UPDATE_NEWS)
+        pushCacheDataIntoObj('PARTNER_UTILITY', partnerUtilityNewsId, LAST_UPDATE_NEWS)
+        pushCacheDataIntoObj('PARTNER_PROMOTION', partnerPromotionNewsId, LAST_UPDATE_NEWS)
       }else{
         setHideNewsFromZaloMiniApp(false)
       }
@@ -102,7 +142,9 @@ const HomeLayout2 = (props) => {
 
   }
   const getExpertNews = async () =>{
-    await NewService.userGetExpertNews(
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['EXPERT_NEWS']?.shouldFetch
+
+    shouldFetch ? await NewService.userGetExpertNews(
     {
       "skip": 0,
       "limit": 10,
@@ -114,11 +156,14 @@ const HomeLayout2 = (props) => {
     ).then((result) => {
       if (result) {
         setExpertNews(result.data)
+        setLocalStorage('EXPERT', [result.data[1]?.stationNewsId, result.data[0]?.stationNewsId], result.data)
       }
-    })
+    }) : setExpertNews(JSON.parse(localStorage.getItem('LAST_EXPERT_NEWS_DATA')))
   }
   const getRecruitmentListNew = async () =>{
-    await NewService.userGetRecruitmentNews({
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['RECRUITMENT_NEWS'].shouldFetch
+
+    shouldFetch ? await NewService.userGetRecruitmentNews({
         "skip": 0,
         "limit": 10,
         "order": {
@@ -128,11 +173,14 @@ const HomeLayout2 = (props) => {
       }).then((result) => {
       if (result) {
         setRecruitmentList(result.data)
+        setLocalStorage('RECRUITMENT', [result.data[0]?.stationNewsId], result.data)
       }
-    })
+    }) : setRecruitmentList(JSON.parse(localStorage.getItem('LAST_RECRUITMENT_NEWS_DATA')))
   }
   const getStationNewsPartnerPromotion = async () =>{
-    await NewService.getPartnerPromotionNews({
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['PARTNER_PROMOTION_NEWS'].shouldFetch
+
+    shouldFetch ? await NewService.getPartnerPromotionNews({
         "skip": 0,
         "limit": 10,
         "order": {
@@ -142,8 +190,9 @@ const HomeLayout2 = (props) => {
       }).then((result) => {
       if (result) {
         setStationNewsPartnerPromotion(result.data)
+        setLocalStorage('PARTNER_PROMOTION', [result.data[0]?.stationNewsId], result.data)
       }
-    })
+    }) : setStationNewsPartnerPromotion(JSON.parse(localStorage.getItem('LAST_PARTNER_PROMOTION_NEWS_DATA')))
   }
   const renderSlider = useMemo(() => {
     return <div className='banner-Layout2'><SliderHome hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp} className={'layout2'} center setting={setting} isLoading={isLoading} /></div>
@@ -152,21 +201,26 @@ const HomeLayout2 = (props) => {
     return <SliderHome hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp} className={'layout2 border-r'} setting={bottomBanner} isLoading={isLoading} />
   }, [])
 
-  const getNews = () =>{
-    setTimeout(() => {
-      NewService.userGetHotNewList().then((result) => {
+  const getNews = async () =>{
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['HIGHLIGHTS_NEWS'].shouldFetch
+
+    shouldFetch ? await NewService.userGetHotNewList().then((result) => {
         if (result) {
           setHotNews(result.data)
+          setLocalStorage('HIGHLIGHTS', [result.data[0]?.stationNewsId], result.data)
         }
-      })
-    }, 500);
+      }) : setHotNews(JSON.parse(localStorage.getItem('LAST_HIGHLIGHTS_NEWS_DATA')))
   }
   const getListNews = async () =>{
-    await NewService.userGetLatestNew().then((result) => {
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['GENERAL_NEWS'].shouldFetch
+
+    shouldFetch ? await NewService.userGetLatestNew().then((result) => {
       if (result) {
         setListNews(result.data)
+        setLocalStorage('GENERAL', [result.data[0]?.stationNewsId, result.data[1]?.stationNewsId, result.data[2]?.stationNewsId], result.data)
+        console.log(result.data)
       }
-    })
+    }) : setListNews(JSON.parse(localStorage.getItem('LAST_GENERAL_NEWS_DATA')))
   }
   const getHomePageConfig = async (params) => {
     NewService.getList({
@@ -206,14 +260,19 @@ const HomeLayout2 = (props) => {
     })
   }
   const getPartnerUtilityNews = async () =>{
-    await NewService.userGetPartnerUtilityNews(4).then((result) => {
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['PARTNER_UTILITY_NEWS'].shouldFetch
+
+    shouldFetch ? await NewService.userGetPartnerUtilityNews(4).then((result) => {
       if (result) {
         setPartnerUtilityNews(result.data)
+        setLocalStorage('PARTNER_UTILITY', [632], result.data)
       }
-    })
+    }) : setPartnerUtilityNews(JSON.parse(localStorage.getItem('LAST_PARTNER_UTILITY_NEWS')))
   }
   const getStationNewsPromotion = async () =>{
-    await NewService.getPromotionNews({
+    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['PROMOTION_NEWS'].shouldFetch
+
+    shouldFetch ? await NewService.getPromotionNews({
         "skip": 0,
         "limit": 10,
         "order": {
@@ -223,22 +282,25 @@ const HomeLayout2 = (props) => {
       }).then((result) => {
       if (result) {
         setStationNewsPromotion(result.data)
+        setLocalStorage('PROMOTION', [result.data[1]?.stationNewsId, result.data[0].stationNewsId], result.data)
       }
-    })
+    }) : setStationNewsPromotion(JSON.parse(localStorage.getItem('LAST_PROMOTION_NEWS_DATA')))
   }
   useEffect(() => {
     getHomePageConfig(1)
     getHomePageConfig(2)
-    getMetaData()
     setTimeout(() => {
       fetchData()
     }, 200);
     setTimeout(async() =>  {
+      getMetaData()
       await getExpertNews()
       await getRecruitmentListNew()
       await getPartnerUtilityNews()
       await getStationNewsPartnerPromotion()
       await getStationNewsPromotion()
+      await getListNews()
+      await getNews()
       await getBannerBySectionCache(12).then(data =>{
         if(data?.length > 0){
           setBottomBanner(data)
@@ -250,10 +312,6 @@ const HomeLayout2 = (props) => {
     }, 500);
   }, [])
 
-  useEffect(() => {
-    getNews()
-    getListNews()
-  }, []);
   const handleReturnLink=()=>{
     if(dataBtn?.link){
       return dataBtn?.link
