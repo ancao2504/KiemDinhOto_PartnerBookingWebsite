@@ -768,8 +768,18 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
   function getStations(filter = null, callback = null) {
     setSelectedBookingStation(false)
     filter = filter ? filter : customerParam
+    const combinedFilter = {
+      ...(filter ? filter : customerParam),
+      filter: {
+          ...(filter?.filter || customerParam?.filter),
+          scheduleType: bookingData?.scheduleType || 
+                       dataLocal?.scheduleType || 
+                       Number(params.get('scheduleType')) || 
+                       SCHEDULE_TYPE[0].value
+      }
+  }
     setIsVisible((prev) => ({ ...prev, stationsId: true }))
-    BookingService.getStationList(filter)
+    BookingService.getStationList(combinedFilter)
       .then((data) => {
         setIsVisible((prev) => ({ ...prev, stationsId: false }))
         let tmp = data?.data || []
@@ -886,7 +896,11 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     if(dataBookingParam?.vntId){
       getStations({
         filter: {
-          stationArea: dataBookingParam?.vntId
+          stationArea: dataBookingParam?.vntId,
+          scheduleType: dataBookingParam?.scheduleType || 
+          dataLocal?.scheduleType || 
+          Number(params.get('scheduleType')) || 
+          SCHEDULE_TYPE[0].value
         }
       })
     } else {
@@ -1090,6 +1104,14 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
               form.setFieldsValue({
                 scheduleType:values,
               })
+              if(bookingData?.vntId) {
+                getStations({
+                    filter: {
+                        stationArea: bookingData.vntId,
+                        scheduleType: values
+                    }
+                })
+            }
               handleCheckReq(values,scheduleTypes)
               setBookingData({
                 ...bookingData,
