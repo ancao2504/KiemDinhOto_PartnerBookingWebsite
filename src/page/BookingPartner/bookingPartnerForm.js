@@ -770,13 +770,13 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     filter = filter ? filter : customerParam
     const newFilter = {
       ...filter,
-      filter:{
-        ...filter?.filter,
-        scheduleType: dataBookingParam?.scheduleType
+      scheduleType: bookingData?.scheduleType || 
+                             dataLocal?.scheduleType || 
+                             Number(params.get('scheduleType')) || 
+                             SCHEDULE_TYPE[0].value
       }
-    }
     setIsVisible((prev) => ({ ...prev, stationsId: true }))
-    BookingService.getStationList(newFilter)
+    BookingService.getStationList(filter)
       .then((data) => {
         setIsVisible((prev) => ({ ...prev, stationsId: false }))
         let tmp = data?.data || []
