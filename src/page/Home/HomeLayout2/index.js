@@ -20,7 +20,6 @@ import PartnerPromotionNew from '../PartnerPromotionNew'
 import useWindowDimensions from '../../../hooks/window-dimensions'
 import BookingService from './../../../services/addBookingService'
 import { useGlobalContext } from '../../../context/GlobalContext'
-import JWT_DECODE from 'jwt-decode'
 import { PATH } from '../../../constants/router'
 
 const HomeLayout2 = (props) => {
