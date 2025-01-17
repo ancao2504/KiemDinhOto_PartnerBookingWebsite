@@ -19,9 +19,6 @@ import HomeRecruitment from '../HomeRecruitment'
 import PartnerPromotionNew from '../PartnerPromotionNew'
 import useWindowDimensions from '../../../hooks/window-dimensions'
 import BookingService from './../../../services/addBookingService'
-import { type } from '@testing-library/user-event/dist/type'
-import { useGlobalContext } from '../../../context/GlobalContext'
-import JWT_DECODE from 'jwt-decode'
 import { PATH } from '../../../constants/router'
 
 
