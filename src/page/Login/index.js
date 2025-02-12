@@ -29,11 +29,11 @@ const HomeLogin = (props) => {
     })
   }
   useEffect(() => {
-    if(globalState?.phoneNumber){
+    if(globalState?.phoneNumber && !firstLoading){
       loginByApikey()
       setFirstLoading(true)
     }
-  }, []);
+  }, [firstLoading]);
 
 
   return (
