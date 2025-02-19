@@ -29,7 +29,7 @@ export const SCHEDULE_STATUS_3_0 = [
     color: '#424242'
   },
   {
-    label: 'Thành công',
+    label: 'Đã đóng',
     value: 30,
     color: '#34AA44'
   }
