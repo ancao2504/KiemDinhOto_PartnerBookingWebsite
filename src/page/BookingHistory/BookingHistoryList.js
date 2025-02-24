@@ -131,6 +131,10 @@ function BookingHistoryList({ search, status }) {
     filter: {
       CustomerScheduleStatus: status,
       phone:phoneNumber
+    },
+    order: {
+      key: "createdAt",
+      value: "desc"
     }
   }
 
