@@ -10,5 +10,4 @@ export const PATH = {
     BOOKING_DETAIL: '/booking-detail/:customerScheduleId',
     PARTNER_GUIDE: '/partner-guide-link',
     PERSONAL_GUIDE: '/personal-guide-link',
-
 }

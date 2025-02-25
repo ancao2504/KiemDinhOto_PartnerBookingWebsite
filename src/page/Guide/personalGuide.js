@@ -22,7 +22,6 @@ function PersonalGuide() {
     })
   }
   useEffect(() => {
-    console.log('chajy');
     fetchData()
   }, []);
 
@@ -37,7 +36,7 @@ function PersonalGuide() {
 
   return (
     <>
-      
+
     </>
   )
 }

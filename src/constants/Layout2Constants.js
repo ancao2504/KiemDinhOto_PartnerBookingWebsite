@@ -312,11 +312,11 @@ export const BOOKING_LIST_BTN = [
     link: `${PATH.BOOKING}?scheduleType=4`,
     unOpen: true,
   },
-  {
-    label: 'Gia hạn <br> đăng kiểm',
-    icon: <GiaHanDangKiemIcon></GiaHanDangKiemIcon>,
-    link: `https://giahanxcg.vr.org.vn/#/dashboard`,
-  },
+  // {
+  //   label: 'Gia hạn <br> đăng kiểm',
+  //   icon: <GiaHanDangKiemIcon></GiaHanDangKiemIcon>,
+  //   link: `https://giahanxcg.vr.org.vn/#/dashboard`,
+  // },
   {
     label: 'Gia hạn <br> BH TNDS',
     icon: <GiaHanBaoHiemTNDSIcon></GiaHanBaoHiemTNDSIcon>,
