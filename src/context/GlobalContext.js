@@ -1,6 +1,6 @@
 import { Button, Modal } from 'antd';
 import React, { createContext, useState } from 'react';
-import { getSettingZalo, getZaloAuthorize, getZaloUserName, getZaloUserPhone } from '../helper/zaloSDK';
+import { getSettingZalo, getZaloAuthorize, getZaloUserName, getZaloUserPhone, followOAZalo } from '../helper/zaloSDK';
 import { ReactComponent as WarningIcon } from '../assets/icons/warning.svg'
 
 const GlobalContext = createContext();
@@ -42,7 +42,8 @@ export const GlobalProvider = ({ children }) => {
         userName: "",
         isZaloApp: isZaloApp,
         isAuthorize:false,
-        setting:undefined
+        setting:undefined,
+        followOA:false,
     });
 
     const [openModal, setOpenModal] = useState(false);
@@ -65,11 +66,14 @@ export const GlobalProvider = ({ children }) => {
                         isAuthorize:true
                     })
                 }else{
-                    await getZaloAuthorize()
-                    setGlobalState({
-                        ...globalState,
-                        isAuthorize:true
-                    })
+                    let authorUserInfo = await getZaloAuthorize()
+                    if(authorUserInfo){
+                        setGlobalState({
+                            ...globalState,
+                            isAuthorize:true
+                        })
+                        handleGetUserName()
+                    }
                 }
             } catch (error) {
                 setOpenModal(true)
@@ -100,13 +104,34 @@ export const GlobalProvider = ({ children }) => {
     const handleGetUserName = async () => {
         if (process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1) {
             try {
+                const { userName, followOA }= await getZaloUserName()
+                if (!followOA) {
+                    handleFollowOA()
+                }
                 if (!globalState.userName) {
-                    const userName = await getZaloUserName()
                     setGlobalState({
                         ...globalState,
                         userName
                     })
                     return userName
+                }
+            } catch (error) {
+                throw error
+            }
+        }
+
+    }
+
+    const handleFollowOA = async () => {
+        if (process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1) {
+            try {
+                if (!globalState.followOA) {
+                    const followOA = await followOAZalo()
+                    setGlobalState({
+                        ...globalState,
+                        followOA
+                    })
+                    return followOA
                 }
 
             } catch (error) {
@@ -117,7 +142,7 @@ export const GlobalProvider = ({ children }) => {
     }
 
     return (
-        <GlobalContext.Provider value={{ setGlobalState,globalState, updateGlobalState, handleGetUserPhone, handleGetUserName, handleZaloAuthorize }}>
+        <GlobalContext.Provider value={{ setGlobalState,globalState, updateGlobalState, handleGetUserPhone, handleGetUserName, handleZaloAuthorize, handleFollowOA }}>
             {children}
             <WarningNotify isModalOpen={openModal} onConfirm={handleConfirm} onClose={() => setOpenModal(false)} />
         </GlobalContext.Provider>

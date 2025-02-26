@@ -1,4 +1,4 @@
-import zaloAPI from "zmp-sdk";
+import zaloAPI, { followOA } from "zmp-sdk";
 import BookingService from '../services/addBookingService';
 
 export async function getZaloUserPhone() {
@@ -34,7 +34,7 @@ export async function getZaloUserPhone() {
       throw new Error("Truy vấn số điện thoại thất bại");
     }
   }
-  
+
   export const getZaloUserName = async () => {
     try {
       const { userInfo } = await new Promise((resolve, reject) => {
@@ -48,7 +48,10 @@ export async function getZaloUserPhone() {
         if (userInfo.name === 'User Name') {
           return '';
         } else {
-          return userInfo.name;
+          return {
+            userName:userInfo.name,
+            followOA: userInfo.followedOA
+          };
         }
       } else {
         return ''
@@ -59,15 +62,14 @@ export async function getZaloUserPhone() {
     }
   };
   export const getZaloAuthorize = async () => {
-    try {
-      await new Promise((resolve, reject) => {
-        zaloAPI.authorize({ scopes: ["scope.userInfo", "scope.userPhonenumber"] });
-      });
-    } catch (error) {
-      console.error("Error:", error);
-      throw new Error("Truy vấn tên thất bại");
+    let author = await zaloAPI.authorize({ scopes: ["scope.userInfo", "scope.userPhonenumber"] });
+    if(author){
+      return true
+    }else{
+      return false
     }
   };
+
   export const getSettingZalo = async () => {
     try {
       const { authSetting } = await new Promise((resolve, reject) => {
@@ -84,6 +86,15 @@ export async function getZaloUserPhone() {
     } catch (error) {
       console.error("Error:", error);
       throw new Error("Truy vấn tên thất bại");
+    }
+  };
+  export const followOAZalo = async () => {
+    try {
+      await zaloAPI.followOA({
+        id: process.env.REACT_APP_ZOA_ID,
+      });
+    } catch (error) {
+      return null
     }
   };
   export const openChatScreen = async ({
