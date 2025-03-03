@@ -38,6 +38,7 @@ const HomeLayout2 = (props) => {
   const [recruitmentList, setRecruitmentList] = useState([])
   const [partnerUtilityNews, setPartnerUtilityNews] = useState([])
   const [setting, setSetting] = useState([]);
+  const [firtLoadding, setFirtLoadding] = useState(true);
   const [bottomBanner, setBottomBanner] = useState([]);
   const { height, width } = useWindowDimensions()
   const mobile= width < 580
@@ -302,10 +303,9 @@ const HomeLayout2 = (props) => {
     getHomePageConfig(2)
     setTimeout(() => {
       fetchData()
-    }, 200);
-    if(!globalState?.isAuthorize){
-      handleZaloAuthorize()
-    }
+      setFirtLoadding(false)
+    }, 300);
+
     if(!userToken){
       history.push(PATH.LOGIN)
     }
@@ -526,6 +526,30 @@ const HomeLayout2 = (props) => {
                 src={handleReturnLink()}
                 width={"100%"}
                 style={{ minHeight: "70vh" }}
+                frameborder="0"
+              ></iframe>
+            </Box>
+          </Box>
+        </Sheet>
+      </div>
+      <div className='hidden-pop'>
+        <Sheet
+          visible={firtLoadding}
+          onClose={() => setFirtLoadding(false)}
+          autoHeight
+          className='sheet-zalo'
+          mask={true}
+          swipeToClose
+        >
+          <Box p={4} className="custom-bottom-sheet" flex flexDirection="column">
+            <Box my={4}>
+              <Text.Title>{(dataBtn?.label)?.replaceAll('<br>','') || dataBtn?.title}</Text.Title>
+            </Box>
+            <Box className="bottom-sheet-body" style={{ overflowY: "auto"}}>
+              <iframe
+                src={`${process.env.REACT_APP_DEPLOY_URL}/stations?type=3&name=Bảo%20dưỡng%20ô%20tô&isEmbeddedView=true`}
+                width={"100%"}
+                style={{ minHeight: "10vh" }}
                 frameborder="0"
               ></iframe>
             </Box>
