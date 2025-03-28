@@ -29,6 +29,8 @@ const BookingDetail = ({
   isHeader = true
 }) => {
   const { customerScheduleId } = useParams()
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = localStorage.getItem('token') || urlParams.get('token');
   let wab = []
   const [scheduleInformation, setScheduleInformation] = useState([])
   const [isModal, setIsModal] = useState(false)
@@ -69,7 +71,6 @@ const BookingDetail = ({
       setVali(true)
     }
   }
-
 
   const enablePaymentMethods = scheduleInformation?.station?.stationPayments ? scheduleInformation?.station?.stationPayments.split(',') : [];
   const ENABLE_PAYMENT_GATEWAY =
@@ -279,11 +280,25 @@ const BookingDetail = ({
         {contentHeader}
         <a target="_blank" style={{ marginTop: '1rem' }} href="https://youtu.be/mpIQeRGv3Lg?feature=shared" className="mgt-15 d-block">Xem thêm hướng dẫn quy trình đăng kiểm</a>
       </div>
-      {scheduleInformation?.CustomerScheduleStatus !== 20 ?
-        <div className="w-100 d-flex justify-content-center">
+      {scheduleInformation?.CustomerScheduleStatus !== 20 && scheduleInformation?.CustomerScheduleStatus !== 30  ?
+        <div className="w-100 d-flex justify-content-center" style={{gap:"2em"}}>
+          {scheduleInformation?.confirmStatus === 0 ? (
+            <>
           <Button className="cancel-schedule d-flex justify-content-center align-items-center" type="primary" onClick={() => { setIsModal(true) }} size="larger" style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px'}}>
             Hủy lịch hẹn
           </Button>
+          <Button className="d-flex justify-content-center align-items-center" type="primary" 
+            onClick={() => { history.push({
+            pathname: `/booking-update/${scheduleInformation?.customerScheduleId}`,
+            state: { data: scheduleInformation, token: token }
+            })}}
+            size="larger"
+            style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px'}}
+            >
+              Sửa
+          </Button>
+            </>
+          ):(null)}
         </div>
         : <></>
       }
