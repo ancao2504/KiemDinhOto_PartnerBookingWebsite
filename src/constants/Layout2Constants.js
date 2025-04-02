@@ -389,12 +389,12 @@ export const INSPECTION_SERVICES = [
     link: `${PATH.BOOKING}?scheduleType=24`,
     unOpen: true,
   },
-  {
-    label: 'Tra cứu <br> cảnh báo ĐK',
-    icon: <TraCuuPn></TraCuuPn>,
-    link: `${PATH.BOOKING}?scheduleType=15`,
-    unOpen: true,
-  },
+  // {
+  //   label: 'Tra cứu <br> cảnh báo ĐK',
+  //   icon: <TraCuuPn></TraCuuPn>,
+  //   link: `${PATH.BOOKING}?scheduleType=15`,
+  //   unOpen: true,
+  // },
   {
     label: 'Hỗ trợ xử lý <br> phạt nguội',
     icon: <XuLyPN></XuLyPN>,
@@ -411,7 +411,7 @@ export const HOT_SERVICES = [
   {
     label: 'Mua BH <br> vật chất xe',
     icon: <GiaHanDangKiemIcon></GiaHanDangKiemIcon>,
-    link: `https://ttdk.partner.saladin.vn/mua-bao-hiem-vat-chat-toan-dien-xe-oto/thong-tin-xe`,
+    link: `${PATH.BOOKING}?scheduleType=8`,
   },
   {
     label: 'Bảo dưỡng xe',
