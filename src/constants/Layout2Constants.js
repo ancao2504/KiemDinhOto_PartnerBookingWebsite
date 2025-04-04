@@ -304,7 +304,8 @@ export const BOOKING_LIST_BTN = [
   {
     label: 'Tra cứu <br> phạt nguội',
     icon: <TraCuuPn></TraCuuPn>,
-    link: `${process.env.REACT_APP_DEPLOY_URL}/kiemtraphatnguoi?isEmbeddedView=true`,
+    // link: `${process.env.REACT_APP_DEPLOY_URL}/kiemtraphatnguoi?isEmbeddedView=true`,
+    link: `https://ttdk.com.vn/kiemtraphatnguoi?isEmbeddedView=true&isFromPartnerApp=true`,
     token: true,
   },
   {
@@ -453,7 +454,9 @@ export const HOT_SERVICES = [
   {
     label: 'Khám sức <br> khỏe lái xe',
     icon: <KhamSKIcon></KhamSKIcon>,
-    link: `${process.env.REACT_APP_DEPLOY_URL}/stations?type=${STATIONS_TYPE.DRIVER_HEALTH}&name=Khám sức khỏe lái xe&isEmbeddedView=true`,
+    // link: `${process.env.REACT_APP_DEPLOY_URL}/stations?type=${STATIONS_TYPE.DRIVER_HEALTH}&name=Khám sức khỏe lái xe&isEmbeddedView=true`,
+    link: `${PATH.BOOKING}?scheduleType=26`,
+    unOpen: true,
   },
   {
     label:  'Đăng ký dán <br> thẻ ePass',
