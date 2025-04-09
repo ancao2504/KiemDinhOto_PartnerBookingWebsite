@@ -304,7 +304,8 @@ export const BOOKING_LIST_BTN = [
   {
     label: 'Tra cứu <br> phạt nguội',
     icon: <TraCuuPn></TraCuuPn>,
-    link: `${process.env.REACT_APP_DEPLOY_URL}/kiemtraphatnguoi?isEmbeddedView=true`,
+    // link: `${process.env.REACT_APP_DEPLOY_URL}/kiemtraphatnguoi?isEmbeddedView=true`,
+    link: `https://ttdk.com.vn/kiemtraphatnguoi?isEmbeddedView=true&isFromPartnerApp=true`,
     token: true,
   },
   {
@@ -333,9 +334,12 @@ export const BOOKING_LIST_BTN = [
   {
     label: 'Bảo hiểm',
     icon: <GiaHanDangKiemIcon></GiaHanDangKiemIcon>,
-    link: isZaloApp 
-      ? 'https://zalo.me/s/3197301789570554227/' 
-      : process.env.REACT_APP_RUNTIME_MODE == 'production' 
+    // link: isZaloApp 
+    //   ? 'https://zalo.me/s/3197301789570554227/' 
+    //   : process.env.REACT_APP_RUNTIME_MODE == 'production' 
+    //     ? `https://baohiem.ttdk.com.vn?&appUserId=${appUserId}&token=${token}` 
+    //     : `https://ttdk-sanbox-muabaohiem.service.makefamousapp.com?isEmbeddedView=1&appUserId=${appUserId}&token=${token}`,
+        link: process.env.REACT_APP_RUNTIME_MODE == 'production' 
         ? `https://baohiem.ttdk.com.vn?&appUserId=${appUserId}&token=${token}` 
         : `https://ttdk-sanbox-muabaohiem.service.makefamousapp.com?isEmbeddedView=1&appUserId=${appUserId}&token=${token}`,
   },
@@ -368,8 +372,11 @@ export const INSPECTION_SERVICES = [
   {
     label: 'Tư vấn BH <br> TNDS xe ô tô',
     icon: <TuVanBaoHiemIcon></TuVanBaoHiemIcon>,
-    link: `${PATH.BOOKING}?scheduleType=14`,
-    unOpen: true,
+    // link: `${PATH.BOOKING}?scheduleType=14`,
+    link: process.env.REACT_APP_RUNTIME_MODE == 'production' 
+    ? `https://baohiem.ttdk.com.vn?&appUserId=${appUserId}&token=${token}` 
+    : `https://ttdk-sanbox-muabaohiem.service.makefamousapp.com?isEmbeddedView=1&appUserId=${appUserId}&token=${token}`,
+    unOpen: false,
   },
   {
     label: 'Tư vấn ĐK <br> xe định kỳ',
@@ -389,12 +396,12 @@ export const INSPECTION_SERVICES = [
     link: `${PATH.BOOKING}?scheduleType=24`,
     unOpen: true,
   },
-  {
-    label: 'Tra cứu <br> cảnh báo ĐK',
-    icon: <TraCuuPn></TraCuuPn>,
-    link: `${PATH.BOOKING}?scheduleType=15`,
-    unOpen: true,
-  },
+  // {
+  //   label: 'Tra cứu <br> cảnh báo ĐK',
+  //   icon: <TraCuuPn></TraCuuPn>,
+  //   link: `${PATH.BOOKING}?scheduleType=15`,
+  //   unOpen: true,
+  // },
   {
     label: 'Hỗ trợ xử lý <br> phạt nguội',
     icon: <XuLyPN></XuLyPN>,
@@ -406,12 +413,17 @@ export const HOT_SERVICES = [
   {
     label: 'Mua bảo hiểm TNDS',
     icon: <TramBDIcon></TramBDIcon>,
-    link: `${process.env.REACT_APP_DEPLOY_URL}/doi-tac-bao-hiem/saladin-bao-hiem-toan-dien?isEmbeddedView=true`,
+    // link: `${process.env.REACT_APP_DEPLOY_URL}/doi-tac-bao-hiem/saladin-bao-hiem-toan-dien?isEmbeddedView=true`,
+    link: process.env.REACT_APP_RUNTIME_MODE == 'production' 
+    ? `https://baohiem.ttdk.com.vn?&appUserId=${appUserId}&token=${token}` 
+    : `https://ttdk-sanbox-muabaohiem.service.makefamousapp.com?isEmbeddedView=1&appUserId=${appUserId}&token=${token}`,
+    unOpen: false,
   },
   {
     label: 'Mua BH <br> vật chất xe',
     icon: <GiaHanDangKiemIcon></GiaHanDangKiemIcon>,
-    link: `https://ttdk.partner.saladin.vn/mua-bao-hiem-vat-chat-toan-dien-xe-oto/thong-tin-xe`,
+    link: `${PATH.BOOKING}?scheduleType=8`,
+    unOpen: true,
   },
   {
     label: 'Bảo dưỡng xe',
@@ -445,7 +457,9 @@ export const HOT_SERVICES = [
   {
     label: 'Khám sức <br> khỏe lái xe',
     icon: <KhamSKIcon></KhamSKIcon>,
-    link: `${process.env.REACT_APP_DEPLOY_URL}/stations?type=${STATIONS_TYPE.DRIVER_HEALTH}&name=Khám sức khỏe lái xe&isEmbeddedView=true`,
+    // link: `${process.env.REACT_APP_DEPLOY_URL}/stations?type=${STATIONS_TYPE.DRIVER_HEALTH}&name=Khám sức khỏe lái xe&isEmbeddedView=true`,
+    link: `${PATH.BOOKING}?scheduleType=26`,
+    unOpen: true,
   },
   {
     label:  'Đăng ký dán <br> thẻ ePass',

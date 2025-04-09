@@ -27,7 +27,21 @@ export default class SystemConfigurationsService {
         method: 'POST',
         path: '/PartnerAPI/PartnerAPIKey/user/getApiKeyByDomain',
         data: { ...data },
-        query: null,
+        query: null
+    }).then((result = {}) => {
+        const { statusCode, data } = result
+        if (statusCode === 200) {
+          return resolve(data)
+        } else {
+          return resolve(null)
+        }
+      })
+
+  static async getZaloDisplayStationList() {
+    return new Promise(resolve => {
+      Request.send({
+        method: 'POST',
+        path: '/PartnerAPI/SystemConfigurations/user/getZaloDisplayStationList',
       }).then((result = {}) => {
         const { statusCode, data } = result
         if (statusCode === 200) {

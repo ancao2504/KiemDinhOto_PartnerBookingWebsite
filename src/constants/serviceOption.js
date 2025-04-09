@@ -24,6 +24,8 @@ export const SCHEDULE_TYPE = {
   TNDS_INSURANCE_RENEWAL: 22, // Gia hạn BH TNDS
   OFF_HOUR_NEW_VEHICLE_REGISTER: 23, // Nộp hồ sơ xe mới (Ngoài giờ HC)
   OFF_HOUR_VEHICLE_INSPECTION: 24, // Đăng kiểm xe (Ngoài giờ HC)
+  CONSULTANT_INSURANCE_COMPENSATION: 25, // Tư vấn bồi thường bảo hiểm
+  CONSULTANT_DRIVER_HEALTH: 26, // Tư vấn sức khỏe lái xe
 }
 
 export const SCHEDULE_TITLE = {

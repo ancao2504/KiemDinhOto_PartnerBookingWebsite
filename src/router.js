@@ -13,6 +13,7 @@ const MyBookingHistory = React.lazy(() => import('./page/MyBookingHistory/index'
 const BookingDetail = React.lazy(() => import('./page/BookingDetail/index'))
 const PartnerGuide = React.lazy(() => import('./page/Guide/partnerGuide'))
 const PersonalGuide = React.lazy(() => import('./page/Guide/personalGuide'))
+const UpdateBookingDetail = React.lazy(() => import('./page/BookingDetail/UpdateBookingDetail'))
 
 const BookingType=process.env.REACT_APP_BHTNDS
 
@@ -66,6 +67,11 @@ export const ROUTERS = {
         component: ResetPassword,
         isZaloApp: 1
     },
+    updateBookingOnMiniApp: {
+        path: PATH.BOOKING_UPDATE,
+        component: UpdateBookingDetail,
+        isZaloApp: 1,
+    },
     // page on web
     checkVihcle: {
         path: PATH.HOME,
@@ -90,6 +96,16 @@ export const ROUTERS = {
     personalGuide: {
         path: PATH.PERSONAL_GUIDE,
         component:PersonalGuide,
+        isZaloApp: 0,
+    },
+    bookingDetailNoId: {
+        path: PATH.BOOKING_DETAIL_NO_ID,
+        component: BookingDetail,
+        isZaloApp: 0
+    },
+    updateBookingOnWeb: {
+        path: PATH.BOOKING_UPDATE,
+        component: UpdateBookingDetail,
         isZaloApp: 0,
     },
     // bookingPartnerIframe: {

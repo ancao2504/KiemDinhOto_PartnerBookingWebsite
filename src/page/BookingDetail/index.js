@@ -29,6 +29,9 @@ const BookingDetail = ({
   isHeader = true
 }) => {
   const { customerScheduleId } = useParams()
+  const urlParams = new URLSearchParams(window.location.search);
+  const scheduleHash = localStorage.getItem('schedulehash') || urlParams.get('schedulehash');
+  const apikey = localStorage.getItem('apiKey') || urlParams.get('apikey');
   let wab = []
   const [scheduleInformation, setScheduleInformation] = useState([])
   const [isModal, setIsModal] = useState(false)
@@ -48,7 +51,7 @@ const BookingDetail = ({
     if ((reasonNoteCancelSchedule || reasonRateCancelSchedule) !== null) {
       setIsModal(true)
       BookingService.cancelBooking({
-        customerScheduleId: customerScheduleId,
+        customerScheduleId: customerScheduleId || scheduleInformation?.customerScheduleId,
         reason: reasonNoteCancelSchedule || reasonRateCancelSchedule
       }).then((result) => {
         const { isSuccess, data } = result
@@ -70,7 +73,6 @@ const BookingDetail = ({
     }
   }
 
-
   const enablePaymentMethods = scheduleInformation?.station?.stationPayments ? scheduleInformation?.station?.stationPayments.split(',') : [];
   const ENABLE_PAYMENT_GATEWAY =
     process.env.REACT_APP_ENABLE_PAYMENT * 1 === 1 &&
@@ -91,7 +93,6 @@ const BookingDetail = ({
   if (dataTime) {
     wab = JSON.parse(scheduleInformation?.station?.stationWorkTimeConfig)
   }
-
   const getScheduleDetail = () => {
     BookingService.getBookingDetail(customerScheduleId).then((result) => {
       const { isSuccess, message, data } = result
@@ -103,8 +104,23 @@ const BookingDetail = ({
     })
   }
   useEffect(() => {
-    getScheduleDetail()
-  }, [customerScheduleId])
+    if(scheduleHash){
+      BookingService.findByHash({scheduleHash:scheduleHash}).then((result) => {
+        const { isSuccess, message, data } = result
+        if (!isSuccess || !data) {
+          return
+        } else {
+          setScheduleInformation(data)
+        }
+      })
+    }
+    else{
+      if(customerScheduleId) {
+        getScheduleDetail()
+      }
+    }
+  }, [customerScheduleId,scheduleHash])
+
   const history = useHistory()
   const BindPlate = ({ type, number }) => {
     const colors = {
@@ -279,11 +295,27 @@ const BookingDetail = ({
         {contentHeader}
         <a target="_blank" style={{ marginTop: '1rem' }} href="https://youtu.be/mpIQeRGv3Lg?feature=shared" className="mgt-15 d-block">Xem thêm hướng dẫn quy trình đăng kiểm</a>
       </div>
-      {scheduleInformation?.CustomerScheduleStatus !== 20 ?
-        <div className="w-100 d-flex justify-content-center">
+      {scheduleInformation?.CustomerScheduleStatus !== 20 && scheduleInformation?.CustomerScheduleStatus !== 30  ?
+        <div className="w-100 d-flex justify-content-center" style={{gap:"2em"}}>
+          {scheduleInformation?.confirmStatus === 0 ? (
+            <>
           <Button className="cancel-schedule d-flex justify-content-center align-items-center" type="primary" onClick={() => { setIsModal(true) }} size="larger" style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px'}}>
             Hủy lịch hẹn
           </Button>
+          <Button className="d-flex justify-content-center align-items-center" type="primary" 
+            onClick={() => { 
+              history.push({
+            pathname: `/booking-update/${scheduleInformation?.customerScheduleId}`,
+            state: { data: scheduleInformation }
+            })
+          }}
+            size="larger"
+            style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px'}}
+            >
+              Sửa
+          </Button>
+            </>
+          ):(null)}
         </div>
         : <></>
       }
