@@ -748,7 +748,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
               paymentMethodType: PAYMENT_TYPE.GTEL_PAY,
             }
             ).then((result) => {
-              if(result?.statusCode == 200){
+              if(result?.isSuccess == true){
                 const {data} = result
                 if(data?.inAppGtelOrderId){
                   setOrderId(data.inAppGtelOrderId)
