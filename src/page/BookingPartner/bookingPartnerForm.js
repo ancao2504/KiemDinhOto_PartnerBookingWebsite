@@ -1574,6 +1574,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           </Form.Item>
         </span>
       )}
+      {requireScheduleStation == '1' && (
       <Form.Item label="Loại dịch vụ" name="serviceType" rules={[
         {
           required: true,
@@ -1602,7 +1603,7 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           styles={customStyles}
           options={serviceTypes}
         />
-      </Form.Item>
+      </Form.Item>)}
       {requireScheduleStation == '1' && (
         <span id="service">
           <Form.Item
