@@ -23,7 +23,6 @@ import BookingHoursPicker from '../../components/BookingHoursPicker'
 import ModalPaymentQR from '../../components/ModalPaymentQR/ModalPaymentQR'
 import { numberWithSeparator } from '../../helper/numberWithSeparator'
 import { optionServiceType } from '../../constants/serviceOption'
-import { sendTelegramNotification } from '../../hooks/botTelegram'
 const Gtel = window
 function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
   const isZaloApp = (process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1)
@@ -741,7 +740,6 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         }, 500);
         } else {
           const isOpenInGETELPAY = window._env_?.REACT_APP_MINIAPP_GTELPAY
-          sendTelegramNotification(`isOpenInGETELPAY: ${isOpenInGETELPAY} type: ${typeof isOpenInGETELPAY}`)
           if(isOpenInGETELPAY == '1') {
             BookingService.createPayment({
               customerScheduleId: data?.customerScheduleId,
@@ -751,8 +749,6 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
               if(result?.isSuccess == true){
                 const {data} = result
                 if(data?.inAppGtelOrderId){
-                  sendTelegramNotificationFormatted(`order_id: ${data.inAppGtelOrderId}`)
-                  sendTelegramNotificationFormatted(`Gtel.GtelPayJSBridge: ${Gtel.GtelPayJSBridge}`)
                   Gtel.GtelPayJSBridge?.payOrder({"order_id":data.inAppGtelOrderId})
                 }}
             })
@@ -799,7 +795,6 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
         }, 500);
         } else {
           const isOpenInGETELPAY = window._env_?.REACT_APP_MINIAPP_GTELPAY
-          sendTelegramNotification(`isOpenInGETELPAY: ${isOpenInGETELPAY} type: ${typeof isOpenInGETELPAY}`)
           if(isOpenInGETELPAY == '1') {
             BookingService.createPayment({
               customerScheduleId: data[0],
@@ -809,8 +804,6 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
           ).then((result) => {
             const {data} = result
             if(data?.inAppGtelOrderId){
-              sendTelegramNotificationFormatted(`order_id: ${data.inAppGtelOrderId}`)
-              sendTelegramNotificationFormatted(`Gtel.GtelPayJSBridge: ${Gtel.GtelPayJSBridge}`)
               Gtel.GtelPayJSBridge?.payOrder({"order_id":data.inAppGtelOrderId})
             }
           })}
@@ -1157,87 +1150,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
     }
   }, [zaloUserName, form])
 
-  // TEST
-
-  const sendTelegramNotificationFormatted = async (title, content) => {
-    const currentTime = new Date().toLocaleString("vi-VN", {
-      timeZone: "Asia/Ho_Chi_Minh",
-    });
-  
-    const formattedMessage = `🛠 ${title} \n🕒 Thời gian: ${currentTime}\n📄 Chi tiết: ${content}\n---`;
-  
-    sendTelegramNotification(formattedMessage);
-  };
-  
-
-  const testBridge = () => {
-    if (Gtel.GtelPayJSBridge?.call) {
-      Gtel.GtelPayJSBridge.showLoadingIndicator();
-      sendTelegramNotificationFormatted("Test Bridge", "Đã gọi hàm `showLoadingIndicator()`");
-  
-      setTimeout(() => {
-        Gtel.GtelPayJSBridge.hideLoadingIndicator();
-        sendTelegramNotificationFormatted("Test Bridge", "Đã gọi hàm `hideLoadingIndicator()`");
-      }, 2000);
-    } else {
-      sendTelegramNotificationFormatted("Test Bridge", "❌ Không tìm thấy hàm `call` trong `GtelPayJSBridge`");
-    }
-  };
-  
-  const testApi = async () => {
-    try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/todos/1");
-      const data = await response.json();
-      sendTelegramNotificationFormatted("Test API", "✅ Dữ liệu trả về từ API:\n" + JSON.stringify(data, null, 2));
-    } catch (error) {
-      sendTelegramNotificationFormatted("Test API", `❌ Lỗi khi gọi API: ${error.message}`);
-    }
-  };
-  
-  const testNothing = () => {
-    sendTelegramNotificationFormatted("Test Nothing", "🤷 Không làm gì cả.");
-  };
-  
-  const testSDK = () => {
-    try {
-      if (Gtel.GtelPayJSBridge?.call) {
-        const order = { order_id: "sandboxOS2025041500077441" };
-        Gtel.GtelPayJSBridge.payOrder(order);
-        sendTelegramNotificationFormatted("Test SDK", `✅ Đã gọi \`payOrder\` với:\n${JSON.stringify(order, null, 2)}`);
-      } else {
-        sendTelegramNotificationFormatted("Test SDK", "❌ Không tìm thấy hàm `call` trong `GtelPayJSBridge`");
-      }
-    } catch (error) {
-      sendTelegramNotificationFormatted("Test SDK", `❌ Lỗi khi gọi \`payOrder\`: ${error.message}`);
-    }
-  };
-  
-  const payOrder = () => {
-    try {
-      if (Gtel.GtelPayJSBridge?.call) {
-        const order = { order_id: "sandboxOS2025041500077441" };
-        Gtel.GtelPayJSBridge.call("PayOrder", order);
-        sendTelegramNotificationFormatted("Pay Order", `✅ Đã gọi \`call("PayOrder")\` với:\n${JSON.stringify(order, null, 2)}`);
-      }
-    } catch (error) {
-      sendTelegramNotificationFormatted("Pay Order", `❌ Lỗi khi gọi \`call("PayOrder")\`: ${error.message}`);
-    }
-  };
-  
-  const testENV = () => {
-    const REACT_APP_MINIAPP_GTELPAY = window._env_?.REACT_APP_MINIAPP_GTELPAY;
-    sendTelegramNotificationFormatted("Test ENV", `🔧 Biến môi trường: \`REACT_APP_MINIAPP_GTELPAY = ${REACT_APP_MINIAPP_GTELPAY}\``);
-  };
-  
   return (
     <>
-      <h2>Test GtelPay SDK trong WebView</h2>
-      <button className='my-4 border fs-3' onClick={testBridge}>Gọi hàm Bridge JS Payorder với order_id là sandboxOS2025041500077441</button><br />
-      <button className='my-4 border fs-3' onClick={payOrder}>Gọi hàm trực tiếp Payorder với order_id là sandboxOS2025041500077441</button><br />
-      <button className='my-4 border fs-3' onClick={testApi}>Gọi API fetch https://jsonplaceholder.typicode.com/todos/1</button><br />
-      <button className='my-4 border fs-3' onClick={testNothing}>Không làm gì</button><br />
-      <button className='my-4 border fs-3' onClick={testSDK}>Gọi SDK nếu có</button><br />
-      <button className='my-4 border fs-3' onClick={testENV}>Kiểm tra ENV</button><br />
     <Form
       name="booking"
       layout="vertical"
