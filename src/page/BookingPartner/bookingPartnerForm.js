@@ -776,6 +776,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             })
           }, 500);
         }
+      }).finally(() => {
+        setIsLoading(false)
       })
     }else{
       // Nếu là lịch hẹn thì thêm serviceId vào data
@@ -820,6 +822,8 @@ function BookingPartnerForm({form, setTabKey, zaloUserName,zaloUserPhone}) {
             })
           }, 500);
         }
+      }).finally(() => {
+        setIsLoading(false)
       })
     }
     setIsVisible(true)
