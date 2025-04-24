@@ -273,7 +273,7 @@ export default class BookingService {
     return new Promise((resolve) => {
       Request.send({
         method: 'POST',
-        path: '/SystemConfigurations/getMetaData',
+        path: '/PartnerAPI/SystemConfigurations/getMetaData',
         data: data
       }).then((result = {}) => {
         const { statusCode, data } = result
@@ -594,4 +594,22 @@ export default class BookingService {
       })
     })
   }
+
+  static async createPayment(data = {}) {
+    return new Promise((resolve) => {
+      Request.send({
+        method: 'POST',
+        path: '/PartnerAPI/CustomerSchedule/user/createPayment',
+        data
+      }).then((result = {}) => {
+        const { statusCode, data, message } = result
+        if (statusCode === 200) {
+          return resolve({ isSuccess: true, data })
+        } else {
+          return resolve({ isSuccess: false, message })
+        }
+      })
+    })
+  }
 }
+
