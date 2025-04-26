@@ -43,6 +43,17 @@ export const SCHEDULE_TYPE_MINIAPP = {
   REISSUE_INSPECTION_STICKER: 11, // Cấp lại tem đăng kiểm
 }
 
+export const CONSULTANT_TYPE = {
+  CONSULTANT_INSURANCE_COMPENSATION: 25, // Tư vấn bồi thường bảo hiểm
+  VEHICLE_INSPECTION_CONSULTATION: 12, // Tư vấn đăng kiểm xe định kỳ
+  TRAFFIC_FINE_CONSULTATION: 13, // Tư vấn xử lý phạt nguội
+  CONSULTANT_MAINTENANCE: 7, // Đặt lịch tư vấn bảo dưỡng
+  CONSULTANT_TNDS_INSURANCE: 14, // Tư vấn bảo hiểm TNDS xe ô tô
+  CONSULTANT_INSURANCE: 8, // Đặt lịch tư bảo hiểm vật chất xe ô tô
+  CONSULTANT_RENOVATION: 9, // Đặt lịch tư vấn cải tạo xe
+  CONSULTANT_DRIVER_HEALTH: 26, // Tư vấn sức khỏe lái xe
+}
+
 export const SCHEDULE_TITLE = {
   [SCHEDULE_TYPE.VEHICLE_INSPECTION]: {
     title: 'Đăng kiểm xe định kỳ',
