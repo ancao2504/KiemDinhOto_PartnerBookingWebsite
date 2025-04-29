@@ -431,7 +431,12 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
         } else {
           setListStation(stationList)
           setStationSelected(stationList[0])
-          form.setFieldValue('stationsId', stationList[0]?.stationsId)
+          if(dataBookingParam?.stationsId){
+            form.setFieldValue('stationsId', dataBookingParam?.stationsId)
+          }
+          else{
+            form.setFieldValue('stationsId', stationList[0]?.stationsId)
+          }
         }
       })
       .catch((err) => {
