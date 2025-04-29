@@ -963,7 +963,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
         setIsModalOpen={setIsModalOpen}
         onClose={() => {
           setIsModalOpen(false)
-          history.goBack()
+          // history.goBack()
         }}></BookingSuccess>
       {isModalErrOpen && (
         <PopupMessage
