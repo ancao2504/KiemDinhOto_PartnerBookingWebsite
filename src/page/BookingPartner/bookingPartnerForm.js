@@ -210,6 +210,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE) {
       createBookingSchedule(data)
     }
+    getBookingDate()
   }
 
   const handleFillStationDateTime = () => {
