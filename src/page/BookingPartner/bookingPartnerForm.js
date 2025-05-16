@@ -145,9 +145,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
             window.open(paymentUrl, '_blank')
           }, 500)
         }
-        setTimeout(() => {
-          form.resetFields()
-        }, 500)
+        form.resetFields(['name', 'phone', 'licensePlates', 'certificateSeries', 'dateSchedule', 'time'])
       })
       .finally(() => {
         setIsLoading(false)
@@ -179,9 +177,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           })
         }
         setIsModalOpen(true)
-        setTimeout(() => {
-          form.resetFields()
-        }, 500)
+        form.resetFields(['name', 'phone', 'licensePlates', 'certificateSeries', 'dateSchedule', 'time'])
       })
       .finally(() => {
         setIsLoading(false)
@@ -194,7 +190,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       phone: values.phone,
       fullnameSchedule: values.name,
       email: values.email,
-      dateSchedule: values?.dateSchedule,
+      dateSchedule: workdaySelectedDate,
       time: values?.time?.scheduleTime,
       stationsId: values.stationsId,
       vehicleType: values.vehicleSubType,
@@ -963,7 +959,10 @@ useEffect(() => {
                 ]}>
                 <BookingDatePicker
                   selectedDate={workdaySelectedDate}
-                  setSelectedDate={setWorkdaySelectedDate}
+                  setSelectedDate={(date)=>{
+                    setWorkdaySelectedDate(date)
+                    // form.setFieldValue('dateSchedule', date)
+                  }}
                   disabled={listBookingDate.length === 0}
                   listBookingDate={listBookingDate}
                   bookingConfig={stationBookingConfig}
