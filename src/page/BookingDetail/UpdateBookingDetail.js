@@ -418,7 +418,6 @@ function UpdateBookingDetail({}) {
     form.setFieldsValue({ [fieldName]: value })
   }
 
-    //function lấy ra ngày đầu tiên có lịch làm
   async function findFirstAvailableDateRange(baseDateFilter) {
     let current = moment() // ngày hiện tại
     const endLimit = moment().add(1, 'year').endOf('year') // 31/12 năm sau
@@ -541,7 +540,7 @@ useEffect(() => {
         licensePlates: dataBookingParam.licensePlates || undefined
       })
     }
-  }, [dataBookingParam])
+  }, [workdaySelectedDate, stationSelected])
 
   useEffect(() => {
     if (isZaloApp) {

@@ -37,7 +37,7 @@ export default function BookingDatePicker({
   currentMonth,
   setCurrentMonth,
   loading= false,
-  minAvailableMonth = moment().format(DATE_DISPLAY_FORMAT),
+  minAvailableMonth = moment().format(DATE_DISPLAY_FORMAT)
 }) {
   const disablePickDate = disabled || !listBookingDate?.length
   const handlePickDate = (date) => {
