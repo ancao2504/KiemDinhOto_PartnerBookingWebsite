@@ -28,11 +28,7 @@ const ModalPaymentQR = ({ open, onClose, driver, onRefresh, method }) => {
             try {
                 setLoading(true);
                 const data = await PaymentService.getPaymentQRMethod({});
-                const dataConverted = (data || []).reduce((acc, item) => {
-                    acc[item.paymentMethodId] = item;
-                    return acc;
-                }, {});
-                setPaymentMethod(dataConverted);
+                setPaymentMethod(data);
             } finally {
                 setLoading(false);
             }
