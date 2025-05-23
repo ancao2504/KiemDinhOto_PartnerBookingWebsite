@@ -524,7 +524,11 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   // function kiểm tra xem nên áp dụng trên URL hay từ DB
   const determineDataSource = () => {
     const paramsFromUrl = getQueryParams()
-    const paramsFromUrlKeys = Object.keys(paramsFromUrl)
+    const allowedKeys = ["apikey","name", "phone", "vehicleSubType","scheduleType", "licensePlateColor", "vntId", "vehicleSubCategory", "certificateSeries", "licensePlates"];
+    const paramsKeysNoUse=  Object.fromEntries(
+      Object.entries(paramsFromUrl).filter(([key]) => allowedKeys.includes(key))
+    );
+    const paramsFromUrlKeys = Object.keys(paramsKeysNoUse)
     const isUsingConfigMiniAppLinkInDb = paramsFromUrlKeys.length === 1 && paramsFromUrlKeys[0] === 'apikey' ? true : false // nếu chỉ có API Key thì lấy trong DB
     return isUsingConfigMiniAppLinkInDb
   }
