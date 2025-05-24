@@ -305,7 +305,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
              const firstAvailableTime = tmp.find(
                 item => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule
               );        
-              form.setFieldValue('dateSchedule', firstAvailableTime?.scheduleDate)
+              form.setFieldValue('time', firstAvailableTime?.scheduleTime)
               if (!firstAvailableTime) {
                 form.setFieldValue('time', undefined)
               }else{
@@ -986,7 +986,7 @@ useEffect(() => {
                   selectedDate={workdaySelectedDate}
                   setSelectedDate={(date)=>{
                     setWorkdaySelectedDate(date)
-                    // form.setFieldValue('dateSchedule', date)
+                    form.setFieldValue('dateSchedule', date)
                   }}
                   disabled={listBookingDate.length === 0}
                   listBookingDate={listBookingDate}
