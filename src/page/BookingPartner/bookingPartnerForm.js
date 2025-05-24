@@ -287,10 +287,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           let tmp = data || []
           if (tmp.length > 0) {
             tmp.forEach((element) => {
-              let stationStatus = stationSelected?.stationStatus
-              if (stationStatus) {
-                element.disabled = element.scheduleTimeStatus == 0
-              }
+              element.disabled = element.scheduleTimeStatus === 0 || element?.totalBookingSchedule >= element?.totalSchedule
               // const enableBookingHandler = stationBookingConfig.some((item) => {
               //   return item?.enableBooking
               // })
@@ -300,9 +297,17 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
                   <div className="text-primary">{getDisplayTextByScheduleTimeStatus(element)}</div>
                 </div>
               )
-              element.value = element.value
+              element.value = element.disabled
             })
-            form.setFieldValue('time', tmp[0])
+             const firstAvailableTime = tmp.find(
+                item => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule
+              );        
+              form.setFieldValue('time', firstAvailableTime?.scheduleTime)
+              if (!firstAvailableTime) {
+                form.setFieldValue('time', undefined)
+              }else{
+                form.setFieldValue('time', firstAvailableTime)
+              }
             setListBookingTime(tmp)
           }
         }
@@ -333,9 +338,15 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
                 element.value = element.scheduleDate
               })
               setListBookingDate(tmp)
-              // fill value đâu tiên vào form
-              form.setFieldValue('dateSchedule', tmp[0]?.scheduleDate)
-              setWorkdaySelectedDate(tmp[0]?.scheduleDate)
+            
+              const firstAvailableSchedule = tmp.find(
+                item => item.scheduleDateStatus === 1 && item.totalBookingSchedule < item.totalSchedule
+              );        
+              form.setFieldValue('dateSchedule', firstAvailableSchedule?.scheduleDate)
+              if (!firstAvailableSchedule?.scheduleDate) {
+                form.setFieldValue('time', undefined)
+              }
+              setWorkdaySelectedDate(firstAvailableSchedule?.scheduleDate)
             }
           } else {
             setListBookingDate([])
@@ -427,11 +438,18 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           callback(stationList)
         } else {
           setListStation(stationList)
-          setStationSelected(stationList[0])
+          const activeStations = stationList.filter(station => station.stationStatus === 1);
+          const priorityStation = activeStations.find(station => station.enablePriorityMode === 1);
+          const selectedStation = priorityStation || activeStations[0];
+          setStationSelected(selectedStation?.stationsId)
+          setWorkdaySelectedDate(undefined)
           if (dataBookingParam?.stationsId) {
+            setStationSelected(dataBookingParam?.stationsId)
             form.setFieldValue('stationsId', dataBookingParam?.stationsId)
           } else {
-            form.setFieldValue('stationsId', stationList[0]?.stationsId)
+            form.setFieldValue('stationsId', selectedStation?.stationsId)
+            form.setFieldValue('dateSchedule', undefined)
+            form.setFieldValue('time', undefined)
           }
         }
       })
@@ -524,7 +542,11 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   // function kiểm tra xem nên áp dụng trên URL hay từ DB
   const determineDataSource = () => {
     const paramsFromUrl = getQueryParams()
-    const paramsFromUrlKeys = Object.keys(paramsFromUrl)
+    const allowedKeys = ["apikey","name", "phone", "vehicleSubType","scheduleType", "licensePlateColor", "vntId", "vehicleSubCategory", "certificateSeries", "licensePlates"];
+    const paramsKeysNoUse=  Object.fromEntries(
+      Object.entries(paramsFromUrl).filter(([key]) => allowedKeys.includes(key))
+    );
+    const paramsFromUrlKeys = Object.keys(paramsKeysNoUse)
     const isUsingConfigMiniAppLinkInDb = paramsFromUrlKeys.length === 1 && paramsFromUrlKeys[0] === 'apikey' ? true : false // nếu chỉ có API Key thì lấy trong DB
     return isUsingConfigMiniAppLinkInDb
   }
@@ -961,7 +983,7 @@ useEffect(() => {
                   selectedDate={workdaySelectedDate}
                   setSelectedDate={(date)=>{
                     setWorkdaySelectedDate(date)
-                    // form.setFieldValue('dateSchedule', date)
+                    form.setFieldValue('dateSchedule', date)
                   }}
                   disabled={listBookingDate.length === 0}
                   listBookingDate={listBookingDate}
