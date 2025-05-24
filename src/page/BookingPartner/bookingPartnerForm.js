@@ -287,10 +287,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           let tmp = data || []
           if (tmp.length > 0) {
             tmp.forEach((element) => {
-              let stationStatus = stationSelected?.stationStatus
-              if (stationStatus) {
-                element.disabled = element.scheduleTimeStatus == 0
-              }
+              element.disabled = element.scheduleTimeStatus === 0 || element?.totalBookingSchedule >= element?.totalSchedule
               // const enableBookingHandler = stationBookingConfig.some((item) => {
               //   return item?.enableBooking
               // })
@@ -300,7 +297,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
                   <div className="text-primary">{getDisplayTextByScheduleTimeStatus(element)}</div>
                 </div>
               )
-              element.value = element.value
+              element.value = element.disabled
             })
              const firstAvailableTime = tmp.find(
                 item => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule
@@ -309,7 +306,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
               if (!firstAvailableTime) {
                 form.setFieldValue('time', undefined)
               }else{
-                form.setFieldValue('time', tmp[0])
+                form.setFieldValue('time', firstAvailableTime)
               }
             setListBookingTime(tmp)
           }
