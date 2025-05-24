@@ -302,7 +302,15 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
               )
               element.value = element.value
             })
-            form.setFieldValue('time', tmp[0])
+             const firstAvailableTime = tmp.find(
+                item => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule
+              );        
+              form.setFieldValue('dateSchedule', firstAvailableTime?.scheduleDate)
+              if (!firstAvailableTime) {
+                form.setFieldValue('time', undefined)
+              }else{
+                form.setFieldValue('time', tmp[0])
+              }
             setListBookingTime(tmp)
           }
         }
@@ -333,9 +341,15 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
                 element.value = element.scheduleDate
               })
               setListBookingDate(tmp)
-              // fill value đâu tiên vào form
-              form.setFieldValue('dateSchedule', tmp[0]?.scheduleDate)
-              setWorkdaySelectedDate(tmp[0]?.scheduleDate)
+            
+              const firstAvailableSchedule = tmp.find(
+                item => item.scheduleDateStatus === 1 && item.totalBookingSchedule < item.totalSchedule
+              );        
+              form.setFieldValue('dateSchedule', firstAvailableSchedule?.scheduleDate)
+              if (!firstAvailableSchedule?.scheduleDate) {
+                form.setFieldValue('time', undefined)
+              }
+              setWorkdaySelectedDate(firstAvailableSchedule?.scheduleDate)
             }
           } else {
             setListBookingDate([])
@@ -427,11 +441,18 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           callback(stationList)
         } else {
           setListStation(stationList)
-          setStationSelected(stationList[0])
+          const activeStations = stationList.filter(station => station.stationStatus === 1);
+          const priorityStation = activeStations.find(station => station.enablePriorityMode === 1);
+          const selectedStation = priorityStation || activeStations[0];
+          setStationSelected(selectedStation?.stationsId)
+          setWorkdaySelectedDate(undefined)
           if (dataBookingParam?.stationsId) {
+            setStationSelected(dataBookingParam?.stationsId)
             form.setFieldValue('stationsId', dataBookingParam?.stationsId)
           } else {
-            form.setFieldValue('stationsId', stationList[0]?.stationsId)
+            form.setFieldValue('stationsId', selectedStation?.stationsId)
+            form.setFieldValue('dateSchedule', undefined)
+            form.setFieldValue('time', undefined)
           }
         }
       })

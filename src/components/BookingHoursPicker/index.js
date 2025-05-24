@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import moment from 'moment'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { Button, Empty } from 'antd'
 import './index.scss'
 import LoadingPopup from '../LoadingPopup'
 
@@ -35,8 +35,11 @@ export default function BookingHoursPicker({
               <div className="booking-hours-picker__text">{value?.scheduleTime || value?.label}</div>
             </div>
           )
-        })}
+        })}   
       </div> : <LoadingPopup type="content" />}
+      {
+        bookingTimeData.length === 0 && !loading && <Empty description={"Không có giờ hẹn trống"}></Empty>
+      }
     </div>
   )
 }
