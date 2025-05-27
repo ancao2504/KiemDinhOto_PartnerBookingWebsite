@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
 import { SHA256 } from 'crypto-js'
@@ -237,6 +237,9 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
             )
           }))
           setScheduleTypes(newValues)
+  
+          const scheduleTypeWithParams = newValues.find(item => item.value === ( +form.getFieldValue('scheduleType')));
+          setScheduleCategory(scheduleTypeWithParams?.scheduleCategory || SCHEDULE_BOOKING_TYPE.SCHEDULE)
         } else {
           firstScheduleTypeHandler()
         }
@@ -709,6 +712,19 @@ useEffect(() => {
     }
   }, [isZaloApp])
 
+  const isShowStationDateTime = useMemo(() => {
+    const selectedOption = scheduleTypes.find(item => item.value === form.getFieldValue('scheduleType'));
+    const showStationField = selectedOption?.requireScheduleStation === 1;
+    const showDateField = selectedOption?.requireScheduleDate === 1;
+    const showTimeField = selectedOption?.requireScheduleTime === 1;
+    return ({
+      showStationField,
+      showDateField,
+      showTimeField,
+      showAreaField: showStationField || showDateField || showTimeField
+    })
+  }, [form, scheduleTypes])
+  
   return (
     <div>
       <Form
@@ -924,6 +940,8 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
+            {
+              isShowStationDateTime.showAreaField &&
             <Form.Item required label="Khu vực" name="vntId" hidden={dataBookingParam?.visible_StationArea === false}>
               <SelectAntd
                 className="cs-select ant-custom booking-input"
@@ -936,7 +954,9 @@ useEffect(() => {
                 options={listStationArea}
               />
             </Form.Item>
-            {scheduleCategory !== SCHEDULE_BOOKING_TYPE.CONSULTANT && (
+            }
+            
+            {isShowStationDateTime.showStationField && (
               <Form.Item
                 label="Chọn trạm"
                 name="stationsId"
@@ -968,7 +988,7 @@ useEffect(() => {
                 />
               </Form.Item>
             )}
-            {scheduleCategory !== SCHEDULE_BOOKING_TYPE.CONSULTANT && (
+            {isShowStationDateTime.showDateField && (
               <Form.Item
                 name="dateSchedule"
                 label="Ngày hẹn"
@@ -1001,7 +1021,7 @@ useEffect(() => {
                 />
               </Form.Item>
             )}
-            {scheduleCategory !== SCHEDULE_BOOKING_TYPE.CONSULTANT && (
+            {isShowStationDateTime.showTimeField && (
               <Form.Item
                 label="Giờ hẹn"
                 name="time"
