@@ -771,7 +771,7 @@ useEffect(() => {
                 }
               ]}
               hidden={dataBookingParam?.visible_firstName === false}>
-              <Input className="login__input booking-input" placeholder="Nguyễn Văn An" type="text" size="large" />
+              <Input className="booking-input booking-input" placeholder="Nguyễn Văn An" type="text" size="large" />
             </Form.Item>
             <Form.Item
               name="phone"
@@ -791,7 +791,7 @@ useEffect(() => {
                   message: 'Số điện thoại quá dài'
                 }
               ]}>
-              <Input className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" disabled={isZaloApp} />
+              <Input className="booking-input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" disabled={isZaloApp} />
             </Form.Item>
 
             <Form.Item
@@ -834,7 +834,7 @@ useEffect(() => {
               ]}
               hidden={dataBookingParam?.visible_vehicleIdentity === false}>
               <Input
-                className="login__input booking-input"
+                className="booking-input booking-input"
                 placeholder="59B16856"
                 type="text"
                 size="large"
