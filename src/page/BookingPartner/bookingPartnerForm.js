@@ -97,14 +97,14 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     return expectedChecksum == checksum
   }
 
-  const getStationConfigByApiKey = () => {
+  const getStationConfigByApiKey = (paramsFromUrl) => {
     setIsLoading(true)
-    const paramsFromUrl = getQueryParams()
+    // const paramsFromUrl = getQueryParams()
     const apikey = paramsFromUrl?.apikey || localStorage.getItem('apiKey') || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apikey })
       .then((result) => {
         const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
-        setDataBookingParam(stationMiniAppLink)
+        setDataBookingParam({...stationMiniAppLink,...paramsFromUrl})
       })
       .catch((err) => {
         setErrorMessage('Lấy thông tin cấu hình thất bại.')
@@ -606,11 +606,11 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       fillFormValue(key, value)
     })
 
-    if (determineDataSource()) {
-      getStationConfigByApiKey()
-    } else {
-      setDataBookingParam(paramsFromUrl)
-    }
+    // if (determineDataSource()) {
+      getStationConfigByApiKey(paramsFromUrl)
+    // } else {
+    //   setDataBookingParam(paramsFromUrl)
+    // }
 
     // xử lí state của scheduleTypes
     firstScheduleTypeHandler()
