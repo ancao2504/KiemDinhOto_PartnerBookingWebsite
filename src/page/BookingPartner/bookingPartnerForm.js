@@ -103,7 +103,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     const apikey = paramsFromUrl?.apikey || localStorage.getItem('apiKey') || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apikey })
       .then((result) => {
-        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '[]')
+        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
         setDataBookingParam(stationMiniAppLink)
       })
       .catch((err) => {
@@ -367,16 +367,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }
 
   function getStations(filter = null, callback = null) {
-    const appliedFilter = filter
-    const newFilter = {
-      ...appliedFilter,
-      filter: {
-        ...appliedFilter?.filter,
-        scheduleType: dataBookingParam?.scheduleType
-      }
-    }
-
-    BookingService.getStationList(newFilter)
+    BookingService.getStationList(filter)
       .then((res) => {
         const stationList = (res?.data || []).map((station) => {
           const name = `${station.stationCode} - ${station.stationsAddress || station.stationsName}`
@@ -614,6 +605,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       paramsFromUrl[key] = value
       fillFormValue(key, value)
     })
+
     if (determineDataSource()) {
       getStationConfigByApiKey()
     } else {
@@ -717,13 +709,14 @@ useEffect(() => {
     const showStationField = selectedOption?.requireScheduleStation === 1;
     const showDateField = selectedOption?.requireScheduleDate === 1;
     const showTimeField = selectedOption?.requireScheduleTime === 1;
+
     return ({
       showStationField,
       showDateField,
       showTimeField,
       showAreaField: showStationField || showDateField || showTimeField
     })
-  }, [form, scheduleTypes])
+  }, [form.getFieldValue('scheduleType'), scheduleTypes ])
   
   return (
     <div>
