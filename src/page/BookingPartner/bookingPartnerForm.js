@@ -31,6 +31,7 @@ import BookingDatePicker from '../../components/BookingDatePicker'
 import BookingHoursPicker from '../../components/BookingHoursPicker'
 import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import SystemConfigurationsService from '../../services/SystemConfigurationsService'
+import addKeyLocalStorage from '../../helper/localStorage'
 const Gtel = window
 function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const customStyles = {
@@ -68,6 +69,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     endDate: moment().endOf('month').format(DATE_DISPLAY_FORMAT),
     vehicleType: VEHICLE_SUB_TYPE[0]?.vehicleType
   })
+  const [dataTheme, setDataTheme] = useState(JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})
 
   // khai báo các biến cho toàn trang
   const history = useHistory()
@@ -96,6 +98,11 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     const expectedChecksum = SHA256(raw).toString()
     return expectedChecksum == checksum
   }
+  useEffect(() => {
+    if (dataTheme) {
+      localStorage.setItem(addKeyLocalStorage('dataTheme'), JSON.stringify(dataTheme))
+    }
+  }, [dataTheme])
 
   const getStationConfigByApiKey = (paramsFromUrl) => {
     setIsLoading(true)
@@ -105,6 +112,18 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       .then((result) => {
         const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
         setDataBookingParam({...stationMiniAppLink,...paramsFromUrl})
+        setDataTheme(prev => ({
+          ...prev,
+          partnerColorButton: stationMiniAppLink?.partnerColorButton,
+          partnerBackground: stationMiniAppLink?.partnerBackground?.[0]?.url
+        }))
+         BookingService.getDetailStation({id: result[0]?.stationsId})
+        .then((res) => {
+         setDataTheme((prev) => ({
+            ...prev,
+            stationsLogo: res.stationsLogo
+          }))
+        })
       })
       .catch((err) => {
         setErrorMessage('Lấy thông tin cấu hình thất bại.')
@@ -719,8 +738,13 @@ useEffect(() => {
   }, [form.getFieldValue('scheduleType'), scheduleTypes ])
   
   return (
-    <div>
+    <div className='position-relative'>
+      {
+        dataTheme?.partnerBackground &&
+        <img className="bg-partner" src={dataTheme?.partnerBackground} alt="logo" />
+      }
       <Form
+        className={dataTheme?.partnerBackground ? 'styled-form' : ''}
         name="booking"
         layout="vertical"
         form={form}
@@ -738,7 +762,7 @@ useEffect(() => {
               label="Họ và tên chủ xe"
               rules={[
                 {
-                  required: dataBookingParam?.require_firstName === true,
+                  required: dataBookingParam?.visible_firstName !== false && dataBookingParam?.require_firstName === true,
                   message: 'Vui lòng nhập tên'
                 },
                 {
@@ -755,7 +779,7 @@ useEffect(() => {
               hidden={dataBookingParam?.visible_phoneNumber === false}
               rules={[
                 {
-                  required: !isZaloApp || dataBookingParam?.require_phoneNumber === true,
+                  required: dataBookingParam?.visible_phoneNumber !== false && (!isZaloApp || dataBookingParam?.require_phoneNumber === true),
                   message: 'Vui lòng nhập số điện thoại'
                 },
                 {
@@ -794,8 +818,9 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
-
-            <Form.Item
+            {
+              dataBookingParam?.visible_vehicleIdentity !== false &&
+              <Form.Item
               name="licensePlates"
               label="Biển số xe"
               required
@@ -818,6 +843,8 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
+            }
+          
 
             <Form.Item
               name="licensePlateColor"
@@ -825,7 +852,7 @@ useEffect(() => {
               hidden={dataBookingParam?.visible_scheduleType === false}
               rules={[
                 {
-                  required: dataBookingParam?.require_vehiclePlateColor === true,
+                  required: dataBookingParam?.visible_scheduleType !== false && dataBookingParam?.require_vehiclePlateColor === true,
                   message: 'Vui lòng chọn màu biển số'
                 }
               ]}>
@@ -851,7 +878,7 @@ useEffect(() => {
                   hidden={dataBookingParam?.visible_vehicleSubCategory === false}
                   rules={[
                     {
-                      required: dataBookingParam?.require_vehicleSubType === true,
+                      required: dataBookingParam?.visible_vehicleSubCategory !== false && dataBookingParam?.require_vehicleSubType === true,
                       message: 'Vui lòng nhập'
                     }
                   ]}>
@@ -877,7 +904,7 @@ useEffect(() => {
                   hidden={dataBookingParam?.visible_vehicleSubCategory === false}
                   rules={[
                     {
-                      required: dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false,
+                      required: dataBookingParam?.visible_vehicleSubCategory !== false && (dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false),
                       message: 'Vui lòng chọn phân loại'
                     }
                   ]}>
@@ -913,7 +940,7 @@ useEffect(() => {
               }
               rules={[
                 {
-                  required: dataBookingParam?.require_certificateSeries === 'true' ? true : false,
+                  required: dataBookingParam?.visible_certificateSeries !== false && (dataBookingParam?.require_certificateSeries === 'true' ? true : false),
                   message: 'Vui lòng nhập số seri GCN'
                 },
                 {
@@ -922,7 +949,7 @@ useEffect(() => {
                 }
               ]}>
               <Input
-                className="login__input"
+                className="booking-input"
                 defaultValue={dataBookingParam?.certificateSeries}
                 placeholder="Ví dụ: KA-7461980"
                 type="text"
@@ -935,7 +962,7 @@ useEffect(() => {
             </Form.Item>
             {
               isShowStationDateTime.showAreaField &&
-            <Form.Item required label="Khu vực" name="vntId" hidden={dataBookingParam?.visible_StationArea === false}>
+            <Form.Item required={dataBookingParam?.visible_StationArea !== false} label="Khu vực" name="vntId" hidden={dataBookingParam?.visible_StationArea === false}>
               <SelectAntd
                 className="cs-select ant-custom booking-input"
                 showSearch
@@ -955,7 +982,7 @@ useEffect(() => {
                 name="stationsId"
                 rules={[
                   {
-                    required: true,
+                    required: dataBookingParam?.visible_StationsCode !== false,
                     message: 'Vui lòng nhập'
                   }
                 ]}
@@ -1037,9 +1064,15 @@ useEffect(() => {
               </Form.Item>
             )}
             <div className="w-100 d-flex justify-content-center mgt-40">
-              <Button className="login__button df" type="primary" htmlType="submit" size="large">
-                Đặt lịch
-              </Button>
+              {
+                dataTheme?.partnerColorButton ?
+                <button type="submit" className='partnerColorButton' style={{backgroundColor:dataTheme?.partnerColorButton}}>Đặt lịch</button>
+                :
+                <Button className="login__button df" type="primary" htmlType="submit" size="large">
+                  Đặt lịch
+                </Button>
+              }
+              
             </div>
           </>
         )}
@@ -1063,7 +1096,13 @@ useEffect(() => {
           }}
           text={errorMessage}></PopupMessage>
       )}
-
+      {
+        dataTheme?.stationsLogo && (
+          <div className="logo-partner">
+            <img src={dataTheme?.stationsLogo} alt="" />
+          </div>
+        )
+      }
       {/* Hiển thị loading */}
       {isLoading && (
         <div className="loading">

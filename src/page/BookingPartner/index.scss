@@ -340,3 +340,41 @@
   justify-content: center;
   display: flex;
 }
+
+.bg-partner{
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  left: 0;
+  top: 0;  
+}
+.styled-form{
+  padding: 20px;
+  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.logo-partner{
+  text-align: center;
+  margin: 30px auto 0;
+  position: relative;
+  img{
+    width: 75%;
+    max-width: 100px;
+    height: auto;
+    mix-blend-mode: darken;
+  }
+}
+.partnerColorButton{
+    height: 46px;
+    border-radius: 8px !important;
+    border: 1px solid transparent;
+    width: 100%;
+    margin-top: 15px;
+    font-weight: 550;
+    font-size: 15px;
+    line-height: 22px;
+    text-align: center;
+    color: #ffffff;
+}
