@@ -37,7 +37,7 @@ const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,schedule
             <div>
             {isConsultantType && (
               <>
-            <p style={{ margin: '15px 0', fontSize: '16px' }}>
+            <p style={{ margin: '15px 0' }}>
                 Bạn có thể tham khảo thông tin tại các nhóm, cộng đồng để có câu trả lời nhanh hơn
                 </p>
                 <Button 

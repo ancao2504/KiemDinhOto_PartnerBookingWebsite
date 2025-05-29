@@ -7,7 +7,6 @@ import { Form, Input, Button, Spin, Select as SelectAntd, Row, Col } from 'antd'
 import BookingSuccess from './BookingSuccessModal'
 import PopupMessage from './PopupMessage'
 import { changeTime } from '../../helper/changeTime'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
 import {
@@ -31,8 +30,21 @@ import BookingDatePicker from '../../components/BookingDatePicker'
 import BookingHoursPicker from '../../components/BookingHoursPicker'
 import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import SystemConfigurationsService from '../../services/SystemConfigurationsService'
+import MainLogo from '../../components/MainLogo'
 import addKeyLocalStorage from '../../helper/localStorage'
 const Gtel = window
+
+// FUNC: Băm url để lấy các params trên url và trả về dạng mảng có object là key và value
+export function getQueryParams(options = {}) {
+  if (typeof window !== 'undefined' && window.location && window.location.search) {
+    const params = new URLSearchParams(window.location.search)
+    const result = {}
+    for (const [key, value] of params.entries()) {
+      result[key] = value
+    }
+    return result
+  }
+}
 function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const customStyles = {
     control: (base) => ({
@@ -69,7 +81,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     endDate: moment().endOf('month').format(DATE_DISPLAY_FORMAT),
     vehicleType: VEHICLE_SUB_TYPE[0]?.vehicleType
   })
-  const [dataTheme, setDataTheme] = useState(JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})
+
+  const dataTheme = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})
 
   // khai báo các biến cho toàn trang
   const history = useHistory()
@@ -98,32 +111,14 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     const expectedChecksum = SHA256(raw).toString()
     return expectedChecksum == checksum
   }
-  useEffect(() => {
-    if (dataTheme) {
-      localStorage.setItem(addKeyLocalStorage('dataTheme'), JSON.stringify(dataTheme))
-    }
-  }, [dataTheme])
 
   const getStationConfigByApiKey = (paramsFromUrl) => {
     setIsLoading(true)
-    // const paramsFromUrl = getQueryParams()
     const apikey = paramsFromUrl?.apikey || localStorage.getItem('apiKey') || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apikey })
       .then((result) => {
         const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
         setDataBookingParam({...stationMiniAppLink,...paramsFromUrl})
-        setDataTheme(prev => ({
-          ...prev,
-          partnerColorButton: stationMiniAppLink?.partnerColorButton,
-          partnerBackground: stationMiniAppLink?.partnerBackground?.[0]?.url
-        }))
-         BookingService.getDetailStation({id: result[0]?.stationsId})
-        .then((res) => {
-         setDataTheme((prev) => ({
-            ...prev,
-            stationsLogo: res.stationsLogo
-          }))
-        })
       })
       .catch((err) => {
         setErrorMessage('Lấy thông tin cấu hình thất bại.')
@@ -533,18 +528,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       })
       return data
     })
-  }
-
-  // FUNC: Băm url để lấy các params trên url và trả về dạng mảng có object là key và value
-  function getQueryParams(options = {}) {
-    if (typeof window !== 'undefined' && window.location && window.location.search) {
-      const params = new URLSearchParams(window.location.search)
-      const result = {}
-      for (const [key, value] of params.entries()) {
-        result[key] = value
-      }
-      return result
-    }
   }
 
   // FUNC: fill value X vào field X của form
@@ -1065,9 +1048,6 @@ useEffect(() => {
             )}
             <div className="w-100 d-flex justify-content-center mgt-40">
               {
-                dataTheme?.partnerColorButton ?
-                <button type="submit" className='partnerColorButton' style={{backgroundColor:dataTheme?.partnerColorButton}}>Đặt lịch</button>
-                :
                 <Button className="login__button df" type="primary" htmlType="submit" size="large">
                   Đặt lịch
                 </Button>
@@ -1096,19 +1076,12 @@ useEffect(() => {
           }}
           text={errorMessage}></PopupMessage>
       )}
-      {
-        dataTheme?.stationsLogo && (
-          <div className="logo-partner">
-            <img src={dataTheme?.stationsLogo} alt="" />
-          </div>
-        )
-      }
       {/* Hiển thị loading */}
       {isLoading && (
         <div className="loading">
-          <div>
-            <LogoTTDK></LogoTTDK>
-            <Spin style={{ width: '100%' }} />
+          <div className='text-center'>
+            <MainLogo height={60} width={60}></MainLogo>
+            <Spin style={{ width: '100%' }}  className='mt-3'/>
           </div>
         </div>
       )}

@@ -1,10 +1,10 @@
 import { Button, Spin } from 'antd'
 import React, { useState } from 'react'
 import { getZaloUserPhone } from '../../helper/zaloSDK'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import "./index.scss"
 import { resetPassword } from '../../services/ttdkService'
 import { notification } from "antd";
+import MainLogo from '../../components/MainLogo'
 
 const statePage = {
     Default: "default",
@@ -113,7 +113,7 @@ export default function ResetPassword() {
             <ContentPage page={currentStatePage} handleConfirm={handleConfirm} />
             <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0', textAlign: 'center' }}>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    <LogoTTDK />
+                <MainLogo height={60} width={60}></MainLogo>
                 </div>
                 <div className='text-blue mt-3'>Powered by TTDK</div>
             </div>

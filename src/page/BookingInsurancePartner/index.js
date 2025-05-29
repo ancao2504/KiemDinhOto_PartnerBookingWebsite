@@ -5,10 +5,10 @@ import BookingInsurancePartnerForm from './BookingInsurancePartnerForm'
 import { useLocation } from 'react-router-dom'
 import LoadFormBookingFailed from '../../components/BasicComponent/LoadFormBookingFailed'
 import { CheckApiKey } from '../../helper/CheckApiKey'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import { TTDK_PARTNER } from '../../components/BasicComponent/CheckLogoPartner'
 import { getZaloUserName, getZaloUserPhone } from '../../helper/zaloSDK'
 import { useGlobalContext } from '../../context/GlobalContext'
+import MainLogo from '../../components/MainLogo'
 function BookingInsurancePartner() {
   const { globalState, handleGetUserPhone, handleGetUserName, setGlobalState } = useGlobalContext();
   const [isVisible, setIsVisible] = useState(false)
@@ -66,7 +66,7 @@ function BookingInsurancePartner() {
                 </div>
                 <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0', textAlign: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                    <LogoTTDK></LogoTTDK>
+                    <MainLogo height={60} width={60}></MainLogo>
                     {TTDK_PARTNER.map(item => {
                       if (item.name == partner) {
                         return (<div style={{ maxHeight: '58px',maxWidth:'150px' }}>

@@ -59,7 +59,7 @@
         color: var(--text-color);
     }
     .active {
-        background: linear-gradient(to top, $--royal-blue-color, $--slate-blue-color);
+        background: var(--linear-gradient-active);
         .booking-date-picker__day--text {
             color: var(--background-color) !important;
         }
