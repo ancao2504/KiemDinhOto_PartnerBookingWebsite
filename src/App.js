@@ -75,11 +75,11 @@ function App() {
     const theme = {}
     apiKey && await SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apiKey })
       .then(async(result) => {
-        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
+        const stationMiniAppLink = JSON.parse(result?.[0]?.stationMiniAppLink || '{}')
         theme.partnerColorButton = stationMiniAppLink?.partnerColorButton
         theme.partnerBackground = stationMiniAppLink?.partnerBackground?.[0]?.url
         theme.partnerColorGradient = stationMiniAppLink?.partnerColorGradient
-        await BookingService.getDetailStation({id: result[0]?.stationsId})
+        await BookingService.getDetailStation({id: result?.[0]?.stationsId})
         .then((res) => {
           theme.stationsLogo= res.stationsLogo
         })
