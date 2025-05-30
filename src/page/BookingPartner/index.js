@@ -10,6 +10,7 @@ import { getZaloUserName, getZaloUserPhone } from '../../helper/zaloSDK'
 import { useGlobalContext } from '../../context/GlobalContext'
 import { SCHEDULE_TYPE, WEBVIEW_TYPES } from '../../constants/global'
 import MainLogo from '../../components/MainLogo'
+import addKeyLocalStorage from '../../helper/localStorage'
 function BookingPartner() {
   const { globalState, handleGetUserPhone, handleGetUserName, setGlobalState } = useGlobalContext();
   const [isVisible, setIsVisible] = useState(false)
@@ -22,6 +23,8 @@ function BookingPartner() {
   let partner = params.get('partner')?.toLowerCase()
   const isWebView = params.get('isWebView')
   let apikey = CheckApiKey()
+  const localLogo = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})?.stationsLogo
+
 
   const handleGetUserInfor = async () => {
     try {
@@ -79,7 +82,7 @@ function BookingPartner() {
                       <Tabs activeKey={tabKey}>
                         <Tabs.TabPane tab="Đặt lịch" key="booking"> */}
                   {
-                    Number(isWebView) !== WEBVIEW_TYPES.WEBVIEW ? <div className='booking-title title-small'>{getTitleName(searchparam)}</div> : null
+                    Number(isWebView) !== WEBVIEW_TYPES.WEBVIEW ? <div className='booking-title title-normal'>{getTitleName(searchparam)}</div> : null
                   }
                   <div className='mt-4'>
                     <BookingPartnerForm zaloUserPhone={globalState.phoneNumber} zaloUserName={globalState.userName} setTabKey={setTabKey} form={form} />
@@ -105,7 +108,10 @@ function BookingPartner() {
                       }
                     })}
                   </div>
-                  <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by TTDK</div>
+                  {
+                    !localLogo &&
+                    <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by TTDK</div>
+                  }
                 </div>
               </>
             )

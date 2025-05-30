@@ -66,8 +66,12 @@ function App() {
   }
   
   const getStationConfigByApiKeyAndSetTheme = async () => {
+    const apiKeyLocal = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})?.apiKey
     const params = getQueryParams()
     const apiKey = params?.apikey
+    if (apiKeyLocal !== apiKey || !apiKey) {
+      localStorage.removeItem(addKeyLocalStorage('dataTheme'))
+    }
     const theme = {}
     apiKey && await SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apiKey })
       .then(async(result) => {
@@ -80,6 +84,7 @@ function App() {
           theme.stationsLogo= res.stationsLogo
         })
       })
+      theme.apiKey = apiKey
       localStorage.setItem(addKeyLocalStorage('dataTheme'), JSON.stringify(theme))
       theme?.partnerColorButton && document.documentElement.style.setProperty('--title-color',  theme?.partnerColorButton);
       theme?.partnerColorGradient && document.documentElement.style.setProperty('--linear-gradient-active',  theme?.partnerColorGradient);

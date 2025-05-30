@@ -59,7 +59,7 @@ function BookingInsurancePartner() {
                 ${nextTab === 'partner' ? 'small' : 'full'}
                 ${nextTab === 'success' ? 'd-flex justify-content-center align-items-center' : ''}
                 `}>
-                  <div className='booking-title title-small'>ĐẶT LỊCH TƯ VẤN MUA BH TNDS</div>
+                  <div className='booking-title title-normal'>ĐẶT LỊCH TƯ VẤN MUA BH TNDS</div>
                   <div className='mt-4'>
                     <BookingInsurancePartnerForm zaloUserPhone={globalState.phoneNumber} zaloUserName={globalState.userName} setTabKey={setTabKey} form={form} />
                   </div>
