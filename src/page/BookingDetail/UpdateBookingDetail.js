@@ -6,7 +6,6 @@ import { Form, Input, Button, Spin, Select as SelectAntd, Row, Col } from 'antd'
 import BookingSuccess from '../BookingPartner/BookingSuccessModal'
 import PopupMessage from '../BookingPartner/PopupMessage'
 import { changeTime } from '../../helper/changeTime'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { CONSULTANT_TYPE, optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
 import {
@@ -27,6 +26,7 @@ import { DATE_DISPLAY_FORMAT } from '../../constants/dateFormats'
 import BookingDatePicker from '../../components/BookingDatePicker'
 import BookingHoursPicker from '../../components/BookingHoursPicker'
 import CustomerScheduleService from '../../services/customerScheduleService'
+import MainLogo from '../../components/MainLogo'
 
 function UpdateBookingDetail({}) {
   const customStyles = {
@@ -900,9 +900,9 @@ useEffect(() => {
       {/* Hiển thị loading */}
       {isLoading && (
         <div className="loading">
-          <div>
-            <LogoTTDK></LogoTTDK>
-            <Spin style={{ width: '100%' }} />
+          <div className='text-center'>
+            <MainLogo height={60} width={60}></MainLogo>
+            <Spin style={{ width: '100%' }}  className='mt-3'/>
           </div>
         </div>
       )}

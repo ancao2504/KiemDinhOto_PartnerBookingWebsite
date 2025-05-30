@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
 import { SHA256 } from 'crypto-js'
@@ -7,7 +7,6 @@ import { Form, Input, Button, Spin, Select as SelectAntd, Row, Col } from 'antd'
 import BookingSuccess from './BookingSuccessModal'
 import PopupMessage from './PopupMessage'
 import { changeTime } from '../../helper/changeTime'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
 import {
@@ -31,7 +30,21 @@ import BookingDatePicker from '../../components/BookingDatePicker'
 import BookingHoursPicker from '../../components/BookingHoursPicker'
 import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import SystemConfigurationsService from '../../services/SystemConfigurationsService'
+import MainLogo from '../../components/MainLogo'
+import addKeyLocalStorage from '../../helper/localStorage'
 const Gtel = window
+
+// FUNC: Băm url để lấy các params trên url và trả về dạng mảng có object là key và value
+export function getQueryParams(options = {}) {
+  if (typeof window !== 'undefined' && window.location && window.location.search) {
+    const params = new URLSearchParams(window.location.search)
+    const result = {}
+    for (const [key, value] of params.entries()) {
+      result[key] = value
+    }
+    return result
+  }
+}
 function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const customStyles = {
     control: (base) => ({
@@ -69,6 +82,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     vehicleType: VEHICLE_SUB_TYPE[0]?.vehicleType
   })
 
+  const dataTheme = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})
+
   // khai báo các biến cho toàn trang
   const history = useHistory()
   const [isLoading, setIsLoading] = useState(false)
@@ -97,14 +112,13 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     return expectedChecksum == checksum
   }
 
-  const getStationConfigByApiKey = () => {
+  const getStationConfigByApiKey = (paramsFromUrl) => {
     setIsLoading(true)
-    const paramsFromUrl = getQueryParams()
     const apikey = paramsFromUrl?.apikey || localStorage.getItem('apiKey') || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apikey })
       .then((result) => {
-        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '[]')
-        setDataBookingParam(stationMiniAppLink)
+        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
+        setDataBookingParam({...stationMiniAppLink,...paramsFromUrl})
       })
       .catch((err) => {
         setErrorMessage('Lấy thông tin cấu hình thất bại.')
@@ -237,6 +251,9 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
             )
           }))
           setScheduleTypes(newValues)
+  
+          const scheduleTypeWithParams = newValues.find(item => item.value === ( +form.getFieldValue('scheduleType')));
+          setScheduleCategory(scheduleTypeWithParams?.scheduleCategory || SCHEDULE_BOOKING_TYPE.SCHEDULE)
         } else {
           firstScheduleTypeHandler()
         }
@@ -364,16 +381,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }
 
   function getStations(filter = null, callback = null) {
-    const appliedFilter = filter
-    const newFilter = {
-      ...appliedFilter,
-      filter: {
-        ...appliedFilter?.filter,
-        scheduleType: dataBookingParam?.scheduleType
-      }
-    }
-
-    BookingService.getStationList(newFilter)
+    BookingService.getStationList(filter)
       .then((res) => {
         const stationList = (res?.data || []).map((station) => {
           const name = `${station.stationCode} - ${station.stationsAddress || station.stationsName}`
@@ -522,18 +530,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     })
   }
 
-  // FUNC: Băm url để lấy các params trên url và trả về dạng mảng có object là key và value
-  function getQueryParams(options = {}) {
-    if (typeof window !== 'undefined' && window.location && window.location.search) {
-      const params = new URLSearchParams(window.location.search)
-      const result = {}
-      for (const [key, value] of params.entries()) {
-        result[key] = value
-      }
-      return result
-    }
-  }
-
   // FUNC: fill value X vào field X của form
   const fillFormValue = (fieldName, value) => {
     form.setFieldsValue({ [fieldName]: value })
@@ -611,11 +607,12 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       paramsFromUrl[key] = value
       fillFormValue(key, value)
     })
-    if (determineDataSource()) {
-      getStationConfigByApiKey()
-    } else {
-      setDataBookingParam(paramsFromUrl)
-    }
+
+    // if (determineDataSource()) {
+      getStationConfigByApiKey(paramsFromUrl)
+    // } else {
+    //   setDataBookingParam(paramsFromUrl)
+    // }
 
     // xử lí state của scheduleTypes
     firstScheduleTypeHandler()
@@ -709,9 +706,28 @@ useEffect(() => {
     }
   }, [isZaloApp])
 
+  const isShowStationDateTime = useMemo(() => {
+    const selectedOption = scheduleTypes.find(item => item.value === form.getFieldValue('scheduleType'));
+    const showStationField = selectedOption?.requireScheduleStation === 1;
+    const showDateField = selectedOption?.requireScheduleDate === 1;
+    const showTimeField = selectedOption?.requireScheduleTime === 1;
+
+    return ({
+      showStationField,
+      showDateField,
+      showTimeField,
+      showAreaField: showStationField || showDateField || showTimeField
+    })
+  }, [form.getFieldValue('scheduleType'), scheduleTypes ])
+  
   return (
-    <div>
+    <div className='position-relative'>
+      {
+        dataTheme?.partnerBackground &&
+        <img className="bg-partner" src={dataTheme?.partnerBackground} alt="logo" />
+      }
       <Form
+        className={dataTheme?.partnerBackground ? 'styled-form' : ''}
         name="booking"
         layout="vertical"
         form={form}
@@ -729,7 +745,7 @@ useEffect(() => {
               label="Họ và tên chủ xe"
               rules={[
                 {
-                  required: dataBookingParam?.require_firstName === true,
+                  required: dataBookingParam?.visible_firstName !== false && dataBookingParam?.require_firstName === true,
                   message: 'Vui lòng nhập tên'
                 },
                 {
@@ -738,7 +754,7 @@ useEffect(() => {
                 }
               ]}
               hidden={dataBookingParam?.visible_firstName === false}>
-              <Input className="login__input booking-input" placeholder="Nguyễn Văn An" type="text" size="large" />
+              <Input className="booking-input booking-input" placeholder="Nguyễn Văn An" type="text" size="large" />
             </Form.Item>
             <Form.Item
               name="phone"
@@ -746,7 +762,7 @@ useEffect(() => {
               hidden={dataBookingParam?.visible_phoneNumber === false}
               rules={[
                 {
-                  required: !isZaloApp || dataBookingParam?.require_phoneNumber === true,
+                  required: dataBookingParam?.visible_phoneNumber !== false && (!isZaloApp || dataBookingParam?.require_phoneNumber === true),
                   message: 'Vui lòng nhập số điện thoại'
                 },
                 {
@@ -758,7 +774,7 @@ useEffect(() => {
                   message: 'Số điện thoại quá dài'
                 }
               ]}>
-              <Input className="login__input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" disabled={isZaloApp} />
+              <Input className="booking-input booking-input" placeholder="Nhập số điện thoại" type="text" size="large" disabled={isZaloApp} />
             </Form.Item>
 
             <Form.Item
@@ -785,8 +801,9 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
-
-            <Form.Item
+            {
+              dataBookingParam?.visible_vehicleIdentity !== false &&
+              <Form.Item
               name="licensePlates"
               label="Biển số xe"
               required
@@ -800,7 +817,7 @@ useEffect(() => {
               ]}
               hidden={dataBookingParam?.visible_vehicleIdentity === false}>
               <Input
-                className="login__input booking-input"
+                className="booking-input booking-input"
                 placeholder="59B16856"
                 type="text"
                 size="large"
@@ -809,6 +826,8 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
+            }
+          
 
             <Form.Item
               name="licensePlateColor"
@@ -816,7 +835,7 @@ useEffect(() => {
               hidden={dataBookingParam?.visible_scheduleType === false}
               rules={[
                 {
-                  required: dataBookingParam?.require_vehiclePlateColor === true,
+                  required: dataBookingParam?.visible_scheduleType !== false && dataBookingParam?.require_vehiclePlateColor === true,
                   message: 'Vui lòng chọn màu biển số'
                 }
               ]}>
@@ -842,7 +861,7 @@ useEffect(() => {
                   hidden={dataBookingParam?.visible_vehicleSubCategory === false}
                   rules={[
                     {
-                      required: dataBookingParam?.require_vehicleSubType === true,
+                      required: dataBookingParam?.visible_vehicleSubCategory !== false && dataBookingParam?.require_vehicleSubType === true,
                       message: 'Vui lòng nhập'
                     }
                   ]}>
@@ -868,7 +887,7 @@ useEffect(() => {
                   hidden={dataBookingParam?.visible_vehicleSubCategory === false}
                   rules={[
                     {
-                      required: dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false,
+                      required: dataBookingParam?.visible_vehicleSubCategory !== false && (dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false),
                       message: 'Vui lòng chọn phân loại'
                     }
                   ]}>
@@ -904,7 +923,7 @@ useEffect(() => {
               }
               rules={[
                 {
-                  required: dataBookingParam?.require_certificateSeries === 'true' ? true : false,
+                  required: dataBookingParam?.visible_certificateSeries !== false && (dataBookingParam?.require_certificateSeries === 'true' ? true : false),
                   message: 'Vui lòng nhập số seri GCN'
                 },
                 {
@@ -913,7 +932,7 @@ useEffect(() => {
                 }
               ]}>
               <Input
-                className="login__input"
+                className="booking-input"
                 defaultValue={dataBookingParam?.certificateSeries}
                 placeholder="Ví dụ: KA-7461980"
                 type="text"
@@ -924,7 +943,9 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
-            <Form.Item required label="Khu vực" name="vntId" hidden={dataBookingParam?.visible_StationArea === false}>
+            {
+              isShowStationDateTime.showAreaField &&
+            <Form.Item required={dataBookingParam?.visible_StationArea !== false} label="Khu vực" name="vntId" hidden={dataBookingParam?.visible_StationArea === false}>
               <SelectAntd
                 className="cs-select ant-custom booking-input"
                 showSearch
@@ -936,13 +957,15 @@ useEffect(() => {
                 options={listStationArea}
               />
             </Form.Item>
-            {scheduleCategory !== SCHEDULE_BOOKING_TYPE.CONSULTANT && (
+            }
+            
+            {isShowStationDateTime.showStationField && (
               <Form.Item
                 label="Chọn trạm"
                 name="stationsId"
                 rules={[
                   {
-                    required: true,
+                    required: dataBookingParam?.visible_StationsCode !== false,
                     message: 'Vui lòng nhập'
                   }
                 ]}
@@ -968,7 +991,7 @@ useEffect(() => {
                 />
               </Form.Item>
             )}
-            {scheduleCategory !== SCHEDULE_BOOKING_TYPE.CONSULTANT && (
+            {isShowStationDateTime.showDateField && (
               <Form.Item
                 name="dateSchedule"
                 label="Ngày hẹn"
@@ -1001,7 +1024,7 @@ useEffect(() => {
                 />
               </Form.Item>
             )}
-            {scheduleCategory !== SCHEDULE_BOOKING_TYPE.CONSULTANT && (
+            {isShowStationDateTime.showTimeField && (
               <Form.Item
                 label="Giờ hẹn"
                 name="time"
@@ -1024,9 +1047,12 @@ useEffect(() => {
               </Form.Item>
             )}
             <div className="w-100 d-flex justify-content-center mgt-40">
-              <Button className="login__button df" type="primary" htmlType="submit" size="large">
-                Đặt lịch
-              </Button>
+              {
+                <Button className="login__button df" type="primary" htmlType="submit" size="large">
+                  Đặt lịch
+                </Button>
+              }
+              
             </div>
           </>
         )}
@@ -1050,13 +1076,12 @@ useEffect(() => {
           }}
           text={errorMessage}></PopupMessage>
       )}
-
       {/* Hiển thị loading */}
       {isLoading && (
         <div className="loading">
-          <div>
-            <LogoTTDK></LogoTTDK>
-            <Spin style={{ width: '100%' }} />
+          <div className='text-center'>
+            <MainLogo height={60} width={60}></MainLogo>
+            <Spin style={{ width: '100%' }}  className='mt-3'/>
           </div>
         </div>
       )}

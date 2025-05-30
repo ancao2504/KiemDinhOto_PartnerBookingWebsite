@@ -15,10 +15,10 @@ import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
 import { validatorPlateNumber } from '../../helper/validatorPlateNumber'
-import { ReactComponent as LogoTTDK } from './../../assets/icons/Logo.svg'
 import PopupMessage from '../BookingPartner/PopupMessage'
 import BookingSuccess from '../BookingPartner/BookingSuccessModal'
 import redirectToInsurancePartner from './redirectToInsurancePartner'
+import MainLogo from '../../components/MainLogo'
 
 const usagePurposeTypeOptions=[
   {
@@ -1143,9 +1143,9 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
       }
       {isLoading && (
         <div className="loading">
-          <div>
-            <LogoTTDK></LogoTTDK>
-            <Spin style={{width:'100%'}} />
+          <div className='text-center'>
+            <MainLogo height={60} width={60}></MainLogo>
+            <Spin style={{ width: '100%' }}  className='mt-3'/>
           </div>
         </div>
       )}

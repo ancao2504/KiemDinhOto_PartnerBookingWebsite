@@ -216,6 +216,9 @@ $title-x-large-fw: map-get(map-get($title-styles, 'x-large'), 'font-weight'); //
   --gray-athens: #F9F9FB;
   --gray-zircon: #F4F7FF;
   --blue-deep-cove: #040747;
+  --royal-blue-color: #416FF3;
+  --slate-blue-color: #6E3DD5;
+  --linear-gradient-active: linear-gradient(to top, var(--royal-blue-color), var(--slate-blue-color));
   // ...Thêm biến sáng 
 }
 

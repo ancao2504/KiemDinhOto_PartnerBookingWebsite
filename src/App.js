@@ -16,7 +16,6 @@ import './main.scss'
 import './dropDownCommon.scss'
 import { IS_ZALO_MINI_APP } from './constants/global';
 import Layout from './components/Layout';
-import { ReactComponent as LogoTTDK } from './assets/icons/Logo.svg'
 import Logo from './assets/MAINLOGO.png'
 import { PATH } from './constants/router';
 import { GlobalProvider } from './context/GlobalContext';
@@ -25,6 +24,8 @@ import { setMetaData } from "./actions";
 import { useDispatch } from 'react-redux'
 import BookingService from './services/addBookingService';
 import SystemConfigurationsService from './services/SystemConfigurationsService';
+import { getQueryParams } from './page/BookingPartner/bookingPartnerForm';
+import addKeyLocalStorage from './helper/localStorage';
 export const baseName = IS_ZALO_MINI_APP ? `/zapps/${process.env.REACT_APP_ZMP_APP_ID}` : '/'
 function App() {
   // Kiểm tra xem có APIKey trong URL không cho tính năng tự động đặt lịch
@@ -63,10 +64,36 @@ function App() {
       })
     }
   }
+  
+  const getStationConfigByApiKeyAndSetTheme = async () => {
+    const apiKeyLocal = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})?.apiKey
+    const params = getQueryParams()
+    const apiKey = params?.apikey
+    if (apiKeyLocal !== apiKey || !apiKey) {
+      localStorage.removeItem(addKeyLocalStorage('dataTheme'))
+    }
+    const theme = {}
+    apiKey && await SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apiKey })
+      .then(async(result) => {
+        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
+        theme.partnerColorButton = stationMiniAppLink?.partnerColorButton
+        theme.partnerBackground = stationMiniAppLink?.partnerBackground?.[0]?.url
+        theme.partnerColorGradient = stationMiniAppLink?.partnerColorGradient
+        await BookingService.getDetailStation({id: result[0]?.stationsId})
+        .then((res) => {
+          theme.stationsLogo= res.stationsLogo
+        })
+      })
+      theme.apiKey = apiKey
+      localStorage.setItem(addKeyLocalStorage('dataTheme'), JSON.stringify(theme))
+      theme?.partnerColorButton && document.documentElement.style.setProperty('--title-color',  theme?.partnerColorButton);
+      theme?.partnerColorGradient && document.documentElement.style.setProperty('--linear-gradient-active',  theme?.partnerColorGradient);
+    }
 
   useLayoutEffect(() => {
     fetchListMetaData()
     handleCheckApiKey()
+    getStationConfigByApiKeyAndSetTheme()
     const loadingScreen = document.querySelector('.splash-screen-loading');
     if (loadingScreen) {
       loadingScreen.style.display = 'none';
