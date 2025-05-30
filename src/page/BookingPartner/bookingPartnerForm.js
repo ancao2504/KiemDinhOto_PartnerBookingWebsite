@@ -117,7 +117,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     const apikey = paramsFromUrl?.apikey || localStorage.getItem('apiKey') || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apikey })
       .then((result) => {
-        const stationMiniAppLink = JSON.parse(result[0]?.stationMiniAppLink || '{}')
+        const stationMiniAppLink = JSON.parse(result?.[0]?.stationMiniAppLink || '{}')
         setDataBookingParam({...stationMiniAppLink,...paramsFromUrl})
       })
       .catch((err) => {
