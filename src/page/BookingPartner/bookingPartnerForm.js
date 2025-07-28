@@ -8,7 +8,7 @@ import BookingSuccess from './BookingSuccessModal'
 import PopupMessage from './PopupMessage'
 import { changeTime } from '../../helper/changeTime'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
-import { optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
+import { E_TICKET_SALE_OPTIONS, optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
 import {
   PAYMENT_TYPE,
   PLATE_COLOR,
@@ -75,6 +75,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const [loadingHoursPicker, setLoadingHoursPicker] = useState(false)
   const [listBookingTime, setListBookingTime] = useState([])
   const [minMonthAvailable, setMinMonthAvailable] = useState(moment().format(DATE_DISPLAY_FORMAT))
+  const [showServiceType, setShowServiceType] = useState(false)
+  const [ETicketOptions, setETicketOptions] = useState(E_TICKET_SALE_OPTIONS)
   const [workdayFilter, setWorkdayFilter] = useState({
     stationsId: null,
     startDate: moment().format(DATE_DISPLAY_FORMAT),
@@ -82,7 +84,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     vehicleType: VEHICLE_SUB_TYPE[0]?.vehicleType
   })
 
-  const dataTheme = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})
+  const dataTheme = JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {}
 
   // khai báo các biến cho toàn trang
   const history = useHistory()
@@ -118,7 +120,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apikey })
       .then((result) => {
         const stationMiniAppLink = JSON.parse(result?.[0]?.stationMiniAppLink || '{}')
-        setDataBookingParam({...stationMiniAppLink,...paramsFromUrl})
+        setDataBookingParam({ ...stationMiniAppLink, ...paramsFromUrl })
       })
       .catch((err) => {
         setErrorMessage('Lấy thông tin cấu hình thất bại.')
@@ -214,6 +216,9 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       vehicleSubCategory: values.vehicleSubCategory,
       certificateSeries: values.certificateSeries
     }
+    if (values.serviceId) {
+      data.stationServicesList = [values.serviceId]
+    }
     if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
       bookingConsultantSchedule(data)
     }
@@ -251,8 +256,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
             )
           }))
           setScheduleTypes(newValues)
-  
-          const scheduleTypeWithParams = newValues.find(item => item.value === ( +form.getFieldValue('scheduleType')));
+
+          const scheduleTypeWithParams = newValues.find((item) => item.value === +form.getFieldValue('scheduleType'))
           setScheduleCategory(scheduleTypeWithParams?.scheduleCategory || SCHEDULE_BOOKING_TYPE.SCHEDULE)
         } else {
           firstScheduleTypeHandler()
@@ -316,15 +321,13 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
               )
               element.value = element.disabled
             })
-             const firstAvailableTime = tmp.find(
-                item => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule
-              );        
-              form.setFieldValue('time', firstAvailableTime?.scheduleTime)
-              if (!firstAvailableTime) {
-                form.setFieldValue('time', undefined)
-              }else{
-                form.setFieldValue('time', firstAvailableTime)
-              }
+            const firstAvailableTime = tmp.find((item) => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule)
+            form.setFieldValue('time', firstAvailableTime?.scheduleTime)
+            if (!firstAvailableTime) {
+              form.setFieldValue('time', undefined)
+            } else {
+              form.setFieldValue('time', firstAvailableTime)
+            }
             setListBookingTime(tmp)
           }
         }
@@ -355,10 +358,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
                 element.value = element.scheduleDate
               })
               setListBookingDate(tmp)
-            
-              const firstAvailableSchedule = tmp.find(
-                item => item.scheduleDateStatus === 1 && item.totalBookingSchedule < item.totalSchedule
-              );        
+
+              const firstAvailableSchedule = tmp.find((item) => item.scheduleDateStatus === 1 && item.totalBookingSchedule < item.totalSchedule)
               form.setFieldValue('dateSchedule', firstAvailableSchedule?.scheduleDate)
               if (!firstAvailableSchedule?.scheduleDate) {
                 form.setFieldValue('time', undefined)
@@ -446,9 +447,9 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           callback(stationList)
         } else {
           setListStation(stationList)
-          const activeStations = stationList.filter(station => station.stationStatus === 1);
-          const priorityStation = activeStations.find(station => station.enablePriorityMode === 1);
-          const selectedStation = priorityStation || activeStations[0];
+          const activeStations = stationList.filter((station) => station.stationStatus === 1)
+          const priorityStation = activeStations.find((station) => station.enablePriorityMode === 1)
+          const selectedStation = priorityStation || activeStations[0]
           setStationSelected(selectedStation?.stationsId)
           setWorkdaySelectedDate(undefined)
           if (dataBookingParam?.stationsId) {
@@ -502,6 +503,21 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       .finally(() => {})
   }
 
+  async function getStationServices(stationsId) {
+    try {
+      const response = await BookingService.getListStationService({ filter: { stationsId: stationsId } })
+      if (response?.isSuccess) {
+        return response.data.data.map((item) => ({
+          value: item.stationServicesId,
+          label: item.serviceName
+        }))
+      }
+      return []
+    } catch (error) {
+      console.error('Error fetching station services:', error)
+    }
+  }
+
   const handleCategory = (evt) => {
     const categoryOptionsMap = {
       [VEHICLE_SUB_CATEGORY.CAR]: VIHCLE_CATEGORY_OTO,
@@ -538,10 +554,19 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   // function kiểm tra xem nên áp dụng trên URL hay từ DB
   const determineDataSource = () => {
     const paramsFromUrl = getQueryParams()
-    const allowedKeys = ["apikey","name", "phone", "vehicleSubType","scheduleType", "licensePlateColor", "vntId", "vehicleSubCategory", "certificateSeries", "licensePlates"];
-    const paramsKeysNoUse=  Object.fromEntries(
-      Object.entries(paramsFromUrl).filter(([key]) => allowedKeys.includes(key))
-    );
+    const allowedKeys = [
+      'apikey',
+      'name',
+      'phone',
+      'vehicleSubType',
+      'scheduleType',
+      'licensePlateColor',
+      'vntId',
+      'vehicleSubCategory',
+      'certificateSeries',
+      'licensePlates'
+    ]
+    const paramsKeysNoUse = Object.fromEntries(Object.entries(paramsFromUrl).filter(([key]) => allowedKeys.includes(key)))
     const paramsFromUrlKeys = Object.keys(paramsKeysNoUse)
     const isUsingConfigMiniAppLinkInDb = paramsFromUrlKeys.length === 1 && paramsFromUrlKeys[0] === 'apikey' ? true : false // nếu chỉ có API Key thì lấy trong DB
     return isUsingConfigMiniAppLinkInDb
@@ -607,9 +632,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       paramsFromUrl[key] = value
       fillFormValue(key, value)
     })
-
     // if (determineDataSource()) {
-      getStationConfigByApiKey(paramsFromUrl)
+    getStationConfigByApiKey(paramsFromUrl)
     // } else {
     //   setDataBookingParam(paramsFromUrl)
     // }
@@ -629,30 +653,49 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     }
   }, [form.getFieldValue('vntId')])
 
-useEffect(() => {
-  const fetchData = async () => {
-    // Lấy giá trị của stationsId từ form
-    const stationsId = form.getFieldValue('stationsId');
+  useEffect(() => {
+    const fetchData = async () => {
+      // Lấy giá trị của stationsId từ form
+      const stationsId = form.getFieldValue('stationsId')
 
-    if (stationsId) {
-      try {
-        // Gọi hàm async để tìm tháng đầu tiên có lịch khả dụng
-        const result = await findFirstAvailableDateRange({ ...workdayFilter, stationsId });
+      if (stationsId) {
+        try {
+          // Gọi hàm async để tìm tháng đầu tiên có lịch khả dụng
+          const result = await findFirstAvailableDateRange({ ...workdayFilter, stationsId })
 
-        // Nếu có kết quả, cập nhật lại workdayFilter
-        if (result) {
-          setWorkdayFilter(result);
+          // Nếu có kết quả, cập nhật lại workdayFilter
+          if (result) {
+            setWorkdayFilter(result)
+          }
+        } catch (err) {
+          console.error('Error fetching available date range:', err)
         }
-      } catch (err) {
-        console.error("Error fetching available date range:", err);
       }
     }
-  };
 
-  // Gọi hàm fetchData
-  fetchData();
-}, [form.getFieldValue('stationsId')]); // Dependency array theo stationsId
+    if (form.getFieldValue('stationsId')) {
+      getStationServices(form.getFieldValue('stationsId')).then((services) => {
+        const allowedValues = E_TICKET_SALE_OPTIONS.map((option) => option.value)
+        const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option.label)
+        const filteredServices = services.filter((service) => allowedValues.includes(service.value) || allowedLabels.includes(service.label))
+        setETicketOptions(filteredServices)
+      })
+    }
 
+    // Gọi hàm fetchData
+    fetchData()
+  }, [form.getFieldValue('stationsId')]) // Dependency array theo stationsId
+
+  useEffect(() => {
+    if (form.getFieldValue('scheduleType') === SCHEDULE_TYPE_MINIAPP.E_TICKET_SALE) {
+      if (ETicketOptions.length > 0) {
+        setShowServiceType(true)
+        form.setFieldValue('serviceId', ETicketOptions[0]?.value)
+      }
+    } else {
+      setShowServiceType(false)
+    }
+  }, [form.getFieldValue('scheduleType')])
 
   useEffect(() => {
     if ((workdayFilter.vehicleType && workdayFilter.stationsId) || (workdayFilter.stationsId && form.getFieldValue('vehicleSubType'))) {
@@ -707,25 +750,22 @@ useEffect(() => {
   }, [isZaloApp])
 
   const isShowStationDateTime = useMemo(() => {
-    const selectedOption = scheduleTypes.find(item => item.value === form.getFieldValue('scheduleType'));
-    const showStationField = selectedOption?.requireScheduleStation === 1;
-    const showDateField = selectedOption?.requireScheduleDate === 1;
-    const showTimeField = selectedOption?.requireScheduleTime === 1;
+    const selectedOption = scheduleTypes.find((item) => item.value === form.getFieldValue('scheduleType'))
+    const showStationField = selectedOption?.requireScheduleStation === 1
+    const showDateField = selectedOption?.requireScheduleDate === 1
+    const showTimeField = selectedOption?.requireScheduleTime === 1
 
-    return ({
+    return {
       showStationField,
       showDateField,
       showTimeField,
       showAreaField: showStationField || showDateField || showTimeField
-    })
-  }, [form.getFieldValue('scheduleType'), scheduleTypes ])
-  
+    }
+  }, [form.getFieldValue('scheduleType'), scheduleTypes])
+
   return (
-    <div className='position-relative'>
-      {
-        dataTheme?.partnerBackground &&
-        <img className="bg-partner" src={dataTheme?.partnerBackground} alt="logo" />
-      }
+    <div className="position-relative">
+      {dataTheme?.partnerBackground && <img className="bg-partner" src={dataTheme?.partnerBackground} alt="logo" />}
       <Form
         className={dataTheme?.partnerBackground ? 'styled-form' : ''}
         name="booking"
@@ -801,33 +841,55 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
-            {
-              dataBookingParam?.visible_vehicleIdentity !== false &&
+            {showServiceType && (
               <Form.Item
-              name="licensePlates"
-              label="Biển số xe"
-              required
-              rules={[
-                {
-                  required: dataBookingParam?.require_vehicleIdentity === true,
-                  validator(_, value) {
-                    return validatorPlateNumber(value?.toUpperCase())
+                name="serviceId"
+                label="Chọn dịch vụ"
+                required
+                rules={[
+                  {
+                    required: true,
+                    message: 'Vui lòng chọn dịch vụ'
                   }
-                }
-              ]}
-              hidden={dataBookingParam?.visible_vehicleIdentity === false}>
-              <Input
-                className="booking-input booking-input"
-                placeholder="59B16856"
-                type="text"
-                size="large"
-                onInput={(e) => {
-                  e.target.value = e.target.value.toUpperCase().replace(/\s/g, '')
-                }}
-              />
-            </Form.Item>
-            }
-          
+                ]}>
+                <SelectAntd
+                  className="cs-select ant-custom booking-input"
+                  isSearchable={true}
+                  placeholder="Vui lòng chọn dịch vụ"
+                  styles={customStyles}
+                  options={ETicketOptions}
+                  menuPlacement="top"
+                  onChange={(values, scheduleType) => {
+                    form.setFieldValue('serviceId', values)
+                  }}
+                />
+              </Form.Item>
+            )}
+            {dataBookingParam?.visible_vehicleIdentity !== false && (
+              <Form.Item
+                name="licensePlates"
+                label="Biển số xe"
+                required
+                rules={[
+                  {
+                    required: dataBookingParam?.require_vehicleIdentity === true,
+                    validator(_, value) {
+                      return validatorPlateNumber(value?.toUpperCase())
+                    }
+                  }
+                ]}
+                hidden={dataBookingParam?.visible_vehicleIdentity === false}>
+                <Input
+                  className="booking-input booking-input"
+                  placeholder="59B16856"
+                  type="text"
+                  size="large"
+                  onInput={(e) => {
+                    e.target.value = e.target.value.toUpperCase().replace(/\s/g, '')
+                  }}
+                />
+              </Form.Item>
+            )}
 
             <Form.Item
               name="licensePlateColor"
@@ -887,7 +949,9 @@ useEffect(() => {
                   hidden={dataBookingParam?.visible_vehicleSubCategory === false}
                   rules={[
                     {
-                      required: dataBookingParam?.visible_vehicleSubCategory !== false && (dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false),
+                      required:
+                        dataBookingParam?.visible_vehicleSubCategory !== false &&
+                        (dataBookingParam?.require_vehicleSubCategory === 'true' ? true : false),
                       message: 'Vui lòng chọn phân loại'
                     }
                   ]}>
@@ -923,7 +987,8 @@ useEffect(() => {
               }
               rules={[
                 {
-                  required: dataBookingParam?.visible_certificateSeries !== false && (dataBookingParam?.require_certificateSeries === 'true' ? true : false),
+                  required:
+                    dataBookingParam?.visible_certificateSeries !== false && (dataBookingParam?.require_certificateSeries === 'true' ? true : false),
                   message: 'Vui lòng nhập số seri GCN'
                 },
                 {
@@ -943,22 +1008,25 @@ useEffect(() => {
                 }}
               />
             </Form.Item>
-            {
-              isShowStationDateTime.showAreaField &&
-            <Form.Item required={dataBookingParam?.visible_StationArea !== false} label="Khu vực" name="vntId" hidden={dataBookingParam?.visible_StationArea === false}>
-              <SelectAntd
-                className="cs-select ant-custom booking-input"
-                showSearch
-                onChange={(values) => {
-                  handleFillStationDateTime()
-                }}
-                placeholder="Vui lòng chọn khu vực"
-                styles={customStyles}
-                options={listStationArea}
-              />
-            </Form.Item>
-            }
-            
+            {isShowStationDateTime.showAreaField && (
+              <Form.Item
+                required={dataBookingParam?.visible_StationArea !== false}
+                label="Khu vực"
+                name="vntId"
+                hidden={dataBookingParam?.visible_StationArea === false}>
+                <SelectAntd
+                  className="cs-select ant-custom booking-input"
+                  showSearch
+                  onChange={(values) => {
+                    handleFillStationDateTime()
+                  }}
+                  placeholder="Vui lòng chọn khu vực"
+                  styles={customStyles}
+                  options={listStationArea}
+                />
+              </Form.Item>
+            )}
+
             {isShowStationDateTime.showStationField && (
               <Form.Item
                 label="Chọn trạm"
@@ -1004,7 +1072,7 @@ useEffect(() => {
                 ]}>
                 <BookingDatePicker
                   selectedDate={workdaySelectedDate}
-                  setSelectedDate={(date)=>{
+                  setSelectedDate={(date) => {
                     setWorkdaySelectedDate(date)
                     form.setFieldValue('dateSchedule', date)
                   }}
@@ -1052,7 +1120,6 @@ useEffect(() => {
                   Đặt lịch
                 </Button>
               }
-              
             </div>
           </>
         )}
@@ -1079,9 +1146,9 @@ useEffect(() => {
       {/* Hiển thị loading */}
       {isLoading && (
         <div className="loading">
-          <div className='text-center'>
+          <div className="text-center">
             <MainLogo height={60} width={60}></MainLogo>
-            <Spin style={{ width: '100%' }}  className='mt-3'/>
+            <Spin style={{ width: '100%' }} className="mt-3" />
           </div>
         </div>
       )}
