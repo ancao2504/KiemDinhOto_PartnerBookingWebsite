@@ -76,7 +76,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const [listBookingTime, setListBookingTime] = useState([])
   const [minMonthAvailable, setMinMonthAvailable] = useState(moment().format(DATE_DISPLAY_FORMAT))
   const [showServiceType, setShowServiceType] = useState(false)
-  const [ETicketOptions, setETicketOptions] = useState(E_TICKET_SALE_OPTIONS)
+  const [ETicketOptions, setETicketOptions] = useState([])
   const [workdayFilter, setWorkdayFilter] = useState({
     stationsId: null,
     startDate: moment().format(DATE_DISPLAY_FORMAT),
@@ -605,6 +605,21 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     return null // Không tìm thấy tháng nào có ngày làm việc
   }
 
+  async function getStationByApiKey(apiKey) {
+    return new Promise((resolve) => {
+      SystemConfigurationsService.getStationByApiKey(apiKey)
+        .then((result = {}) => {
+          if (!result) {
+            return resolve(null)
+          }
+          return resolve(result)
+        })
+        .catch(() => {
+          return resolve(null)
+        })
+    })
+  }
+
   // ------------USE EFFECT------------------
   useEffect(() => {
     getMetaData()
@@ -762,6 +777,21 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       showAreaField: showStationField || showDateField || showTimeField
     }
   }, [form.getFieldValue('scheduleType'), scheduleTypes])
+
+  useEffect(() => {
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
+      getStationByApiKey(dataBookingParam?.apikey || localStorage.getItem('apiKey')).then((station) => {
+        if (station) {
+          getStationServices(station?.stationsId).then((services) => {
+            const allowedValues = E_TICKET_SALE_OPTIONS.map((option) => option.value)
+            const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option.label)
+            const filteredServices = services.filter((service) => allowedValues.includes(service.value) || allowedLabels.includes(service.label))
+            setETicketOptions(filteredServices)
+          })
+        }
+      })
+    }
+  }, [scheduleCategory])
 
   return (
     <div className="position-relative">
