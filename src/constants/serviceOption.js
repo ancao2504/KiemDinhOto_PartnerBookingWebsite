@@ -325,15 +325,15 @@ export const optionServiceType = [
 
 export const E_TICKET_SALE_OPTIONS = [
   {
-    value: 654,
+    value: "vé vào cổng",
     label: 'Vé vào cổng'
   },
   {
-    value: 655,
+    value: "vé cầu",
     label: 'Vé cầu'
   },
   {
-    value: 656,
+    value: "vé lượt",
     label: 'Vé lượt'
   }
 ]
