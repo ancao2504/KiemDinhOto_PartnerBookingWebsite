@@ -690,9 +690,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
 
     if (form.getFieldValue('stationsId')) {
       getStationServices(form.getFieldValue('stationsId')).then((services) => {
-        const allowedValues = E_TICKET_SALE_OPTIONS.map((option) => option.value)
-        const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option.label)
-        const filteredServices = services.filter((service) => allowedValues.includes(service.value) || allowedLabels.includes(service.label))
+        const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
+        const filteredServices = services.filter((service) => allowedLabels.includes(service?.label?.toLowerCase()))
         setETicketOptions(filteredServices)
       })
     }
@@ -783,9 +782,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       getStationByApiKey(dataBookingParam?.apikey || localStorage.getItem('apiKey')).then((station) => {
         if (station) {
           getStationServices(station?.stationsId).then((services) => {
-            const allowedValues = E_TICKET_SALE_OPTIONS.map((option) => option.value)
-            const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option.label)
-            const filteredServices = services.filter((service) => allowedValues.includes(service.value) || allowedLabels.includes(service.label))
+            const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
+            const filteredServices = services.filter((service) => allowedLabels.includes(service?.label?.toLowerCase()))
             setETicketOptions(filteredServices)
           })
         }
