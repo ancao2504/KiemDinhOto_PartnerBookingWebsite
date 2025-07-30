@@ -701,17 +701,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }, [form.getFieldValue('stationsId')]) // Dependency array theo stationsId
 
   useEffect(() => {
-    if (form.getFieldValue('scheduleType') === SCHEDULE_TYPE_MINIAPP.E_TICKET_SALE) {
-      if (ETicketOptions.length > 0) {
-        setShowServiceType(true)
-        form.setFieldValue('serviceId', ETicketOptions[0]?.value)
-      }
-    } else {
-      setShowServiceType(false)
-    }
-  }, [form.getFieldValue('scheduleType')])
-
-  useEffect(() => {
     if ((workdayFilter.vehicleType && workdayFilter.stationsId) || (workdayFilter.stationsId && form.getFieldValue('vehicleSubType'))) {
       getBookingDate()
     }
@@ -778,18 +767,31 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }, [form.getFieldValue('scheduleType'), scheduleTypes])
 
   useEffect(() => {
-    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
-      getStationByApiKey(dataBookingParam?.apikey || localStorage.getItem('apiKey')).then((station) => {
-        if (station) {
-          getStationServices(station?.stationsId).then((services) => {
-            const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
-            const filteredServices = services.filter((service) => allowedLabels.includes(service?.label?.toLowerCase()))
-            setETicketOptions(filteredServices)
-          })
-        }
-      })
+    console.log('form.getFieldValue ', form.getFieldValue('scheduleType'))
+    if (form.getFieldValue('scheduleType') === SCHEDULE_TYPE_MINIAPP.E_TICKET_SALE) {
+      if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
+        getStationByApiKey(dataBookingParam?.apikey || localStorage.getItem('apiKey')).then((station) => {
+          if (station) {
+            getStationServices(station?.stationsId).then((services) => {
+              const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
+              const filteredServices = services.filter((service) => allowedLabels.includes(service?.label?.toLowerCase()))
+              if (filteredServices.length > 0) {
+                setShowServiceType(true)
+                form.setFieldValue('serviceId', filteredServices[0]?.value)
+                setETicketOptions(filteredServices)
+              } else {
+                form.setFieldValue('serviceId', undefined)
+                setShowServiceType(false)
+              }
+            })
+          }
+        })
+      }
+    } else {
+      setShowServiceType(false)
+      form.setFieldValue('serviceId', undefined)
     }
-  }, [scheduleCategory])
+  }, [form.getFieldValue('scheduleType')])
 
   return (
     <div className="position-relative">
