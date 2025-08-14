@@ -44,6 +44,7 @@ export function getQueryParams(options = {}) {
     }
     return result
   }
+  return {}
 }
 function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const customStyles = {
