@@ -343,7 +343,7 @@ function UpdateBookingDetail({}) {
           callback(stationList)
         } else {
           setListStation(stationList)
-          setStationSelected(stationList[0])
+          // setStationSelected(stationList[0])
           form.setFieldValue('stationsId', stationList[0]?.stationsId)
         }
       })
@@ -549,12 +549,11 @@ function UpdateBookingDetail({}) {
         vehicleSubType: dataBookingParam.vehicleSubType || VEHICLE_SUB_TYPE[0]?.value,
         scheduleType: dataBookingParam.scheduleType || optionServiceType[0]?.value,
         licensePlateColor: dataBookingParam.licensePlateColor || licensePlateColorList[0]?.value,
-        vntId: dataBookingParam.vntId || listStationArea[0]?.value,
         vehicleSubCategory: dataBookingParam.vehicleSubCategory || vehicleSubCategoryOptions[0]?.value,
         certificateSeries: dataBookingParam.certificateSeries || undefined,
         licensePlates: dataBookingParam.licensePlates || undefined,
         vntId: dataBookingParam.stationArea || undefined,
-        stationsId: dataBookingParam.stationsId || undefined
+        stationsId: stationSelected?.stationsId || dataBookingParam.stationsId || undefined
       })
     }
   }, [workdaySelectedDate, stationSelected])
@@ -798,7 +797,7 @@ function UpdateBookingDetail({}) {
                 onChange={(values) => {
                   setDataBookingParam({
                     ...dataBookingParam,
-                    vntId: values
+                    stationArea: values
                   })
                   handleFillStationDateTime()
                 }}
