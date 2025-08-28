@@ -132,6 +132,42 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       })
   }
 
+  const GtelBookingConsultantSchedule = (values) => {
+    setIsLoading(true)
+    BookingService.createOrderSchedule(values)
+      .then((result) => {
+        const { error: rsMess, statusCode, data } = result
+        if (statusCode !== 200) {
+          setIsModalErrOpen(true)
+          setErrorMessage(SCHEDULE_ERROR[rsMess] || SCHEDULE_ERROR.INVALID_REQUEST)
+          return
+        }
+        const { customerScheduleId, paymentUrl } = data
+        // Gọi API thanh toán nếu ở môi trường GTEL
+        if (MINIAPP_GTELPAY) {
+          BookingService.createPayment({
+            customerScheduleId,
+            paymentMethodType: PAYMENT_TYPE.GTEL_PAY
+          }).then((result) => {
+            const orderId = result?.data?.inAppGtelOrderId
+            if (result?.isSuccess && orderId) {
+              Gtel.GtelPayJSBridge?.payOrder({ order_id: orderId })
+            }
+          })
+        }
+        setScheduleTypePopUp(values.scheduleType)
+        if (paymentUrl?.length > 0) {
+          setTimeout(() => {
+            window.open(paymentUrl, '_blank')
+          }, 500)
+        }
+        form.resetFields(['name', 'licensePlates', 'certificateSeries', 'time'])
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
   const bookingConsultantSchedule = (values) => {
     setIsLoading(true)
     BookingService.createConsultantSchedule(values)
@@ -161,6 +197,37 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           setTimeout(() => {
             window.open(paymentUrl, '_blank')
           }, 500)
+        }
+        form.resetFields(['name', 'licensePlates', 'certificateSeries', 'time'])
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  const GtelCreateBookingSchedule = (values) => {
+    setIsLoading(true)
+    BookingService.createOrderSchedule(values)
+      .then((result) => {
+        const { error: rsMess, statusCode, data } = result
+
+        if (statusCode !== 200) {
+          setIsModalErrOpen(true)
+          setErrorMessage(SCHEDULE_ERROR[rsMess] || SCHEDULE_ERROR.INVALID_REQUEST)
+          return
+        }
+        const scheduleId = data?.[0]
+        if (MINIAPP_GTELPAY && scheduleId) {
+          BookingService.createPayment({
+            customerScheduleId: scheduleId,
+            stationServicesList: values['stationServicesList'],
+            paymentMethodType: PAYMENT_TYPE.GTEL_PAY
+          }).then((result) => {
+            const orderId = result?.data?.inAppGtelOrderId
+            if (orderId) {
+              Gtel.GtelPayJSBridge?.payOrder({ order_id: orderId })
+            }
+          })
         }
         form.resetFields(['name', 'licensePlates', 'certificateSeries', 'time'])
       })
@@ -220,11 +287,19 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     if (values.serviceId) {
       data.stationServicesList = [values.serviceId]
     }
-    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
+    // dùng cho miniApp
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT && !MINIAPP_GTELPAY) {
       bookingConsultantSchedule(data)
     }
-    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE) {
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE && !MINIAPP_GTELPAY) {
       createBookingSchedule(data)
+    }
+    // dùng cho GTEL
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT && MINIAPP_GTELPAY) {
+      GtelBookingConsultantSchedule(data)
+    }
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE && MINIAPP_GTELPAY) {
+      GtelCreateBookingSchedule(data)
     }
     getBookingDate()
   }
