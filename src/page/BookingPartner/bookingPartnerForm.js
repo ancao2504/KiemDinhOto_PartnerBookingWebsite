@@ -44,6 +44,7 @@ export function getQueryParams(options = {}) {
     }
     return result
   }
+  return {}
 }
 function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   const customStyles = {
@@ -131,6 +132,43 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
       })
   }
 
+  const GtelBookingConsultantSchedule = (values) => {
+    setIsLoading(true)
+    BookingService.createOrderSchedule(values)
+      .then((result) => {
+        const { error: rsMess, statusCode, data } = result
+        if (statusCode !== 200) {
+          setIsModalErrOpen(true)
+          setErrorMessage(SCHEDULE_ERROR[rsMess] || SCHEDULE_ERROR.INVALID_REQUEST)
+          return
+        }
+        const { paymentUrl } = data
+        const customerScheduleId = data?.[0]
+        // Gọi API thanh toán nếu ở môi trường GTEL
+        if (MINIAPP_GTELPAY) {
+          BookingService.createPayment({
+            customerScheduleId,
+            paymentMethodType: PAYMENT_TYPE.GTEL_PAY
+          }).then((result) => {
+            const orderId = result?.data?.inAppGtelOrderId
+            if (result?.isSuccess && orderId) {
+              Gtel.GtelPayJSBridge?.payOrder({ order_id: orderId })
+            }
+          })
+        }
+        setScheduleTypePopUp(values.scheduleType)
+        if (paymentUrl?.length > 0) {
+          setTimeout(() => {
+            window.open(paymentUrl, '_blank')
+          }, 500)
+        }
+        form.resetFields(['name', 'licensePlates', 'certificateSeries', 'time'])
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
   const bookingConsultantSchedule = (values) => {
     setIsLoading(true)
     BookingService.createConsultantSchedule(values)
@@ -160,6 +198,37 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           setTimeout(() => {
             window.open(paymentUrl, '_blank')
           }, 500)
+        }
+        form.resetFields(['name', 'licensePlates', 'certificateSeries', 'time'])
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  const GtelCreateBookingSchedule = (values) => {
+    setIsLoading(true)
+    BookingService.createOrderSchedule(values)
+      .then((result) => {
+        const { error: rsMess, statusCode, data } = result
+
+        if (statusCode !== 200) {
+          setIsModalErrOpen(true)
+          setErrorMessage(SCHEDULE_ERROR[rsMess] || SCHEDULE_ERROR.INVALID_REQUEST)
+          return
+        }
+        const scheduleId = data?.[0]
+        if (MINIAPP_GTELPAY && scheduleId) {
+          BookingService.createPayment({
+            customerScheduleId: scheduleId,
+            stationServicesList: values['stationServicesList'],
+            paymentMethodType: PAYMENT_TYPE.GTEL_PAY
+          }).then((result) => {
+            const orderId = result?.data?.inAppGtelOrderId
+            if (orderId) {
+              Gtel.GtelPayJSBridge?.payOrder({ order_id: orderId })
+            }
+          })
         }
         form.resetFields(['name', 'licensePlates', 'certificateSeries', 'time'])
       })
@@ -219,11 +288,19 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
     if (values.serviceId) {
       data.stationServicesList = [values.serviceId]
     }
-    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
+    // dùng cho miniApp
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT && !MINIAPP_GTELPAY) {
       bookingConsultantSchedule(data)
     }
-    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE) {
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE && !MINIAPP_GTELPAY) {
       createBookingSchedule(data)
+    }
+    // dùng cho GTEL
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT && MINIAPP_GTELPAY) {
+      GtelBookingConsultantSchedule(data)
+    }
+    if (scheduleCategory === SCHEDULE_BOOKING_TYPE.SCHEDULE && MINIAPP_GTELPAY) {
+      GtelCreateBookingSchedule(data)
     }
     getBookingDate()
   }
@@ -452,7 +529,9 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
           const selectedStation = priorityStation || activeStations[0]
           setStationSelected(selectedStation?.stationsId)
           setWorkdaySelectedDate(undefined)
-          if (dataBookingParam?.stationsId) {
+
+          const hasStationIdByConfig = stationList?.find((item) => item?.stationsId === dataBookingParam?.stationsId)
+          if (dataBookingParam?.stationsId && hasStationIdByConfig) {
             setStationSelected(dataBookingParam?.stationsId)
             form.setFieldValue('stationsId', dataBookingParam?.stationsId)
           } else {
@@ -489,18 +568,20 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }
 
   function getStationAreas() {
-    BookingService.getStationAreaList()
+    return BookingService.getStationAreaList()
       .then((data) => {
         if (data?.statusCode === 505) {
-          return
+          return null
         }
-        setListStationArea(data?.data)
+        // Lưu vào localStorage
+        localStorage.setItem('stationAreas', JSON.stringify(data?.data))
+        return data?.data
       })
       .catch((error) => {
         setErrorMessage('Lấy thông tin khu vực thất bại.')
         setIsModalErrOpen(true)
+        return null
       })
-      .finally(() => {})
   }
 
   async function getStationServices(stationsId) {
@@ -622,40 +703,41 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
 
   // ------------USE EFFECT------------------
   useEffect(() => {
-    getMetaData()
-    setTimeout(() => {
-      getStationAreas()
-    }, 1500)
-    const paramsFromUrl = getQueryParams()
-    handleCategory(paramsFromUrl?.vehicleSubType || VEHICLE_SUB_TYPE[0]?.value)
-    let isValid = null
+    const init = async () => {
+      await getMetaData()
 
-    if (MINIAPP_GTELPAY) {
-      isValid = CheckSum()
-    } else {
-      isValid = paramsFromUrl ? true : false
+      // Check localStorage trước
+      const cached = localStorage.getItem('stationAreas')
+      if (cached) {
+        setListStationArea(JSON.parse(cached))
+      } else {
+        const areas = await getStationAreas()
+        if (areas) {
+          setListStationArea(areas)
+        }
+      }
+
+      const paramsFromUrl = getQueryParams()
+      handleCategory(paramsFromUrl?.vehicleSubType || VEHICLE_SUB_TYPE[0]?.value)
+      let isValid = MINIAPP_GTELPAY ? CheckSum() : !!paramsFromUrl
+      if (isValid === false) return
+
+      Object.keys(paramsFromUrl).forEach((key) => {
+        let value = paramsFromUrl[key]
+        if (key !== 'phone') value = stringToRealValue(value)
+        if (key === 'phone' && (value === 'null' || value === 'undefined' || value === 'NaN')) {
+          value = null
+        }
+        paramsFromUrl[key] = value
+        // fillFormValue(key, value)
+      })
+
+      getStationConfigByApiKey(paramsFromUrl)
+      firstScheduleTypeHandler()
+      setLicensePlateColorList(PLATE_COLOR)
     }
-    if (isValid === false) return
-    Object.keys(paramsFromUrl).map((key) => {
-      let value = paramsFromUrl[key]
-      if (key !== 'phone') {
-        value = stringToRealValue(paramsFromUrl[key])
-      }
-      if (key === 'phone' && (value === 'null' || value === 'undefined' || value === 'NaN')) {
-        value = null
-      }
-      paramsFromUrl[key] = value
-      fillFormValue(key, value)
-    })
-    // if (determineDataSource()) {
-    getStationConfigByApiKey(paramsFromUrl)
-    // } else {
-    //   setDataBookingParam(paramsFromUrl)
-    // }
 
-    // xử lí state của scheduleTypes
-    firstScheduleTypeHandler()
-    setLicensePlateColorList(PLATE_COLOR)
+    init()
   }, [])
 
   useEffect(() => {
@@ -736,7 +818,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
         vntId: dataBookingParam.vntId || listStationArea[0]?.value,
         vehicleSubCategory: dataBookingParam.vehicleSubCategory || vehicleSubCategoryOptions[0]?.value,
         certificateSeries: dataBookingParam.certificateSeries || undefined,
-        licensePlates: dataBookingParam.licensePlates || undefined
+        licensePlates: dataBookingParam.licensePlates || undefined,
+        stationsId: dataBookingParam.stationsId || undefined
       })
     }
   }, [dataBookingParam])
@@ -767,7 +850,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }, [form.getFieldValue('scheduleType'), scheduleTypes])
 
   useEffect(() => {
-    console.log('form.getFieldValue ', form.getFieldValue('scheduleType'))
     if (form.getFieldValue('scheduleType') === SCHEDULE_TYPE_MINIAPP.E_TICKET_SALE) {
       if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
         getStationByApiKey(dataBookingParam?.apikey || localStorage.getItem('apiKey')).then((station) => {

@@ -6,7 +6,6 @@ import _ from 'lodash'
 import { changeTime } from '../../helper/changeTime'
 import { useHistory } from 'react-router-dom'
 import moment from 'moment'
-import { QRCodeCanvas } from 'qrcode.react'
 import BookingService from '../../services/addBookingService'
 import PopupMessage from '../BookingPartner/PopupMessage'
 import { useParams } from 'react-router-dom/cjs/react-router-dom'
@@ -32,6 +31,7 @@ const BookingDetail = ({
   const urlParams = new URLSearchParams(window.location.search);
   const scheduleHash = localStorage.getItem('schedulehash') || urlParams.get('schedulehash');
   const apikey = localStorage.getItem('apiKey') || urlParams.get('apikey');
+  localStorage.setItem('apiKey', apikey);
   let wab = []
   const [scheduleInformation, setScheduleInformation] = useState([])
   const [isModal, setIsModal] = useState(false)
