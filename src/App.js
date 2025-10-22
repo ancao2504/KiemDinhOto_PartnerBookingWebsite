@@ -22,7 +22,6 @@ import { GlobalProvider } from './context/GlobalContext';
 import { fillterRoutes } from './router';
 import { setMetaData } from "./actions";
 import { useDispatch } from 'react-redux'
-import BookingService from './services/addBookingService';
 import SystemConfigurationsService from './services/SystemConfigurationsService';
 import { getQueryParams } from './page/BookingPartner/bookingPartnerForm';
 import addKeyLocalStorage from './helper/localStorage';
@@ -35,7 +34,6 @@ function App() {
     localStorage.setItem('apiKey', apiKey)
   }
 
-  const dispatch = useDispatch()
   const themeApp = process.env.REACT_APP_THEME_NAME
   const setThemeApp = () => {
     document.querySelector('body').setAttribute('data-theme', themeApp)
@@ -43,13 +41,6 @@ function App() {
   useEffect(() => {
     setThemeApp()
   }, [])
-  function fetchListMetaData() {
-    BookingService.getMetaData({}).then(result => {
-      const { statusCode,data } = result
-      if(statusCode == 200)
-      dispatch(setMetaData(data))
-    })
-  }
   
   const handleCheckApiKey = ()=>{
     const API_KEY = process.env.REACT_APP_BOOKING_API_KEY
@@ -88,7 +79,6 @@ function App() {
     }
 
   useLayoutEffect(() => {
-    fetchListMetaData()
     handleCheckApiKey()
     getStationConfigByApiKeyAndSetTheme()
     const loadingScreen = document.querySelector('.splash-screen-loading');

@@ -1,5 +1,7 @@
 import Request from './request'
 import addKeyLocalStorage from './../helper/localStorage'
+import store from '../store'
+import { setMetaData } from '../actions/common'
 
 export default class BookingService {
   static async AddBooking({ time, dateSchedule, email, fullnameSchedule, phone, licensePlates, notificationMethod }) {
@@ -169,9 +171,9 @@ export default class BookingService {
         data: {
           skip: 0,
           limit: 10,
-          order:{
-              key: 'ordinalNumber',
-              value:"asc"
+          order: {
+            key: 'ordinalNumber',
+            value: 'asc'
           }
         }
       }).then((result = {}) => {
@@ -192,7 +194,7 @@ export default class BookingService {
         data: {
           skip: skip || 0,
           limit: 10,
-          stationsUrl: window.origin.split('://')[1],
+          stationsUrl: window.origin.split('://')[1]
         }
       }).then((result = {}) => {
         const { statusCode, data } = result
@@ -204,7 +206,8 @@ export default class BookingService {
       })
     })
   }
-  static async getPartnerPromotionNews(data={}) { // mặc định {} để có payload
+  static async getPartnerPromotionNews(data = {}) {
+    // mặc định {} để có payload
     return new Promise((resolve) => {
       Request.send({
         method: 'POST',
@@ -220,7 +223,8 @@ export default class BookingService {
       })
     })
   }
-  static async getPromotionNews(data={}) { // mặc định {} để có payload
+  static async getPromotionNews(data = {}) {
+    // mặc định {} để có payload
     return new Promise((resolve) => {
       Request.send({
         method: 'POST',
@@ -238,13 +242,13 @@ export default class BookingService {
   }
   static async getZaloUserPhoneNumber(headers) {
     return new Promise((resolve) => {
-      console.log("BookingService ~ returnnewPromise ~ headers:", headers)
+      console.log('BookingService ~ returnnewPromise ~ headers:', headers)
       Request.sendZaloMiniApp({
         method: 'GET',
         headers: headers
       }).then((result = {}) => {
         const { statusCode, data } = result
-        console.log("BookingService ~ returnnewPromise ~ result:", result)
+        console.log('BookingService ~ returnnewPromise ~ result:', result)
         if (statusCode === 200) {
           return resolve(result)
         } else {
@@ -341,9 +345,9 @@ export default class BookingService {
         data: {
           skip: 0,
           limit: limit || 10,
-          order:{
-              key: 'ordinalNumber',
-              value:"asc"
+          order: {
+            key: 'ordinalNumber',
+            value: 'asc'
           }
         }
       }).then((result = {}) => {
@@ -364,9 +368,9 @@ export default class BookingService {
         data: data || {
           skip: 0,
           limit: 10,
-          order:{
-              key: 'ordinalNumber',
-              value:"asc"
+          order: {
+            key: 'ordinalNumber',
+            value: 'asc'
           }
         }
       }).then((result = {}) => {
@@ -520,7 +524,7 @@ export default class BookingService {
     })
   }
 
-  static async getBookingHistoryImport(data = {} , cancelEvent) {
+  static async getBookingHistoryImport(data = {}, cancelEvent) {
     return new Promise((resolve) => {
       Request.sendImportExport({
         method: 'POST',
@@ -613,7 +617,7 @@ export default class BookingService {
   }
 
   static async createOrderSchedule(data = {}) {
-        return new Promise((resolve) => {
+    return new Promise((resolve) => {
       Request.send({
         method: 'POST',
         path: '/PartnerAPI/Order/user/createOrderSchedule',
@@ -627,5 +631,44 @@ export default class BookingService {
         }
       })
     })
+  }
+}
+
+export async function fetchMetadataWithCache() {
+  const cacheKey = addKeyLocalStorage('api_cache_meta_data')
+  const CACHE_TTL = 7 * 24 * 60 * 60 * 1000
+
+  try {
+    // 🔹 Dùng cache nếu còn hạn
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      const isExpired = Date.now() - parsed.timestamp > CACHE_TTL
+      if (!isExpired && parsed.data) {
+        return parsed.data
+      }
+    }
+
+    // 🔹 Gọi API
+    const data = await BookingService.getMetaData()
+    if (data) {
+      // Lưu cache
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          data,
+          timestamp: Date.now()
+        })
+      )
+
+      // Lưu redux
+      store.dispatch(setMetaData(data))
+      return data
+    }
+
+    throw new Error(`Empty data for key meta data`)
+  } catch (err) {
+    console.error(`❌ fetchWithCache(meta data) error:`, err)
+    throw err
   }
 }

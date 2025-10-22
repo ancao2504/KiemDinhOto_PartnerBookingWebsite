@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react'
 import * as sc from './../HomeLayout.styled'
 import './../index.scss'
 import { useEffect } from 'react'
-import NewService from './../../../services/addBookingService'
+import NewService, { fetchMetadataWithCache } from './../../../services/addBookingService'
 import HomePartner from './../HomePartner'
 import L2FunctionButtonList from './L2FunctionButtonList'
 import L2HotNew from './L2HotNew'
@@ -92,7 +92,7 @@ const HomeLayout2 = (props) => {
     return result
   }
   const getMetaData = async () => {
-    await BookingService.getMetaData({}).then((result) => {
+    await fetchMetadataWithCache().then((result) => {
       const { statusCode,data } = result
       if(statusCode==200){
         const { LAST_UPDATE_DATA } = data
