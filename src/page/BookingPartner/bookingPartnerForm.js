@@ -23,7 +23,7 @@ import {
   VIHCLE_CATEGORY_TRUCK,
   VIHCLE_TYPES
 } from '../../constants/global'
-import BookingService from '../../services/addBookingService'
+import BookingService, { fetchMetadataWithCache } from '../../services/addBookingService'
 import { DATE_DISPLAY_FORMAT } from '../../constants/dateFormats'
 
 import BookingDatePicker from '../../components/BookingDatePicker'
@@ -314,7 +314,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone }) {
   }
 
   const getMetaData = () => {
-    BookingService.getMetaData({})
+    fetchMetadataWithCache()
       .then((result) => {
         const { statusCode, data } = result
         if (statusCode === 200 && data?.SCHEDULE_TYPE) {

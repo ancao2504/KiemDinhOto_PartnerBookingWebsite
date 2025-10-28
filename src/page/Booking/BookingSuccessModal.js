@@ -8,30 +8,10 @@ import { useLocation } from 'react-router-dom'
 import { CheckApiKey } from '../../helper/CheckApiKey'
 
 const BookingSuccess = ({ isModalOpen, onClose, history, scheduleId,setStep,setIsModalOpen }) => {
-  const [isStationEnablePayment, setIsStationEnablePayment] = useState(false)
-  let apikey = CheckApiKey()
   const handleClose = () => {
     setIsModalOpen(false)
     window.location.reload()
   }
-  useEffect(() => {
-    if (isModalOpen && process.env.REACT_APP_ENABLE_PAYMENT * 1 === 1) {
-      const stationsId = sessionStorage.getItem(STATION_SESSION_KEY)
-      BookingService.getDetailStation({
-        id: Number(stationsId)
-      }).then((res) => {
-        if (
-          res && res.enablePaymentGateway
-          && res.stationPayments.length > 0
-        ) {
-          !isStationEnablePayment && setIsStationEnablePayment(true)
-        } else {
-          isStationEnablePayment && setIsStationEnablePayment(false)
-        }
-      })
-    }
-  }, [isModalOpen])
-
 
   return (
     <>
