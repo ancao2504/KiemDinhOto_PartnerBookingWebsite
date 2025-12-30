@@ -12,6 +12,9 @@ import { useGlobalContext } from '../../context/GlobalContext'
 import { SCHEDULE_TYPE, WEBVIEW_TYPES } from '../../constants/global'
 import MainLogo from '../../components/MainLogo'
 import addKeyLocalStorage from '../../helper/localStorage'
+import Header from '../../components/Header'
+import { PARAM_HEADER_TITLE, PARAM_IS_MINI_APP, PARAM_IS_WEB_VIEW } from '../../constants/params'
+import { smartParseParam } from '../../helper/params'
 function BookingPartner() {
   const { globalState, handleGetUserPhone, handleGetUserName, setGlobalState } = useGlobalContext();
   const { gtelpayUser } = useGtelpayUserData()
@@ -23,7 +26,8 @@ function BookingPartner() {
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
   let partner = params.get('partner')?.toLowerCase()
-  const isWebView = params.get('isWebView')
+  const isWebView = smartParseParam(params.get(PARAM_IS_WEB_VIEW))
+  const isMiniApp = smartParseParam(params.get(PARAM_IS_MINI_APP))
   let apikey = CheckApiKey()
   const localLogo = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})?.stationsLogo
 
@@ -64,13 +68,14 @@ function BookingPartner() {
     <>
       {apikey ?
         (
-          <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 480, margin: 'auto', padding: '10px' }}>
+          <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 600, margin: 'auto', padding: '16px' }}>
             {isVisible ? (
               <div className="loading">
                 <Spin style={{ width: '100%' }} />
               </div>
             ) : (
               <>
+                {(isMiniApp) && <Header/>} 
                 <div
                   className={`
                 partner-container 
@@ -84,7 +89,7 @@ function BookingPartner() {
                       <Tabs activeKey={tabKey}>
                         <Tabs.TabPane tab="Đặt lịch" key="booking"> */}
                   {
-                    Number(isWebView) !== WEBVIEW_TYPES.WEBVIEW ? <div className='booking-title title-normal'>{getTitleName(searchparam)}</div> : null
+                    (Number(isWebView) === WEBVIEW_TYPES.WEBVIEW || isMiniApp) ? null : <div className='booking-title title-normal mb-4'>{getTitleName(searchparam)}</div>
                   }
                   <div className='mt-4'>
                     <BookingPartnerForm gtelpayUser={gtelpayUser} zaloUserPhone={globalState.phoneNumber} zaloUserName={globalState.userName} setTabKey={setTabKey} form={form} />
@@ -112,7 +117,7 @@ function BookingPartner() {
                   </div>
                   {
                     !localLogo &&
-                    <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by TTDK</div>
+                    <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by {process.env.REACT_APP_THEME_NAME}</div>
                   }
                 </div>
               </>
@@ -133,7 +138,7 @@ function BookingPartner() {
                   }
                 })}
               </div>
-              <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by TTDK</div>
+              <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by {process.env.REACT_APP_THEME_NAME}</div>
             </div>
           </>
         )

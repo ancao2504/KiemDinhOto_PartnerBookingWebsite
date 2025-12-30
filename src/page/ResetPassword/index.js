@@ -5,6 +5,7 @@ import "./index.scss"
 import { resetPassword } from '../../services/ttdkService'
 import { notification } from "antd";
 import MainLogo from '../../components/MainLogo'
+import { useHistory } from 'react-router-dom'
 
 const statePage = {
     Default: "default",
@@ -78,6 +79,7 @@ const ContentPage = (props) => {
 }
 
 export default function ResetPassword() {
+     const history = useHistory()
     const [currentStatePage, setCurrentStatePage] = useState(statePage.Default);
     const handleConfirm = async () => {
         try {
@@ -106,16 +108,17 @@ export default function ResetPassword() {
                 message: "Có lỗi phát sinh. Vui lòng thử lại"
             })
             setCurrentStatePage(statePage.Error)
+            history.push('/')
         }
     }
     return (
-        <div style={{ maxWidth: 480, margin: 'auto', padding: '10px' }}>
+        <div style={{ maxWidth: 600, margin: 'auto', padding: '16px' }}>
             <ContentPage page={currentStatePage} handleConfirm={handleConfirm} />
             <div style={{ maxWidth: 600, margin: 'auto', padding: '30px 0', textAlign: 'center' }}>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
                 <MainLogo height={60} width={60}></MainLogo>
                 </div>
-                <div className='text-blue mt-3'>Powered by TTDK</div>
+                <div className='text-blue mt-3'>Powered by {process.env.REACT_APP_THEME_NAME}</div>
             </div>
         </div>
     )

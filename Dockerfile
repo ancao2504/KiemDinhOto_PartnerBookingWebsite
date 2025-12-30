@@ -16,7 +16,7 @@ COPY . /usr/src/app
 #replace "public" folder based on Theme name from REACT_APP_THEME_NAME system environment
 ARG REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
 ENV REACT_APP_THEME_NAME=${REACT_APP_THEME_NAME}
-# COPY ./public/${REACT_APP_THEME_NAME}/* /usr/src/app/public/
+COPY ./public/${REACT_APP_THEME_NAME}/* /usr/src/app/public/
 
 #replace new build version
 RUN sed -i "s/REACT_APP_BUILD_VERSION=/REACT_APP_BUILD_VERSION=$(date +%Y%m%d%H%M)/g" .env
@@ -37,8 +37,17 @@ ENV REACT_APP_KEY_PAYLOAD=${REACT_APP_KEY_PAYLOAD}
 ARG REACT_APP_ENCRYPT_SECRET_KEY=${REACT_APP_ENCRYPT_SECRET_KEY}
 ENV REACT_APP_ENCRYPT_SECRET_KEY=${REACT_APP_ENCRYPT_SECRET_KEY}
 
+ARG REACT_APP_DEPLOY_URL=${REACT_APP_DEPLOY_URL}
+ENV REACT_APP_DEPLOY_URL=${REACT_APP_DEPLOY_URL}
+
 ARG REACT_APP_BOOKING_API_KEY=${REACT_APP_BOOKING_API_KEY}
 ENV REACT_APP_BOOKING_API_KEY=${REACT_APP_BOOKING_API_KEY}
+
+ARG REACT_APP_PHATNGUOI_WEB_URL=${REACT_APP_PHATNGUOI_WEB_URL}
+ENV REACT_APP_PHATNGUOI_WEB_URL=${REACT_APP_PHATNGUOI_WEB_URL}
+
+ARG REACT_APP_INSURANCE_WEB_URL=${REACT_APP_INSURANCE_WEB_URL}
+ENV REACT_APP_INSURANCE_WEB_URL=${REACT_APP_INSURANCE_WEB_URL}
 
 #run command to build and notify
 RUN npm run autobuild
@@ -60,8 +69,13 @@ COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 COPY --from=builder /usr/src/app/ops/config/nginx.template.conf /etc/nginx/nginx.conf
 COPY --from=builder /usr/src/app/ops/config/default.template.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /usr/src/app/start-container.sh /etc/nginx/start-container.sh
+COPY --from=builder /usr/src/app/entrypoint.sh /etc/nginx/entrypoint.sh
+
 RUN chmod +x /etc/nginx/start-container.sh
+RUN chmod +x /etc/nginx/entrypoint.sh
 RUN mkdir -p /usr/share/nginx/html/media
+
+ENTRYPOINT ["/etc/nginx/entrypoint.sh"]
 
 ## Serve the app
 CMD [ "/bin/sh", "-c", "/etc/nginx/start-container.sh" ]

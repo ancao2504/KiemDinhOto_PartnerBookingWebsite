@@ -118,6 +118,11 @@
   background-color: var(--background-banner-color);
   border-radius: 0 0 32px 32px;
 }
+.banner-Layout2-empty{
+  background-color: transparent !important;
+  height: 190px !important;
+  min-height: 190px !important;
+}
 .layout2-body{
   transform: translateY(-125px);
 }

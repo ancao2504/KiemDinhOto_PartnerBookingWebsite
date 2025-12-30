@@ -19,7 +19,7 @@ function BookingInsurancePartner() {
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
   let partner = params.get('partner')?.toLowerCase()
-  let apikey = CheckApiKey()
+  let apiKey = CheckApiKey()
 
   const handleGetUserInfor = async () => {
     try {
@@ -44,9 +44,9 @@ function BookingInsurancePartner() {
   }, [])
   return (
     <>
-      {apikey ?
+      {apiKey ?
         (
-          <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 480, margin: 'auto', padding: '10px' }}>
+          <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 600, margin: 'auto', padding: '16px' }}>
             {isVisible ? (
               <div className="loading">
                 <Spin style={{ width: '100%' }} />
@@ -75,7 +75,7 @@ function BookingInsurancePartner() {
                       }
                     })}
                   </div>
-                  <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by TTDK</div>
+                  <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by {process.env.REACT_APP_THEME_NAME}</div>
                 </div>
               </>
             )
@@ -95,7 +95,7 @@ function BookingInsurancePartner() {
                   }
                 })}
               </div>
-              <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by TTDK</div>
+              <div style={{ color: 'var(--primary-button-color)', marginTop: '0.5rem' }}>Powered by {process.env.REACT_APP_THEME_NAME}</div>
             </div>
           </>
         )

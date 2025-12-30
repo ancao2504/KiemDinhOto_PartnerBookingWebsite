@@ -1,0 +1,73 @@
+@import '../../assets/scss/_variable.scss';
+
+.Header {
+  position: relative;
+
+  .Header_fixed {
+    z-index: 99;
+    position: fixed;
+    max-width: 600px;
+    width: 100%;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateZ(0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--primary-button-color);
+    height: 80px;
+    padding: 0px 15px;
+    font-size: $text-normal-fs;
+    padding-top: 42px; // ẩn app cho ko bị che camera ở phía trên
+
+    svg {
+      height: 16px;
+      width: 16px;
+      path {
+        fill: white;
+      }
+    }
+    span {
+      color: white;
+    }
+    .no_icon {
+      height: 16px;
+      width: 16px;
+    }
+  }
+  .Header_padding {
+    position: relative;
+    height: 80px;
+    flex-shrink: 0;
+    display: block;
+    min-height: 80px;
+    content: '';
+  }
+}
+
+@media screen and (min-width: 600px) {
+  .Header {
+    .Header_fixed {
+      height: 80px;
+      padding: 42px 15px 0;
+      background: var(--background-color);
+      font-size: $text-large-fs;
+      span {
+        color: var(--title-color) !important;
+      }
+      svg {
+        path {
+          fill: var(--title-color) !important;
+        }
+      }
+    }
+    .Header_padding {
+      position: relative;
+      height: 80px;
+      flex-shrink: 0;
+      display: block;
+      min-height: 80px;
+      content: '';
+    }
+  }
+}

@@ -14,6 +14,7 @@ const BookingDetail = React.lazy(() => import('./page/BookingDetail/index'))
 const PartnerGuide = React.lazy(() => import('./page/Guide/partnerGuide'))
 const PersonalGuide = React.lazy(() => import('./page/Guide/personalGuide'))
 const UpdateBookingDetail = React.lazy(() => import('./page/BookingDetail/UpdateBookingDetail'))
+const IframeView = React.lazy(() => import('./page/IframeView'))
 
 const BookingType=process.env.REACT_APP_BHTNDS
 
@@ -73,8 +74,13 @@ export const ROUTERS = {
         isZaloApp: 1,
     },
     // page on web
-    checkVihcle: {
+    homePageWeb: {
         path: PATH.HOME,
+        component: HomePage,
+        isZaloApp: 0,
+    },
+    checkVihcle: {
+        path: PATH.CHECK_VIHCLE,
         component:CheckVihcle,
         isZaloApp: 0,
     },
@@ -106,6 +112,16 @@ export const ROUTERS = {
     updateBookingOnWeb: {
         path: PATH.BOOKING_UPDATE,
         component: UpdateBookingDetail,
+        isZaloApp: 0,
+    },
+    iframeView: {
+        path: PATH.IFRAME_VIEW,
+        component: IframeView,
+        isZaloApp: 1,
+    },
+    iframeViewWeb: {
+        path: PATH.IFRAME_VIEW,
+        component: IframeView,
         isZaloApp: 0,
     },
     // bookingPartnerIframe: {

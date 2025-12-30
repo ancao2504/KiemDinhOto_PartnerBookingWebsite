@@ -1,108 +1,70 @@
 import { PageLayout } from './../../../components/PageLayout/PageLayout'
 import { SliderHome } from './../../../components/Slider/SliderHome'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as sc from './../HomeLayout.styled'
 import './../index.scss'
 import { useEffect } from 'react'
 import NewService, { fetchMetadataWithCache } from './../../../services/addBookingService'
-import HomePartner from './../HomePartner'
 import L2FunctionButtonList from './L2FunctionButtonList'
-import L2HotNew from './L2HotNew'
-import {BOOKING_LIST_BTN, BTN_LIST_SERVICE, CONVENIENCE_DRIVERS_BTN, GOVERNMENT_BTN, INSPECTION_SERVICES, HOT_SERVICES} from '../../../constants/Layout2Constants'
-import { useHistory, useLocation } from 'react-router-dom'
-import HomeNew from '../HomeNew'
-import SystemConfigurationsService from '../../../services/SystemConfigurationsService'
-import { Button, Sheet, Text, Box, Page } from "zmp-ui";
-import "zmp-ui/zaui.min.css";
+import { useLocation } from 'react-router-dom'
+import 'zmp-ui/zaui.min.css'
 import { getBannerBySectionCache } from '../../../helper/getBannerBySectionCache'
-import HomeRecruitment from '../HomeRecruitment'
-import PartnerPromotionNew from '../PartnerPromotionNew'
-import useWindowDimensions from '../../../hooks/window-dimensions'
-import BookingService from './../../../services/addBookingService'
-import { PATH } from '../../../constants/router'
-import { useGlobalContext } from '../../../context/GlobalContext'
-
+import PopupSheetIframe from '../../../components/Popup/PopupSheetIframe'
+import MainLogo from '../../../components/MainLogo'
+import { Spin } from 'antd'
+import { getHomePageConfigCache } from '../../../helper/getHomePageConfigCache'
 
 const HomeLayout2 = (props) => {
-  const { introduction } = props
-  const { handleZaloAuthorize,globalState } = useGlobalContext();
-  const history = useHistory();
   const location = useLocation()
-  const [hotNews, setHotNews] = useState([])
   const [userToken, setUserToken] = useState(location?.state?.token || localStorage.getItem('userToken') || '')
-  const [driverAmenities, setDriverAmenities] = useState(CONVENIENCE_DRIVERS_BTN)
-  const [governmentAgency, setGovernmentAgency] = useState(GOVERNMENT_BTN)
-  const [stationNewsPartnerPromotion, setStationNewsPartnerPromotion] = useState([])
-  const [stationNewsPromotion, setStationNewsPromotion] = useState([])
-  const [expertNews, setExpertNews] = useState([])
-  const [recruitmentList, setRecruitmentList] = useState([])
-  const [partnerUtilityNews, setPartnerUtilityNews] = useState([])
-  const [setting, setSetting] = useState([]);
-  const [firtLoadding, setFirtLoadding] = useState(true);
-  const [bottomBanner, setBottomBanner] = useState([]);
-  const { height, width } = useWindowDimensions()
-  const mobile= width < 580
-  const [paramsFilter, setParamsFilter] = useState({
-    filter: {
-      configCategory:1
-    },
-    skip: 0,
-    limit: 20
-  });
-  const [sheetVisible, setSheetVisible] = useState(false);
+  const [isLoadingAPI, setIsLoadingAPI] = useState(true)
+
+  const [sheetVisible, setSheetVisible] = useState(false)
   const [dataBtn, setDataBtn] = useState({
-    label: "Zalo",
-    link: "/"
-  });
-  const [isLoading , setIsLoading] = useState(false);
-  const [listNews , setListNews ] = useState([]) 
-  const [hideNewsFromZaloMiniApp , setHideNewsFromZaloMiniApp ] = useState(true) 
-  const [isZaloShowStationList, setIsZaloShowStationList] = useState(false)
+    label: 'Zalo',
+    link: '/'
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [hideNewsFromZaloMiniApp, setHideNewsFromZaloMiniApp] = useState(true)
   const LAST_UPDATE_NEWS = {}
-  const lastUpdateNews = JSON.parse(localStorage.getItem('LAST_UPDATE_NEWS'))
+  const storageTopBanner = localStorage.getItem('BANNER_2001')
+  const storageBottomBanner = localStorage.getItem('BANNER_2002')
+  const [topBanner, setTopBanner] = useState(storageTopBanner ? JSON.parse(storageTopBanner)?.data : [])
+  const [bottomBanner, setBottomBanner] = useState(storageBottomBanner ? JSON.parse(storageBottomBanner)?.data : [])
+  const storageHomePageConfigVehicleInspection = localStorage.getItem('HOME_PAGE_CONFIG_4')
+  const storageHomePageConfigViolation = localStorage.getItem('HOME_PAGE_CONFIG_5')
+  const [vehicleInspectionList, setVehicleInspectionList] = useState(storageHomePageConfigVehicleInspection ? (JSON.parse(storageHomePageConfigVehicleInspection))?.data : [])
+  const [violationList, setViolationList] = useState(storageHomePageConfigViolation ? (JSON.parse(storageHomePageConfigViolation))?.data : [])
 
   const pushCacheDataIntoObj = (typeOfNews, lastId, obj) => {
     const id = JSON.parse(localStorage.getItem(`LAST_${typeOfNews}_NEWS_ID`)) || undefined
-    const shouldFetch = id === undefined
-      ? false
-      : !id.includes(lastId);
+    const shouldFetch = id === undefined ? false : !id.includes(lastId)
 
     id?.push(lastId)
 
-    obj[`${typeOfNews}_NEWS`] = { 
+    obj[`${typeOfNews}_NEWS`] = {
       id: id?.filter((element, index) => id.indexOf(element) === index),
-      shouldFetch 
+      shouldFetch
     }
 
     localStorage.setItem(`LAST_UPDATE_NEWS`, JSON.stringify(obj))
 
     return obj
   }
-  const setLocalStorage = (typeOfNews, id, data) => {
-    localStorage.setItem(`LAST_${typeOfNews}_NEWS_ID`, JSON.stringify(id))
-    localStorage.setItem(`LAST_${typeOfNews}_NEWS_DATA`, JSON.stringify(data))
-  }
-  const pushStationNewsIdIntoArr = (dataArray) => {
-    const result = []
 
-    dataArray?.forEach((el) => {
-      result.push(el.stationNewsId)
-    })
-
-    return result
-  }
   const getMetaData = async () => {
     await fetchMetadataWithCache().then((result) => {
-      const { statusCode,data } = result
-      if(statusCode==200){
+      const { statusCode, data } = result
+      if (statusCode == 200) {
         const { LAST_UPDATE_DATA } = data
-        const { lastNews_1: generalNewsId, 
-                lastNews_2: highlightNewsId, 
-                lastNews_3: promotionNewsId,
-                lastNews_4: recruitmentNewsId,
-                lastNews_5: expertNewsId, 
-                lastNews_6: partnerPromotionNewsId, 
-                lastNews_7: partnerUtilityNewsId
+        const {
+          lastNews_1: generalNewsId,
+          lastNews_2: highlightNewsId,
+          lastNews_3: promotionNewsId,
+          lastNews_4: recruitmentNewsId,
+          lastNews_5: expertNewsId,
+          lastNews_6: partnerPromotionNewsId,
+          lastNews_7: partnerUtilityNewsId
         } = LAST_UPDATE_DATA
 
         setHideNewsFromZaloMiniApp(data?.HIDE_NEWS_FROM_ZALO_MINIAPP ? true : false)
@@ -114,254 +76,97 @@ const HomeLayout2 = (props) => {
         pushCacheDataIntoObj('EXPERT', expertNewsId, LAST_UPDATE_NEWS)
         pushCacheDataIntoObj('PARTNER_UTILITY', partnerUtilityNewsId, LAST_UPDATE_NEWS)
         pushCacheDataIntoObj('PARTNER_PROMOTION', partnerPromotionNewsId, LAST_UPDATE_NEWS)
-      }else{
+      } else {
         setHideNewsFromZaloMiniApp(false)
       }
     })
   }
-  const fetchData = () => {
-    setIsLoading(true);
-    const clearBannerUrls = (banners) => {
-      let arr=[]
-      for (let i = 1; i <= 5; i++) {
-        let data={
-          systemPromoBannersId:i,
-          bannerImageUrl:banners['bannerUrl'+[i]],
-          bannerUrl:banners['linkBanner'+[i]]
-        }
-        arr.push(data)
-      }
-      return arr;
-    };
-    NewService.getBannerStationsList({
-      filter: {
-          bannerSection:10,
-      },
-    }).then(res =>{
-      const {data}=res
-      if(data?.length > 0){
-        setSetting(data);
-        setIsLoading(false);
-        return
-      }else{
-        SystemConfigurationsService.getPublicSystemConfigurations({}).then((res) => {
-          setSetting(clearBannerUrls(res));
-          setIsLoading(false);
-        })
-      }
-      setIsLoading(false);
-    })
 
-  }
-  const getExpertNews = async () =>{
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['EXPERT_NEWS']?.shouldFetch
-
-    shouldFetch ? await NewService.userGetExpertNews(
-    {
-      "skip": 0,
-      "limit": 10,
-      "order": {
-        "key": "ordinalNumber",
-        "value": "asc"
-      }
-    }
-    ).then((result) => {
-      if (result) {
-        setExpertNews(result.data)
-        setLocalStorage('EXPERT', pushStationNewsIdIntoArr(result.data), result.data)
-      }
-    }) : setExpertNews(JSON.parse(localStorage.getItem('LAST_EXPERT_NEWS_DATA')))
-  }
-  const getRecruitmentListNew = async () =>{
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['RECRUITMENT_NEWS'].shouldFetch
-
-    shouldFetch ? await NewService.userGetRecruitmentNews({
-        "skip": 0,
-        "limit": 10,
-        "order": {
-          "key": "ordinalNumber",
-          "value": "asc"
-        }
-      }).then((result) => {
-      if (result) {
-        setRecruitmentList(result.data)
-        setLocalStorage('RECRUITMENT', pushStationNewsIdIntoArr(result.data), result.data)
-      }
-    }) : setRecruitmentList(JSON.parse(localStorage.getItem('LAST_RECRUITMENT_NEWS_DATA')))
-  }
-  const getStationNewsPartnerPromotion = async () =>{
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['PARTNER_PROMOTION_NEWS'].shouldFetch
-
-    shouldFetch ? await NewService.getPartnerPromotionNews({
-        "skip": 0,
-        "limit": 10,
-        "order": {
-          "key": "ordinalNumber",
-          "value": "asc"
-        }
-      }).then((result) => {
-      if (result) {
-        setStationNewsPartnerPromotion(result.data)
-        setLocalStorage('PARTNER_PROMOTION', pushStationNewsIdIntoArr(result.data), result.data)
-      }
-    }) : setStationNewsPartnerPromotion(JSON.parse(localStorage.getItem('LAST_PARTNER_PROMOTION_NEWS_DATA')))
-  }
   const renderSlider = useMemo(() => {
-    return <div className='banner-Layout2'><SliderHome hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp} className={'layout2'} center setting={setting} isLoading={isLoading} /></div>
-  }, [setting , isLoading])
+    return (
+      <div className={`banner-Layout2 ${topBanner?.length === 0 ? 'banner-Layout2-empty' : ''}`}>
+        <SliderHome
+          hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp}
+          className={'layout2'}
+          setting={topBanner}
+          isLoading={isLoading}
+          setSheetVisible={setSheetVisible}
+          setDataBtn={setDataBtn}
+        />
+      </div>
+    )
+  }, [topBanner, isLoading])
+
   const renderBottomSlider = useMemo(() => {
-    return <SliderHome hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp} className={'layout2 border-r'} setting={bottomBanner} isLoading={isLoading} />
-  }, [])
+    return (
+      <SliderHome hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp} className={'layout2 border-r'} setting={bottomBanner} isLoading={isLoading} />
+    )
+  }, [bottomBanner, isLoading])
 
-  const getNews = async () => {
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['HIGHLIGHTS_NEWS'].shouldFetch
-
-    shouldFetch ? await NewService.userGetHotNewList().then((result) => {
-        if (result) {
-          setHotNews(result.data)
-          setLocalStorage('HIGHLIGHTS', pushStationNewsIdIntoArr(result.data), result.data)
-        }
-      }) : setHotNews(JSON.parse(localStorage.getItem('LAST_HIGHLIGHTS_NEWS_DATA')))
-  }
-  const getListNews = async () => {
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['GENERAL_NEWS'].shouldFetch
-
-    shouldFetch ? await NewService.userGetLatestNew().then((result) => {
-      if (result) {
-        setListNews(result.data)
-        setLocalStorage('GENERAL', pushStationNewsIdIntoArr(result.data), result.data)
-      }
-    }) : setListNews(JSON.parse(localStorage.getItem('LAST_GENERAL_NEWS_DATA')))
-  }
   const getHomePageConfig = async (params) => {
-    NewService.getList({
-      filter: {
-        configCategory:params
-      },
-      skip: 0,
-      limit: 20,
-    }).then((result) => {
-      const { statusCode, data, message } = result;
-      if (data?.data?.length >0) {
-        setParamsFilter({
-          filter: {
-            configCategory:params
-          },
-          skip: 0,
-          limit: 20,
-        });
-        switch (params) {
-          case 1:
-            setDriverAmenities(data?.data);
-            break;
-          case 2:
-            setGovernmentAgency(data?.data);
-            break;
-        }
-      } else {
-        switch (params) {
-          case 1:
-            setDriverAmenities(CONVENIENCE_DRIVERS_BTN);
-            break;
-          case 2:
-            setGovernmentAgency(GOVERNMENT_BTN);
-            break;
-        }
+    getHomePageConfigCache(params).then((result) => {
+      switch (params) {
+        case 4:
+          setVehicleInspectionList(result || [])
+          break
+        case 5:
+          setViolationList(result || [])
+          break
+        default:
+          break
       }
     })
   }
-  const getPartnerUtilityNews = async () =>{
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['PARTNER_UTILITY_NEWS'].shouldFetch
-
-    shouldFetch ? await NewService.userGetPartnerUtilityNews(4).then((result) => {
-      if (result) {
-        setPartnerUtilityNews(result.data)
-        setLocalStorage('PARTNER_UTILITY', pushStationNewsIdIntoArr(result.data), result.data)
-      }
-    }) : setPartnerUtilityNews(JSON.parse(localStorage.getItem('LAST_PARTNER_UTILITY_NEWS')))
-  }
-  const getStationNewsPromotion = async () =>{
-    const shouldFetch = lastUpdateNews === null ? true : lastUpdateNews['PROMOTION_NEWS'].shouldFetch
-
-    shouldFetch ? await NewService.getPromotionNews({
-        "skip": 0,
-        "limit": 10,
-        "order": {
-          "key": "ordinalNumber",
-          "value": "asc"
-        }
-      }).then((result) => {
-      if (result) {
-        setStationNewsPromotion(result.data)
-        setLocalStorage('PROMOTION', pushStationNewsIdIntoArr(result.data), result.data)
-      }
-    }) : setStationNewsPromotion(JSON.parse(localStorage.getItem('LAST_PROMOTION_NEWS_DATA')))
-  }
-
-  const getZaloDisplayStationListSetting = async () => {
-    SystemConfigurationsService.getZaloDisplayStationList().then((res) => {
-      if(res) {
-        setIsZaloShowStationList(true)
-      }
-      else{
-        setIsZaloShowStationList(false)
-      }
-    })
-  }
-  
   useEffect(() => {
-    getZaloDisplayStationListSetting()
-    getHomePageConfig(1)
-    getHomePageConfig(2)
-    setTimeout(() => {
-      fetchData()
-      setFirtLoadding(false)
-    }, 300);
-
-    if(!userToken){
-      history.push(PATH.LOGIN)
-    }
-    setTimeout(async() =>  {
-      await getMetaData()
-      await getExpertNews()
-      await getRecruitmentListNew()
-      await getPartnerUtilityNews()
-      await getStationNewsPartnerPromotion()
-      await getStationNewsPromotion()
-      await getListNews()
-      await getNews()
-      await getBannerBySectionCache(12).then(data =>{
-        if(data?.length > 0){
-          setBottomBanner(data)
-          return
-        }else{
-          setBottomBanner([]);
-        }
-      })
-    }, 500);
+    // if(!userToken){
+    //   history.push(PATH.LOGIN)
+    // }
+    handleFetchData()
   }, [])
+  const fetchHomePageConfig = async (params) => {
+    getHomePageConfig(4)
+    getHomePageConfig(5)
+  }
+  const fetchBanner = async () => {
+    getBannerBySectionCache('2001').then((data) => {
+      setTopBanner(data || [])
+    })
+    getBannerBySectionCache('2002').then((data) => {
+      setBottomBanner(data || [])
+    })
+  }
 
-  const handleReturnLink=()=>{
-    if(dataBtn?.link){
-      if(dataBtn.token){
+  const handleFetchData = async () => {
+    setIsLoadingAPI(true)
+    await Promise.all([fetchHomePageConfig(), fetchBanner(), getMetaData()])
+    setIsLoadingAPI(false)
+  }
+
+  const handleReturnLink = () => {
+    if (dataBtn?.link) {
+      if (dataBtn.token) {
         return dataBtn?.link + `&token=${userToken}`
-      }else{
+      } else {
         return dataBtn?.link
       }
-    }else{
-      if((dataBtn?.linkNavigation).slice(0, 7).includes("http") ){
+    } else {
+      if ((dataBtn?.linkNavigation).slice(0, 7).includes('http')) {
         return dataBtn?.linkNavigation
-      }else{
+      } else {
         return `${process.env.REACT_APP_DEPLOY_URL}${dataBtn?.linkNavigation}`
       }
     }
   }
-  const handleOpenSheet=(Title,link)=>{
-    setSheetVisible(true);
-    setDataBtn({
-      label: Title,
-      link: `${process.env.REACT_APP_DEPLOY_URL}${link}`
-    })
+
+  if (isLoadingAPI) {
+    return (
+      <div className="loading">
+        <div className="text-center">
+          <MainLogo height={60} width={60}></MainLogo>
+          <Spin style={{ width: '100%' }} className="mt-3" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -369,208 +174,34 @@ const HomeLayout2 = (props) => {
       <sc.Container>
         <PageLayout>{renderSlider}</PageLayout>
         <div className="more mt-3">
-        <div className='layout2-body' style={{ maxWidth: 600, margin: 'auto' }}>
-            <div className='booking-layout2'>
-              <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={BOOKING_LIST_BTN} title={'Đặt lịch'}></L2FunctionButtonList>
-            </div>
-            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={INSPECTION_SERVICES} title={'Dịch vụ đăng kiểm'}></L2FunctionButtonList>
-            {!hideNewsFromZaloMiniApp && (
-              <div className='layout2-bg mb-4'>
-                {hotNews?.length > 0 &&
-                  <div style={{padding:'0 10px',marginBottom:'1.5rem'}}>
-                    <div className="d-flex justify-content-between align-items-center news-center" >
-                      <div className='text-large title-homelayout'>Nổi bật</div>
-                      <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet("Nổi bật",'/highlight-news')}>
-                        <a href="/" onClick={(e) => e.preventDefault()}>
-                          Xem tất cả
-                        </a>
-                      </div>
-                    </div>
-                    <L2HotNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} hotNew={hotNews} />
-                  </div>
-                }
-              </div>
-            )}
-            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} slider={HOT_SERVICES?.length > 9 || (mobile && HOT_SERVICES?.length > 7)} list={HOT_SERVICES} title={'Dịch vụ nổi bật'}></L2FunctionButtonList>
-            {!hideNewsFromZaloMiniApp && (
-              stationNewsPartnerPromotion?.length > 0 && (
-                <div className="home-container mb-5 ">
-                  <div className="d-flex justify-content-between align-items-center news-center" >
-                    <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Ưu đãi từ đối tác</div>
-                    <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet("Ưu đãi từ đối tác",'/station-newsPartner-promotion')}>
-                      <a href="/" onClick={(e) => e.preventDefault()}>
-                        Xem tất cả
-                      </a>
-                    </div>
-                  </div>
-                  <div className='mobile-content'>
-                    <HomeNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={stationNewsPartnerPromotion} linkDirectDetail = {"station-news-Partner-promotion-post"} showEye={false}/>
-                  </div>
-                </div>
-              )
-            )}
-            {isZaloShowStationList && ( //Nếu không phải là zalo mini app thì mới hiện lên
-              <L2FunctionButtonList setSheetVisible={setSheetVisible} slider={true} setDataBtn={setDataBtn} list={BTN_LIST_SERVICE} title={'Điểm dịch vụ đề xuất'}></L2FunctionButtonList>
-            )}
-            {!hideNewsFromZaloMiniApp && (
-              <div className='layout2-bg mb-4'>
-                {listNews?.length > 0 && (
-                  <div className="home-container mb-1 mt-1">
-                    <div className="d-flex justify-content-between align-items-center news-center" >
-                      <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Tin tức</div>
-                      <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet("Tin tức",'/new')}>
-                        <a href="/" onClick={(e) => e.preventDefault()}>
-                          Xem tất cả
-                        </a>
-                      </div>
-                    </div>
-                    <div className='mobile-content'>
-                      <HomeNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={listNews} />
-                    </div>
-                  </div>
+          <div className="layout2-body" style={{ maxWidth: 600, margin: 'auto' }}>
+            <div>
+              <div className="booking-layout2 mb-4">
+                {vehicleInspectionList?.length > 0 && (
+                  <L2FunctionButtonList
+                    setSheetVisible={setSheetVisible}
+                    setDataBtn={setDataBtn}
+                    list={vehicleInspectionList}
+                    title={'Đăng kiểm xe cơ giới'}></L2FunctionButtonList>
+                )}
+                {violationList?.length > 0 && (
+                  <L2FunctionButtonList
+                    setSheetVisible={setSheetVisible}
+                    setDataBtn={setDataBtn}
+                    list={violationList}
+                    title={'Phạt nguội giao thông'}></L2FunctionButtonList>
                 )}
               </div>
-            )}
-            {!hideNewsFromZaloMiniApp && (
-              <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} slider={CONVENIENCE_DRIVERS_BTN?.length > 9 || (mobile && CONVENIENCE_DRIVERS_BTN?.length > 7)} list={CONVENIENCE_DRIVERS_BTN} title={'Tiện ích cho tài xế'}></L2FunctionButtonList>
-            )}
-            {/* <div className=''>
-              {partnerUtilityNews?.length > 0 &&
-                <div className="home-container mb-5">
-                  <div className="d-flex justify-content-between align-items-center news-center" >
-                  <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Tiện ích từ đối tác</div>
-                    <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet('Tiện ích từ đối tác','/partner-news')}>
-                      <a href="/" onClick={(e) => e.preventDefault()}>
-                        Xem tất cả
-                      </a>
-                    </div>
-                  </div>
-                  <div className='mobile-content'>
-                    <PartnerPromotionNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={partnerUtilityNews?.slice(0,4)} />
-                  </div>
-                </div>
-              }
-            </div> */}
-            <L2FunctionButtonList setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={GOVERNMENT_BTN} className='government-btn' title={'Cơ quan chính phủ'}></L2FunctionButtonList>
-            {/* <div className='mb-5'>
-              <div className="home-container sation-slider">
-                <div className="d-flex justify-content-between align-items-center news-center" >
-                  <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Đối tác</div>
-                  <div >
-                  </div>
-                </div>
-                <div className='mobile-content'>
-                  <HomePartner setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} />
-                </div>
-              </div>
-            </div> */}
-            <div>
-              {/* {stationNewsPromotion?.length > 0 && (
-                <div className="home-container mb-5">
-                  <div className="d-flex justify-content-between align-items-center news-center" >
-                    <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Ưu đãi</div>
-                    <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet("Ưu đãi",'/station-news-promotion')}>
-                      <a href="/" onClick={(e) => e.preventDefault()}>
-                        Xem tất cả
-                      </a>
-                    </div>
-                  </div>
-                  <div className='mobile-content'>
-                    <HomeNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={stationNewsPromotion} linkDirectDetail = {"station-news-promotion-post"} showEye={false}/>
-                  </div>
-                </div>
-              )} */}
-              {!hideNewsFromZaloMiniApp && (
-                <>
-                  <div className='layout2-bg'>
-                    {recruitmentList?.length > 0 && (
-                      <div className="home-container mb-1 mt-1">
-                        <div className="d-flex justify-content-between align-items-center news-center" >
-                          <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Tuyển dụng</div>
-                          <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet("Tuyển dụng",'/recruitment-news')}>
-                            <a href="/" onClick={(e) => e.preventDefault()}>
-                              Xem tất cả
-                            </a>
-                          </div>
-                        </div>
-                        <div className='mobile-content'>
-                          <HomeRecruitment setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={recruitmentList.slice(0,2)} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  {expertNews?.length > 0 &&
-                    <div className="home-container mb-5">
-                      <div className="d-flex justify-content-between align-items-center news-center" >
-                        <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Chuyên gia chia sẻ</div>
-                        <div className="d-flex mb-0 justify-content-end home-link" onClick={() => handleOpenSheet("Chuyên gia chia sẻ",'/expert-news')}>
-                          <a href="/" onClick={(e) => e.preventDefault()}>
-                            Xem tất cả
-                          </a>
-                        </div>
-                      </div>
-                      <div className='mobile-content'>
-                        <HomeNew setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} listNews={expertNews} />
-                      </div>
-                    </div>
-                  }
-                </>
-              )}
             </div>
-            {bottomBanner?.length > 1 && <PageLayout>{renderBottomSlider}</PageLayout>}
-            {bottomBanner?.length == 1 && <div className={'layout2'}><img style={{borderRadius:'8px'}} src={bottomBanner[0]?.bannerImageUrl}></img></div>}
+            {bottomBanner?.length > 0 && <PageLayout>{renderBottomSlider}</PageLayout>}
+            {/* {bottomBanner?.length == 1 && (
+              <div className={'layout2'}>
+                <img style={{ borderRadius: '8px' }} src={bottomBanner[0]?.bannerImageUrl}></img>
+              </div>
+            )} */}
           </div>
         </div>
       </sc.Container>
-      <div>
-        <Sheet
-          visible={sheetVisible}
-          onClose={() => setSheetVisible(false)}
-          autoHeight
-          className='sheet-zalo'
-          mask={true}
-          swipeToClose
-        >
-          <Box p={4} className="custom-bottom-sheet" flex flexDirection="column">
-            <Box my={4}>
-              <Text.Title>{(dataBtn?.label)?.replaceAll('<br>','') || dataBtn?.title}</Text.Title>
-            </Box>
-            <Box className="bottom-sheet-body" style={{ overflowY: "auto"}}>
-              <iframe
-                src={handleReturnLink()}
-                width={"100%"}
-                style={{ minHeight: "70vh" }}
-                frameborder="0"
-              ></iframe>
-            </Box>
-          </Box>
-        </Sheet>
-      </div>
-      <div className='hidden-pop'>
-        <Sheet
-          visible={firtLoadding}
-          onClose={() => setFirtLoadding(false)}
-          autoHeight
-          className='sheet-zalo'
-          mask={true}
-          swipeToClose
-        >
-          <Box p={4} className="custom-bottom-sheet" flex flexDirection="column">
-            <Box my={4}>
-              <Text.Title>{(dataBtn?.label)?.replaceAll('<br>','') || dataBtn?.title}</Text.Title>
-            </Box>
-            <Box className="bottom-sheet-body" style={{ overflowY: "auto"}}>
-              <iframe
-                src={`${process.env.REACT_APP_DEPLOY_URL}/stations?type=3&name=Bảo%20dưỡng%20ô%20tô&isEmbeddedView=true`}
-                width={"100%"}
-                style={{ minHeight: "10vh" }}
-                frameborder="0"
-              ></iframe>
-            </Box>
-          </Box>
-        </Sheet>
-      </div>
-
     </>
   )
 }
