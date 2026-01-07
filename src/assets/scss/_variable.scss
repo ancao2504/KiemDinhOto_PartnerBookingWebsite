@@ -288,6 +288,48 @@ $title-x-large-fw: map-get(map-get($title-styles, 'x-large'), 'font-weight'); //
   // ...Thêm biến sáng 
 }
 
+[data-theme='TAMOVE'] {
+  --primary-color: #0e57b7; // Màu chính cho chủ đề sáng
+  --background-color: #ffffff; // Màu nền cho chủ đề sáng
+  --text-color: #000000; // Màu văn bản cho chủ đề sáng
+  --secondary-color: #f0f0f0; // Màu phụ cho chủ đề sáng
+  --border-color: #e8e8e8; // Màu viền cho chủ đề sáng
+  --hover-color: #e6f7ff; // Màu khi rê chuột lên cho chủ đề sáng
+  --gray-color: gray;
+  --background-iphone-popup-coler:#a6bab8;
+  --transparent-color:transparent;
+  --secondary-button-color:#14C560;
+  --title-color:#0870d9;
+  --background-banner-color: #F4F7FF;
+  --bgr-list-btn-color: #F2F5FF;
+  --unactive-button-color:#d6d6d6;
+  --primary-button-color:#262FED;
+  --stop-receiving-color:#AA8934;
+  --error-btn-color:#ff7875;
+  --success-btn-color:#34AA44;
+  --step-line-booking:#1890ff;
+  --step-line-booking-opacity30:#1890ff30;
+  --float-btn-color:#4b7fed;
+  --attention-color:#0039e3;
+  --light-black-color: #333;
+  --sunrise-yellow-color:$--sunrise-yellow-6;
+  --bgr-review-color:#F3F3F5;
+  --blue-ribbon: #0068FF;
+  --gray-solitude: #E8F0FE;
+  --gray-alto: #DDDDDD;
+  --gray-silver: #C4C4C4;
+  --gray-gallery: #EDEDED;
+  --gray-mercury: #E4E4E4;
+  --gray-mid-gray: #686770;
+  --gray-athens: #F9F9FB;
+  --gray-zircon: #F4F7FF;
+  --blue-deep-cove: #040747;
+  --royal-blue-color: #416FF3;
+  --slate-blue-color: #6E3DD5;
+  --linear-gradient-active: linear-gradient(to top, var(--royal-blue-color), var(--slate-blue-color));
+  // ...Thêm biến sáng 
+}
+
 // Màu sắc cho chủ đề tối
 body.dark {
   --primary-color: #0e57b7; // Màu chính cho chủ đề tối
