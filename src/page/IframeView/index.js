@@ -2,14 +2,15 @@ import React, { useEffect } from 'react'
 import './index.scss'
 import { useHistory, useLocation } from 'react-router-dom'
 import { MESSAGE_BACK_TO_HOME_MINI_APP, PARAM_URL_IFRAME } from '../../constants/params'
+import { decodeLink } from '../../helper/common'
 
 export default function IframeView() {
   const history = useHistory()
   const location = useLocation()
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
-  const urlIframe = params.get(PARAM_URL_IFRAME)
-  const urlIframeDecode = urlIframe ? decodeURIComponent(urlIframe) : null
+  const url = params.get(PARAM_URL_IFRAME)
+  const urlIframeDecode = url ? decodeLink(url) : null
   useEffect(() => {
     if (!urlIframeDecode) return history.replace('/')
 

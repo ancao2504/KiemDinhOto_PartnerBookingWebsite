@@ -49,3 +49,25 @@ export const xoa_dau = (str) => {
   str = str.replace(/Đ/g, 'D')
   return str
 }
+
+export function encodeLink(url) {
+  const utf8 = new TextEncoder().encode(url);
+  let binary = '';
+  utf8.forEach(b => binary += String.fromCharCode(b));
+
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+export function decodeLink(encoded) {
+  encoded = encoded
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const binary = atob(encoded);
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+
+  return new TextDecoder().decode(bytes);
+}

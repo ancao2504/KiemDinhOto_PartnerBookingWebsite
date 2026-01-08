@@ -6,6 +6,7 @@ import Slider from 'react-slick'
 import useWindowDimensions from '../../../hooks/window-dimensions'
 import { PATH } from '../../../constants/router'
 import { PARAM_URL_IFRAME } from '../../../constants/params'
+import { encodeLink } from '../../../helper/common'
 
 const L2FunctionButtonList = (props) => {
   const { handleZaloAuthorize,globalState } = useGlobalContext();
@@ -43,7 +44,7 @@ const L2FunctionButtonList = (props) => {
       if (!(link?.startsWith("https://") || link?.startsWith("http://"))) {
         history.push(link)
       } else{
-        history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeURIComponent(link)}`)
+        history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeLink(link)}`)
       }
     }
     // if (isZaloLink) {

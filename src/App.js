@@ -67,6 +67,7 @@ function App() {
     apiKey && await SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apiKey })
       .then(async(result) => {
         const stationMiniAppLink = JSON.parse(result?.[0]?.stationMiniAppLink || '{}')
+        theme.partnerColorTitle = stationMiniAppLink?.partnerColorTitle
         theme.partnerColorButton = stationMiniAppLink?.partnerColorButton
         theme.partnerBackground = stationMiniAppLink?.partnerBackground?.[0]?.url
         theme.partnerColorGradient = stationMiniAppLink?.partnerColorGradient
@@ -75,7 +76,8 @@ function App() {
       theme.apiKey = apiKey
       localStorage.setItem(addKeyLocalStorage('dataTheme'), JSON.stringify(theme))
       const body = document.body;
-      theme?.partnerColorButton && body.style.setProperty('--title-color', theme.partnerColorButton);
+      theme?.partnerColorTitle && body.style.setProperty('--title-color', theme.partnerColorTitle);
+      theme?.partnerColorButton && body.style.setProperty('--linear-gradient-button', theme.partnerColorButton);
       theme?.partnerColorGradient && body.style.setProperty('--linear-gradient-active', theme.partnerColorGradient);
     }
 

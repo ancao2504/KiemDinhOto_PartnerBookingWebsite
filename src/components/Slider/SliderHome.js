@@ -8,6 +8,7 @@ import LogService from '../../services/logService'
 import { useHistory } from 'react-router-dom'
 import { PATH } from '../../constants/router'
 import { PARAM_URL_IFRAME } from '../../constants/params'
+import { encodeLink } from '../../helper/common'
 
 const CLICK_STORAGE_KEY = 'recordClickData'
 export const SliderHome = (props) => {
@@ -46,7 +47,7 @@ export const SliderHome = (props) => {
         if (!(link?.startsWith("https://") || link?.startsWith("http://"))) {
           history.push(link)
         } else{
-          history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeURIComponent(link)}`)
+          history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeLink(link)}`)
         }
       }
       // setPopupUrl(item.bannerUrl)
