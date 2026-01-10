@@ -10,6 +10,7 @@ import { changeTime } from '../../helper/changeTime'
 import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { E_TICKET_SALE_OPTIONS, optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
 import {
+  PAYMENT_SUB_TYPE,
   PAYMENT_TYPE,
   PLATE_COLOR,
   VEHICLE_SUB_CATEGORY,
@@ -85,7 +86,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
     endDate: moment().endOf('month').format(DATE_DISPLAY_FORMAT),
     vehicleType: VEHICLE_SUB_TYPE[0]?.vehicleType
   })
-
+  const paramsScheduleTypeParams = (getQueryParams() || {})?.scheduleType
   const dataTheme = JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {}
 
   // khai báo các biến cho toàn trang
@@ -164,7 +165,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
         if (MINIAPP_GTELPAY) {
           BookingService.createPayment({
             customerScheduleId,
-            paymentMethodType: PAYMENT_TYPE.GTEL_PAY
+            paymentMethodType: PAYMENT_TYPE.GTEL_PAY,
+            paymentMethodSubType: PAYMENT_SUB_TYPE.GTEL_WEBINAPP
           }).then((result) => {
             const orderId = result?.data?.inAppGtelOrderId
             if (result?.isSuccess && orderId) {
@@ -201,7 +203,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
           BookingService.createPayment({
             customerScheduleId: scheduleId,
             stationServicesList: values['stationServicesList'],
-            paymentMethodType: PAYMENT_TYPE.GTEL_PAY
+            paymentMethodType: PAYMENT_TYPE.GTEL_PAY,
+            paymentMethodSubType: PAYMENT_SUB_TYPE.GTEL_WEBINAPP
           }).then((result) => {
             const orderId = result?.data?.inAppGtelOrderId
             if (orderId) {
@@ -1067,7 +1070,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                 isSearchable={true}
                 placeholder="Vui lòng chọn mục đích đặt lịch"
                 styles={customStyles}
-                options={dataBookingParam?.scheduleType ? (scheduleTypes || optionServiceType)?.filter((item) => +item?.value === +dataBookingParam?.scheduleType ) : (scheduleTypes || optionServiceType)}
+                options={paramsScheduleTypeParams ? (scheduleTypes || optionServiceType)?.filter((item) => +item?.value === +paramsScheduleTypeParams ) : (scheduleTypes || optionServiceType)}
                 menuPlacement="top"
                 onChange={(values, scheduleType) => {
                   setScheduleCategory(scheduleType?.scheduleCategory)

@@ -860,3 +860,7 @@ export const PAYMENT_TYPE = {
   ZALOPAY: 5,
   VIETTEL_PAY: 6
 }
+
+export const PAYMENT_SUB_TYPE = {
+  GTEL_WEBINAPP: 'GTEL_WEBINAPP',
+}
