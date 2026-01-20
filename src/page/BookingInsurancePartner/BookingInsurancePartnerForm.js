@@ -314,8 +314,8 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
       insuranceEnd:values?.insuranceEnd || undefined,
       referCode:values?.referCode || undefined,
       discountCode:values?.discountCode || undefined,
-      referUserId:localStorage.getItem('partnerReferUserId') || undefined,
-      referStationId:localStorage.getItem('partnerReferStationId') || undefined,
+      referUserId:Number(localStorage.getItem('partnerReferStationId')) > 0  ? undefined : (Number(localStorage.getItem('partnerReferUserId')) || undefined),
+      referStationId:Number(localStorage.getItem('partnerReferStationId')) > 0 ? Number(localStorage.getItem('partnerReferStationId')) : undefined,
     }
     Object.keys(newData).forEach((key) => {
       if (newData[key] === "") {

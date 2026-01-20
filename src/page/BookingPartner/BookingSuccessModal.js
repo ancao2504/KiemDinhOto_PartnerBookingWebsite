@@ -3,9 +3,10 @@ import { Modal, Button } from 'antd'
 import { ReactComponent as SuccessIcon } from './../../assets/icons/success.svg'
 import './index.scss'
 import { SCHEDULE_TYPE } from '../../constants/serviceOption'
-import { PARAM_IS_MINI_APP, PARAM_IS_WEB_VIEW } from '../../constants/params'
+import { PARAM_IS_WEB_VIEW } from '../../constants/params'
 import { useLocation } from 'react-router-dom'
 import { smartParseParam } from '../../helper/params'
+import { checkIsWebView } from '../../helper/checkIsEmbeddedView'
 const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,scheduleType }) => {
   const consultantTypes = [
     SCHEDULE_TYPE.CONSULTANT_MAINTENANCE,
@@ -19,9 +20,12 @@ const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,schedule
   const location = useLocation()
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
-  const isMiniApp = smartParseParam(params.get(PARAM_IS_MINI_APP))
-  const isWebView = smartParseParam(params.get(PARAM_IS_WEB_VIEW))
-
+  const isWebView = checkIsWebView(window.location.href) ||
+    sessionStorage.getItem(PARAM_IS_WEB_VIEW) === 'true' ||
+    sessionStorage.getItem(PARAM_IS_WEB_VIEW) === '1'
+  if (isWebView) {
+    sessionStorage.setItem(PARAM_IS_WEB_VIEW, 'true')
+  }
   const handleViewListBooking=()=>{
     setTimeout(() => {
       setTabKey()
@@ -44,7 +48,7 @@ const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,schedule
               <div>Thông tin đã được chuyển đến tư vấn viên của chúng tôi. Nhân viên tư vấn sẽ sớm liên hệ lại để hỗ trợ tư vấn cho bạn.</div>
             </div>
             <div>
-            {isConsultantType && !(isMiniApp || isWebView) && (
+            {isConsultantType && !(isWebView) && (
               <>
             <p style={{ margin: '15px 0' }}>
                 Bạn có thể tham khảo thông tin tại các nhóm, cộng đồng để có câu trả lời nhanh hơn

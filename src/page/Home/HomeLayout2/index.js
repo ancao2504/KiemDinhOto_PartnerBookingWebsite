@@ -33,8 +33,14 @@ const HomeLayout2 = (props) => {
   const [bottomBanner, setBottomBanner] = useState(storageBottomBanner ? JSON.parse(storageBottomBanner)?.data : [])
   const storageHomePageConfigVehicleInspection = localStorage.getItem('HOME_PAGE_CONFIG_4')
   const storageHomePageConfigViolation = localStorage.getItem('HOME_PAGE_CONFIG_5')
-  const [vehicleInspectionList, setVehicleInspectionList] = useState(storageHomePageConfigVehicleInspection ? (JSON.parse(storageHomePageConfigVehicleInspection))?.data : [])
-  const [violationList, setViolationList] = useState(storageHomePageConfigViolation ? (JSON.parse(storageHomePageConfigViolation))?.data : [])
+  const storageHomePageConfigStationService = localStorage.getItem('HOME_PAGE_CONFIG_6')
+  const [vehicleInspectionList, setVehicleInspectionList] = useState(
+    storageHomePageConfigVehicleInspection ? JSON.parse(storageHomePageConfigVehicleInspection)?.data : []
+  )
+  const [violationList, setViolationList] = useState(storageHomePageConfigViolation ? JSON.parse(storageHomePageConfigViolation)?.data : [])
+  const [stationServiceList, setStationServiceList] = useState(
+    storageHomePageConfigStationService ? JSON.parse(storageHomePageConfigStationService)?.data : []
+  )
 
   const pushCacheDataIntoObj = (typeOfNews, lastId, obj) => {
     const id = JSON.parse(localStorage.getItem(`LAST_${typeOfNews}_NEWS_ID`)) || undefined
@@ -112,6 +118,9 @@ const HomeLayout2 = (props) => {
         case 5:
           setViolationList(result || [])
           break
+        case 6:
+          setStationServiceList(result || [])
+          break
         default:
           break
       }
@@ -126,14 +135,19 @@ const HomeLayout2 = (props) => {
   const fetchHomePageConfig = async (params) => {
     getHomePageConfig(4)
     getHomePageConfig(5)
+    setTimeout(() => {
+      getHomePageConfig(6)
+    }, 100)
   }
   const fetchBanner = async () => {
     getBannerBySectionCache('2001').then((data) => {
       setTopBanner(data || [])
     })
-    getBannerBySectionCache('2002').then((data) => {
-      setBottomBanner(data || [])
-    })
+    setTimeout(() => {
+      getBannerBySectionCache('2002').then((data) => {
+        setBottomBanner(data || [])
+      })
+    }, 100)
   }
 
   const handleFetchData = async () => {
@@ -190,6 +204,13 @@ const HomeLayout2 = (props) => {
                     setDataBtn={setDataBtn}
                     list={violationList}
                     title={'Phạt nguội giao thông'}></L2FunctionButtonList>
+                )}
+                {stationServiceList?.length > 0 && (
+                  <L2FunctionButtonList
+                    setSheetVisible={setSheetVisible}
+                    setDataBtn={setDataBtn}
+                    list={stationServiceList}
+                    title={'Điểm dịch vụ'}></L2FunctionButtonList>
                 )}
               </div>
             </div>
