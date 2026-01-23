@@ -78,6 +78,7 @@ function BookingPartner() {
 
   return (
     <>
+      {(isHeaderMiniApp) && <Header/>} 
       {apikey ?
         (
           <div className={`partner app-container ${nextTab === 'otp' ? 'py-0 px-2' : 'pd-30-15'}`} style={{ maxWidth: 600, margin: 'auto', padding: '16px' }}>
@@ -87,7 +88,7 @@ function BookingPartner() {
               </div>
             ) : (
               <>
-                {(isHeaderMiniApp) && <Header/>} 
+                
                 <div
                   className={`
                 partner-container 

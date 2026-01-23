@@ -185,54 +185,46 @@ const HomeLayout2 = (props) => {
   }
 
   return (
-    <>
-      <sc.Container>
-        {
-          process.env.REACT_APP_THEME_NAME === "IHANOI" && (
-            <Header title={"Giao thông số"} onBack={()=> {
-              
-            }}/>
-          )
-        }
-        
-        <PageLayout>{renderSlider}</PageLayout>
-        <div className="more mt-3">
-          <div className="layout2-body" style={{ maxWidth: 600, margin: 'auto' }}>
-            <div>
-              <div className="booking-layout2 mb-4">
-                {vehicleInspectionList?.length > 0 && (
-                  <L2FunctionButtonList
-                    setSheetVisible={setSheetVisible}
-                    setDataBtn={setDataBtn}
-                    list={vehicleInspectionList}
-                    title={'Đăng kiểm xe cơ giới'}></L2FunctionButtonList>
-                )}
-                {violationList?.length > 0 && (
-                  <L2FunctionButtonList
-                    setSheetVisible={setSheetVisible}
-                    setDataBtn={setDataBtn}
-                    list={violationList}
-                    title={'Phạt nguội giao thông'}></L2FunctionButtonList>
-                )}
-                {stationServiceList?.length > 0 && (
-                  <L2FunctionButtonList
-                    setSheetVisible={setSheetVisible}
-                    setDataBtn={setDataBtn}
-                    list={stationServiceList}
-                    title={'Điểm dịch vụ'}></L2FunctionButtonList>
-                )}
-              </div>
+    <div>
+      {process.env.REACT_APP_THEME_NAME === 'IHANOI' && <Header title={'Giao thông số'} onBack={() => {}} />}
+
+      <PageLayout>{renderSlider}</PageLayout>
+      <div className="more mt-3">
+        <div className="layout2-body" style={{ maxWidth: 600, margin: 'auto' }}>
+          <div>
+            <div className="booking-layout2 mb-4">
+              {vehicleInspectionList?.length > 0 && (
+                <L2FunctionButtonList
+                  setSheetVisible={setSheetVisible}
+                  setDataBtn={setDataBtn}
+                  list={vehicleInspectionList}
+                  title={'Đăng kiểm xe cơ giới'}></L2FunctionButtonList>
+              )}
+              {violationList?.length > 0 && (
+                <L2FunctionButtonList
+                  setSheetVisible={setSheetVisible}
+                  setDataBtn={setDataBtn}
+                  list={violationList}
+                  title={'Phạt nguội giao thông'}></L2FunctionButtonList>
+              )}
+              {stationServiceList?.length > 0 && (
+                <L2FunctionButtonList
+                  setSheetVisible={setSheetVisible}
+                  setDataBtn={setDataBtn}
+                  list={stationServiceList}
+                  title={'Điểm dịch vụ'}></L2FunctionButtonList>
+              )}
             </div>
-            {bottomBanner?.length > 0 && <PageLayout>{renderBottomSlider}</PageLayout>}
-            {/* {bottomBanner?.length == 1 && (
+          </div>
+          {bottomBanner?.length > 0 && <PageLayout>{renderBottomSlider}</PageLayout>}
+          {/* {bottomBanner?.length == 1 && (
               <div className={'layout2'}>
                 <img style={{ borderRadius: '8px' }} src={bottomBanner[0]?.bannerImageUrl}></img>
               </div>
             )} */}
-          </div>
         </div>
-      </sc.Container>
-    </>
+      </div>
+    </div>
   )
 }
 export default HomeLayout2
