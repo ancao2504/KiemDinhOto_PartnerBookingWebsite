@@ -30,11 +30,14 @@
     "slick-carousel": "^1.8.1",
     "styled-components": "^5.2.0",
     "web-vitals": "^2.1.4",
+    "x-app-sdk": "^1.4.4",
     "zmp-cli": "^3.15.9",
     "zmp-sdk": "^2.42.0",
     "zmp-ui": "^1.5.5"
   },
   "devDependencies": {
+    "ajv": "^6.12.6",
+    "ajv-keywords": "^3.5.2",
     "copyright-header": "^0.4.6",
     "env-cmd": "^10.1.0",
     "husky": "^8.0.2",

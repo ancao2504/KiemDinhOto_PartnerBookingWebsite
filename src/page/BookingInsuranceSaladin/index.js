@@ -91,7 +91,7 @@ function BookingInsurancePartner() {
                       ${nextTab === 'partner' ? 'small' : 'full'}
                       ${nextTab === 'success' ? 'd-flex justify-content-center align-items-center' : ''}
                       `}>
-                        <div className='mt-4'>
+                        <div className='mt-3'>
                           <BookingInsuranceSaladinForm zaloUserPhone={globalState.phoneNumber} zaloUserName={globalState.userName} setTabKey={setTabKey} form={form} />
                         </div>
                       </div>

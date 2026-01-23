@@ -15,7 +15,7 @@ import addKeyLocalStorage from '../../helper/localStorage'
 import Header from '../../components/Header'
 import { PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW } from '../../constants/params'
 import { smartParseParam } from '../../helper/params'
-import { checkHeaderMiniApp, checkIsWebView } from '../../helper/checkIsEmbeddedView'
+import { checkHeaderMiniApp, checkIsBackToHomeMiniApp, checkIsWebView } from '../../helper/checkIsEmbeddedView'
 function BookingPartner() {
   const { globalState, handleGetUserPhone, handleGetUserName, setGlobalState } = useGlobalContext();
   const { gtelpayUser } = useGtelpayUserData()
@@ -103,7 +103,7 @@ function BookingPartner() {
                   {
                     (Number(isWebView) === WEBVIEW_TYPES.WEBVIEW) ? null : <div className='booking-title title-normal mb-4'>{getTitleName(searchparam)}</div>
                   }
-                  <div className='mt-4'>
+                  <div className='mt-3'>
                     <BookingPartnerForm gtelpayUser={gtelpayUser} zaloUserPhone={globalState.phoneNumber} zaloUserName={globalState.userName} setTabKey={setTabKey} form={form} />
                   </div>
                   {/* </Tabs.TabPane>

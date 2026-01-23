@@ -1,4 +1,4 @@
-import { PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW } from "../constants/params";
+import { PARAM_IS_BACK_TO_HOME_MINI_APP, PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW } from "../constants/params";
 
 export const checkIsWebView = (url) => {
   const parsedUrl = new URL(url)
@@ -13,5 +13,13 @@ export const checkHeaderMiniApp = (url) => {
   const isHeaderMiniApp =
     parsedUrl.searchParams.get(PARAM_IS_HEADER_MINI_APP) === 'true' ||
     parsedUrl.searchParams.get(PARAM_IS_HEADER_MINI_APP) === '1'
+  return isHeaderMiniApp
+}
+
+export const checkIsBackToHomeMiniApp = (url) => {
+  const parsedUrl = new URL(url)
+  const isHeaderMiniApp =
+    parsedUrl.searchParams.get(PARAM_IS_BACK_TO_HOME_MINI_APP) === 'true' ||
+    parsedUrl.searchParams.get(PARAM_IS_BACK_TO_HOME_MINI_APP) === '1'
   return isHeaderMiniApp
 }

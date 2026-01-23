@@ -7,12 +7,14 @@ import { useEffect } from 'react'
 import NewService, { fetchMetadataWithCache } from './../../../services/addBookingService'
 import L2FunctionButtonList from './L2FunctionButtonList'
 import { useLocation } from 'react-router-dom'
+import { SdkCommunicationService } from 'x-app-sdk'
 import 'zmp-ui/zaui.min.css'
 import { getBannerBySectionCache } from '../../../helper/getBannerBySectionCache'
 import PopupSheetIframe from '../../../components/Popup/PopupSheetIframe'
 import MainLogo from '../../../components/MainLogo'
 import { Spin } from 'antd'
 import { getHomePageConfigCache } from '../../../helper/getHomePageConfigCache'
+import Header from '../../../components/Header'
 
 const HomeLayout2 = (props) => {
   const location = useLocation()
@@ -186,6 +188,14 @@ const HomeLayout2 = (props) => {
   return (
     <>
       <sc.Container>
+        {
+          process.env.REACT_APP_THEME_NAME === "IHANOI" && (
+            <Header title={"Giao thông số"} onBack={()=> {
+              SdkCommunicationService?.exit && SdkCommunicationService?.exit()
+            }}/>
+          )
+        }
+        
         <PageLayout>{renderSlider}</PageLayout>
         <div className="more mt-3">
           <div className="layout2-body" style={{ maxWidth: 600, margin: 'auto' }}>
