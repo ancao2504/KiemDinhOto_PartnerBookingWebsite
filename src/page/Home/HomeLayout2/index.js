@@ -7,7 +7,6 @@ import { useEffect } from 'react'
 import NewService, { fetchMetadataWithCache } from './../../../services/addBookingService'
 import L2FunctionButtonList from './L2FunctionButtonList'
 import { useLocation } from 'react-router-dom'
-import { SdkCommunicationService } from 'x-app-sdk'
 import 'zmp-ui/zaui.min.css'
 import { getBannerBySectionCache } from '../../../helper/getBannerBySectionCache'
 import PopupSheetIframe from '../../../components/Popup/PopupSheetIframe'
@@ -191,7 +190,7 @@ const HomeLayout2 = (props) => {
         {
           process.env.REACT_APP_THEME_NAME === "IHANOI" && (
             <Header title={"Giao thông số"} onBack={()=> {
-              SdkCommunicationService?.exit && SdkCommunicationService?.exit()
+              
             }}/>
           )
         }
