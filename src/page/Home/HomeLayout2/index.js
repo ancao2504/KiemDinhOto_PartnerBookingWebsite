@@ -14,11 +14,13 @@ import MainLogo from '../../../components/MainLogo'
 import { Spin } from 'antd'
 import { getHomePageConfigCache } from '../../../helper/getHomePageConfigCache'
 import Header from '../../../components/Header'
+import usePartnerBridge from '../../../sdk/usePartnerBridge'
 
 const HomeLayout2 = (props) => {
   const location = useLocation()
   const [userToken, setUserToken] = useState(location?.state?.token || localStorage.getItem('userToken') || '')
   const [isLoadingAPI, setIsLoadingAPI] = useState(true)
+  const { init: initBridge, exit: exitBridge, isSupported: isPartnerBridgeSupported } = usePartnerBridge()
 
   const [sheetVisible, setSheetVisible] = useState(false)
   const [dataBtn, setDataBtn] = useState({
@@ -157,6 +159,19 @@ const HomeLayout2 = (props) => {
     setIsLoadingAPI(false)
   }
 
+  useEffect(() => {
+    if (!isPartnerBridgeSupported) return
+    initBridge()
+  }, [initBridge, isPartnerBridgeSupported])
+  const handleExit = async () => {
+    try {
+      await exitBridge()
+      // Thường sẽ không chạy tới đây nếu host đóng webview ngay.
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleReturnLink = () => {
     if (dataBtn?.link) {
       if (dataBtn.token) {
@@ -186,7 +201,9 @@ const HomeLayout2 = (props) => {
 
   return (
     <div>
-      {process.env.REACT_APP_THEME_NAME === 'IHANOI' && <Header title={'Giao thông số'} onBack={() => {}} />}
+      {process.env.REACT_APP_HOME_MINIAPP_HEADER_TITLE && 
+        <Header title={process.env.REACT_APP_HOME_MINIAPP_HEADER_TITLE} onBack={() => {handleExit()}} />
+      }
 
       <PageLayout>{renderSlider}</PageLayout>
       <div className="more mt-3">
