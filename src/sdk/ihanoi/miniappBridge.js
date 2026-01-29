@@ -1,5 +1,3 @@
-import { sendTelegramNotification } from "../../hooks/botTelegram";
-
 // miniappBridge.js
 const DEFAULT_TIMEOUT_MS = 10000;
 
@@ -51,7 +49,6 @@ const MiniAppBridge = (() => {
 
   function init(options = {}) {
     mode = options.mode || detectMode();
-    sendTelegramNotification(JSON.stringify({app:"ihanoi test ios", mode }));
     targetOrigin = options.targetOrigin || "*";
     initialized = true;
 
