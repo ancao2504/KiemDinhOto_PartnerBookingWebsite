@@ -1,3 +1,5 @@
+import { sendTelegramNotification } from "../../hooks/botTelegram";
+
 // miniappBridge.js
 const DEFAULT_TIMEOUT_MS = 10000;
 
@@ -25,23 +27,23 @@ const MiniAppBridge = (() => {
 
   function detectMode() {
     // React Native WebView
-    if (window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === "function") {
+    if (window?.ReactNativeWebView && typeof window?.ReactNativeWebView?.postMessage === "function") {
       return "REACT_NATIVE";
     }
     // Flutter InAppWebView
-    if (window.flutter_inappwebview && typeof window.flutter_inappwebview.callHandler === "function") {
+    if (window?.flutter_inappwebview && typeof window?.flutter_inappwebview?.callHandler === "function") {
       return "FLUTTER";
     }
     // iOS WKWebView
-    if (window.webkit?.messageHandlers?.miniappWebviewToSdk?.postMessage) {
+    if (window?.webkit?.messageHandlers?.miniappWebviewToSdk && window.webkit?.messageHandlers?.miniappWebviewToSdk?.postMessage) {
       return "IOS";
     }
     // Android JS Interface
-    if (window.AndroidWebview && typeof window.AndroidWebview.miniappWebviewToSdk === "function") {
+    if (window?.AndroidWebview && typeof window.AndroidWebview?.miniappWebviewToSdk === "function") {
       return "ANDROID";
     }
     // Web embedded in iframe (partner web)
-    if (window.parent && window.parent !== window) {
+    if (window?.parent && window?.parent !== window) {
       return "WEB_PARENT";
     }
     return "UNKNOWN";
@@ -49,6 +51,7 @@ const MiniAppBridge = (() => {
 
   function init(options = {}) {
     mode = options.mode || detectMode();
+    sendTelegramNotification(JSON.stringify({app:"ihanoi test ios", mode }));
     targetOrigin = options.targetOrigin || "*";
     initialized = true;
 
@@ -77,11 +80,7 @@ const MiniAppBridge = (() => {
 
       case "IOS":
         // iOS WKWebView messageHandlers thường nhận object tốt
-        try {
-          window.webkit.messageHandlers.miniappWebviewToSdk.postMessage(payload);
-        } catch {
-          window.webkit.messageHandlers.miniappWebviewToSdk.postMessage(asJson);
-        }
+        window.webkit.messageHandlers.miniappWebviewToSdk.postMessage(asJson);
         return;
 
       case "ANDROID":
