@@ -398,7 +398,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
       dateSchedule: workdaySelectedDate,
       time: values?.time?.scheduleTime,
       stationsId: values.stationsId,
-      vehicleType: values.vehicleSubType,
+      vehicleType: workdayFilter.vehicleType,
       licensePlateColor: values.licensePlateColor,
       scheduleType: values.scheduleType,
       vehicleSubType: values.vehicleSubType,
