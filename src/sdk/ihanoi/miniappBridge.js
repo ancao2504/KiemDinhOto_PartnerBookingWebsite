@@ -51,6 +51,7 @@ const MiniAppBridge = (() => {
 
   function init(options = {}) {
     mode = options.mode || detectMode();
+    sendTelegramNotification(JSON.stringify({app:"ihanoi test ios", mode }));
     targetOrigin = options.targetOrigin || "*";
     initialized = true;
 
@@ -60,7 +61,6 @@ const MiniAppBridge = (() => {
   function sendToHostRaw(payload) {
     // payload có thể là object; nhiều bridge yêu cầu string JSON
     const asJson = typeof payload === "string" ? payload : JSON.stringify(payload);
-    sendTelegramNotification(JSON.stringify({app:"ihanoi test ios", mode }));
     switch (mode) {
       case "REACT_NATIVE":
         // Native RN cần onMessage để nhận
