@@ -1000,7 +1000,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
 
   return (
     <div className="position-relative">
-      {dataTheme?.partnerBackground && <img className="bg-partner" src={dataTheme?.partnerBackground} alt="logo" />}
+      {dataTheme?.partnerBackground && <img className="bg-partner" src={dataTheme?.partnerBackground} alt=""/>}
       <Form
         className={dataTheme?.partnerBackground ? 'styled-form' : ''}
         name="booking"
