@@ -469,3 +469,31 @@ export const HOT_SERVICES = [
     unOpen: true,
   },
 ]
+
+export const HOME_CONFIG_CATEGORY = {
+  DEFAULT: null,
+  DRIVER_UTILITIES: 1,      // Tiện ích đối tác
+  GOVERNMENT_AGENCIES: 2,   // Cơ quan chính phủ
+  PARTNER: 3,               // Đối tác
+  VEHICLE_INSPECTION: 4,    // Đăng kiểm
+  TRAFFIC_VIOLATION: 5,     // Phạt nguội
+  STATION_SERVICES: 6,     // Điểm dịch vụ
+  HOME_MAIN_SERVICES: 7,    // Dịch vụ chính trang chủ,
+  TAX_INFO_LOOKUP: 8,       // Tra cứu thông tin thuế
+  SUPPORT_PARTNER: 9,       // Đơn vị hỗ trợ
+  UTILITIES: 10,            // Tiền ích
+}
+
+export const HOME_CONFIG_CATEGORY_TEXT = {
+  [HOME_CONFIG_CATEGORY.DEFAULT]: null,
+  [HOME_CONFIG_CATEGORY.DRIVER_UTILITIES]: "Tiện ích đối tác",
+  [HOME_CONFIG_CATEGORY.GOVERNMENT_AGENCIES]: "Cơ quan chính phủ",
+  [HOME_CONFIG_CATEGORY.PARTNER]: "Đối tác",
+  [HOME_CONFIG_CATEGORY.VEHICLE_INSPECTION]: "Đăng kiểm xe cơ giới",
+  [HOME_CONFIG_CATEGORY.TRAFFIC_VIOLATION]: "Phạt nguội giao thông",
+  [HOME_CONFIG_CATEGORY.STATION_SERVICES]: "Điểm dịch vụ",
+  [HOME_CONFIG_CATEGORY.HOME_MAIN_SERVICES]: "Dịch vụ chính trang chủ",
+  [HOME_CONFIG_CATEGORY.TAX_INFO_LOOKUP]: "Tra cứu thông tin thuế",
+  [HOME_CONFIG_CATEGORY.SUPPORT_PARTNER]: "Đơn vị hỗ trợ",
+  [HOME_CONFIG_CATEGORY.UTILITIES]: "Tiện ích",
+};

@@ -1,20 +1,18 @@
 import { PageLayout } from './../../../components/PageLayout/PageLayout'
 import { SliderHome } from './../../../components/Slider/SliderHome'
 import { useMemo, useState } from 'react'
-import * as sc from './../HomeLayout.styled'
 import './../index.scss'
 import { useEffect } from 'react'
-import NewService, { fetchMetadataWithCache } from './../../../services/addBookingService'
+import { fetchMetadataWithCache } from './../../../services/addBookingService'
 import L2FunctionButtonList from './L2FunctionButtonList'
 import { useLocation } from 'react-router-dom'
 import 'zmp-ui/zaui.min.css'
 import { getBannerBySectionCache } from '../../../helper/getBannerBySectionCache'
-import PopupSheetIframe from '../../../components/Popup/PopupSheetIframe'
 import MainLogo from '../../../components/MainLogo'
-import { Spin } from 'antd'
 import { getHomePageConfigCache } from '../../../helper/getHomePageConfigCache'
 import Header from '../../../components/Header'
 import usePartnerBridge from '../../../sdk/usePartnerBridge'
+import { HOME_CONFIG_CATEGORY, HOME_CONFIG_CATEGORY_TEXT } from '../../../constants/Layout2Constants'
 
 const HomeLayout2 = (props) => {
   const location = useLocation()
@@ -34,16 +32,9 @@ const HomeLayout2 = (props) => {
   const storageBottomBanner = localStorage.getItem('BANNER_2002')
   const [topBanner, setTopBanner] = useState(storageTopBanner ? JSON.parse(storageTopBanner)?.data : [])
   const [bottomBanner, setBottomBanner] = useState(storageBottomBanner ? JSON.parse(storageBottomBanner)?.data : [])
-  const storageHomePageConfigVehicleInspection = localStorage.getItem('HOME_PAGE_CONFIG_4')
-  const storageHomePageConfigViolation = localStorage.getItem('HOME_PAGE_CONFIG_5')
-  const storageHomePageConfigStationService = localStorage.getItem('HOME_PAGE_CONFIG_6')
-  const [vehicleInspectionList, setVehicleInspectionList] = useState(
-    storageHomePageConfigVehicleInspection ? JSON.parse(storageHomePageConfigVehicleInspection)?.data : []
-  )
-  const [violationList, setViolationList] = useState(storageHomePageConfigViolation ? JSON.parse(storageHomePageConfigViolation)?.data : [])
-  const [stationServiceList, setStationServiceList] = useState(
-    storageHomePageConfigStationService ? JSON.parse(storageHomePageConfigStationService)?.data : []
-  )
+
+  const storageHomePageConfig = localStorage.getItem('HOME_PAGE_CONFIG_ALL')
+  const [homepageConfig, setHomepageConfig] = useState(storageHomePageConfig ? JSON.parse(storageHomePageConfig)?.data : []? JSON.parse(storageHomePageConfig)?.data : [])
 
   const pushCacheDataIntoObj = (typeOfNews, lastId, obj) => {
     const id = JSON.parse(localStorage.getItem(`LAST_${typeOfNews}_NEWS_ID`)) || undefined
@@ -104,29 +95,17 @@ const HomeLayout2 = (props) => {
         />
       </div>
     )
-  }, [topBanner, isLoading])
+  }, [topBanner, hideNewsFromZaloMiniApp, isLoading])
 
   const renderBottomSlider = useMemo(() => {
     return (
       <SliderHome hideNewsFromZaloMiniApp={hideNewsFromZaloMiniApp} className={'layout2 border-r'} setting={bottomBanner} isLoading={isLoading} />
     )
-  }, [bottomBanner, isLoading])
+  }, [bottomBanner, hideNewsFromZaloMiniApp, isLoading])
 
   const getHomePageConfig = async (params) => {
     getHomePageConfigCache(params).then((result) => {
-      switch (params) {
-        case 4:
-          setVehicleInspectionList(result || [])
-          break
-        case 5:
-          setViolationList(result || [])
-          break
-        case 6:
-          setStationServiceList(result || [])
-          break
-        default:
-          break
-      }
+      setHomepageConfig(result || [])
     })
   }
   useEffect(() => {
@@ -135,12 +114,9 @@ const HomeLayout2 = (props) => {
     // }
     handleFetchData()
   }, [])
-  const fetchHomePageConfig = async (params) => {
-    getHomePageConfig(4)
-    getHomePageConfig(5)
-    setTimeout(() => {
-      getHomePageConfig(6)
-    }, 100)
+  
+  const fetchHomePageConfig = async () => {
+    getHomePageConfig("ALL")
   }
   const fetchBanner = async () => {
     getBannerBySectionCache('2001').then((data) => {
@@ -172,21 +148,24 @@ const HomeLayout2 = (props) => {
     }
   };
 
-  const handleReturnLink = () => {
-    if (dataBtn?.link) {
-      if (dataBtn.token) {
-        return dataBtn?.link + `&token=${userToken}`
-      } else {
-        return dataBtn?.link
-      }
-    } else {
-      if ((dataBtn?.linkNavigation).slice(0, 7).includes('http')) {
-        return dataBtn?.linkNavigation
-      } else {
-        return `${process.env.REACT_APP_DEPLOY_URL}${dataBtn?.linkNavigation}`
-      }
-    }
-  }
+  const dataHomePageConfig = useMemo(() => {
+  const keyToRender = [
+    HOME_CONFIG_CATEGORY.VEHICLE_INSPECTION,
+    HOME_CONFIG_CATEGORY.TRAFFIC_VIOLATION,
+    HOME_CONFIG_CATEGORY.STATION_SERVICES,
+    HOME_CONFIG_CATEGORY.TAX_INFO_LOOKUP,
+    HOME_CONFIG_CATEGORY.SUPPORT_PARTNER,
+    HOME_CONFIG_CATEGORY.UTILITIES,
+  ];
+
+  const list = homepageConfig || [];
+
+  return keyToRender.map((category) => ({
+    configCategory: category,
+    title: HOME_CONFIG_CATEGORY_TEXT[category],
+    icons: list.filter((item) => item.configCategory === category),
+  }));
+}, [homepageConfig]);
 
   if (isLoadingAPI) {
     return (
@@ -209,35 +188,21 @@ const HomeLayout2 = (props) => {
         <div className="layout2-body" style={{ maxWidth: 600, margin: 'auto' }}>
           <div>
             <div className="booking-layout2 mb-4">
-              {vehicleInspectionList?.length > 0 && (
-                <L2FunctionButtonList
-                  setSheetVisible={setSheetVisible}
-                  setDataBtn={setDataBtn}
-                  list={vehicleInspectionList}
-                  title={'Đăng kiểm xe cơ giới'}></L2FunctionButtonList>
-              )}
-              {violationList?.length > 0 && (
-                <L2FunctionButtonList
-                  setSheetVisible={setSheetVisible}
-                  setDataBtn={setDataBtn}
-                  list={violationList}
-                  title={'Phạt nguội giao thông'}></L2FunctionButtonList>
-              )}
-              {stationServiceList?.length > 0 && (
-                <L2FunctionButtonList
-                  setSheetVisible={setSheetVisible}
-                  setDataBtn={setDataBtn}
-                  list={stationServiceList}
-                  title={'Điểm dịch vụ'}></L2FunctionButtonList>
-              )}
+              {
+                dataHomePageConfig.map((item, index) => {
+                  return (
+                    item.icons && item.icons.length > 0 && <L2FunctionButtonList
+                      key={index}
+                      setSheetVisible={setSheetVisible}
+                      setDataBtn={setDataBtn}
+                      list={item.icons}
+                      title={item.title}></L2FunctionButtonList>
+                  )
+                })
+              }
             </div>
           </div>
           {bottomBanner?.length > 0 && <PageLayout>{renderBottomSlider}</PageLayout>}
-          {/* {bottomBanner?.length == 1 && (
-              <div className={'layout2'}>
-                <img style={{ borderRadius: '8px' }} src={bottomBanner[0]?.bannerImageUrl}></img>
-              </div>
-            )} */}
         </div>
       </div>
     </div>

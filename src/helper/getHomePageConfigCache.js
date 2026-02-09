@@ -2,8 +2,6 @@ import NewService from "./../services/addBookingService"
 const CACHE_EXPIRATION_MINUTES = 5;
 
 export const getHomePageConfigCache = async (configCategory) => {
-    if (!configCategory) return [];
-
     const cacheKey = `HOME_PAGE_CONFIG_${configCategory}`;
     const cachedData = localStorage.getItem(cacheKey);
 
@@ -16,7 +14,7 @@ export const getHomePageConfigCache = async (configCategory) => {
             console.error('Error parsing cached data:', e);
         }
 
-        if (parsedData && parsedData.timestamp && parsedData.data) {
+        if (parsedData && parsedData.timestamp && parsedData.data && parsedData.data.length > 0) {
             const { data, timestamp } = parsedData;
             const now = new Date().getTime();   
             // Kiểm tra nếu dữ liệu cache còn hạn
@@ -29,7 +27,7 @@ export const getHomePageConfigCache = async (configCategory) => {
     // Nếu không có cache hoặc cache đã hết hạn, gọi API
     const result = await NewService.getList({
         filter: {
-            configCategory: configCategory + ""
+            configCategory: configCategory === "ALL" ? undefined : JSON.stringify(configCategory)
         }
     });
 
