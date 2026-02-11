@@ -28,7 +28,8 @@ export const getHomePageConfigCache = async (configCategory) => {
     const result = await NewService.getList({
         filter: {
             configCategory: configCategory === "ALL" ? undefined : JSON.stringify(configCategory)
-        }
+        },
+        limit: 100
     });
 
     if (result?.data) {
