@@ -5,6 +5,8 @@ import './../index.scss'
 import { useEffect } from 'react'
 import { fetchMetadataWithCache } from './../../../services/addBookingService'
 import L2FunctionButtonList from './L2FunctionButtonList'
+import L2PartnerSection from './L2PartnerSection'
+import MainButton from '../../../components/MainButton'
 import { useLocation } from 'react-router-dom'
 import 'zmp-ui/zaui.min.css'
 import { getBannerBySectionCache } from '../../../helper/getBannerBySectionCache'
@@ -150,12 +152,18 @@ const HomeLayout2 = (props) => {
 
   const dataHomePageConfig = useMemo(() => {
   const keyToRender = [
+    HOME_CONFIG_CATEGORY.HOME_MAIN_SERVICES,
     HOME_CONFIG_CATEGORY.VEHICLE_INSPECTION,
     HOME_CONFIG_CATEGORY.TRAFFIC_VIOLATION,
+    HOME_CONFIG_CATEGORY.VEHICLE_INSPECTION_SERVICES,
+    HOME_CONFIG_CATEGORY.FEATURED_SERVICES,
     HOME_CONFIG_CATEGORY.STATION_SERVICES,
     HOME_CONFIG_CATEGORY.TAX_INFO_LOOKUP,
     HOME_CONFIG_CATEGORY.SUPPORT_PARTNER,
+    HOME_CONFIG_CATEGORY.PARTNER,
     HOME_CONFIG_CATEGORY.UTILITIES,
+    HOME_CONFIG_CATEGORY.DRIVER_UTILITIES,
+    HOME_CONFIG_CATEGORY.GOVERNMENT_AGENCIES,
   ];
 
   const list = homepageConfig || [];
@@ -190,14 +198,40 @@ const HomeLayout2 = (props) => {
             <div className="booking-layout2 mb-4">
               {
                 dataHomePageConfig.map((item, index) => {
-                  return (
-                    item.icons && item.icons.length > 0 && <L2FunctionButtonList
-                      key={index}
-                      setSheetVisible={setSheetVisible}
-                      setDataBtn={setDataBtn}
-                      list={item.icons}
-                      title={item.title}></L2FunctionButtonList>
-                  )
+                  if (item.icons && item.icons.length > 0) {
+                    if (item.configCategory === HOME_CONFIG_CATEGORY.HOME_MAIN_SERVICES) {
+                      return (
+                        <div key={index} className="mb-4">
+                          <MainButton
+                            setSheetVisible={setSheetVisible}
+                            setDataBtn={setDataBtn}
+                            list={item.icons}
+                            title={item.title}
+                          />
+                        </div>
+                      )
+                    } else if (item.configCategory === HOME_CONFIG_CATEGORY.PARTNER) {
+                      return (
+                        <div key={index} className="mb-4">
+                          <div className='text-large title-homelayout' style={{padding:'0 10px', marginBottom: '12px'}}>
+                            {item.title}
+                          </div>
+                          <L2PartnerSection data={item.icons} />
+                        </div>
+                      )
+                    } else {
+                      return (
+                        <L2FunctionButtonList
+                          key={index}
+                          setSheetVisible={setSheetVisible}
+                          setDataBtn={setDataBtn}
+                          list={item.icons}
+                          title={item.title}
+                        />
+                      )
+                    }
+                  }
+                  return null
                 })
               }
             </div>

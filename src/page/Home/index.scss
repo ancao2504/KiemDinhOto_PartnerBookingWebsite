@@ -260,6 +260,79 @@
   display: flex;
   justify-content: center;
 }
+
+.l2-partner-section {
+  .partner-slider {
+    & .slick-initialized .slick-slide {
+      padding-right: 9px;
+    }
+  }
+
+  .partner-icon-wrapper {
+    height: 65px;
+    border-radius: 15px;
+    aspect-ratio: 1/1;
+  }
+
+  .partner-icon-wrapper img {
+    height: 65px;
+    border-radius: 15px;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+  }
+
+  .partner-link {
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .partner-name {
+    color: var(--light-black-color);
+    margin-top: 8px;
+    font-size: 12px;
+    max-width: 80px;
+    word-break: break-word;
+    white-space: pre-line;
+  }
+
+  .group-wrapper {
+    padding: 0 5px;
+  }
+
+  @media (max-width: 450px) {
+    .partner-icon-wrapper {
+      height: 50px;
+      border-radius: 10px;
+    }
+
+    .partner-icon-wrapper img {
+      height: 50px;
+      border-radius: 10px;
+    }
+  }
+
+  @media (max-width: 280px) {
+    .partner-icon-wrapper {
+      height: 50px;
+      border-radius: 10px;
+    }
+
+    .partner-icon-wrapper img {
+      height: 50px;
+      border-radius: 10px;
+    }
+
+    .partner-name {
+      font-size: 11px;
+    }
+  }
+}
+
 @media (max-width: 420px) {
   .layout1-btn-booking-section .layout1-btn-booking-item{
     width: 33.333%;

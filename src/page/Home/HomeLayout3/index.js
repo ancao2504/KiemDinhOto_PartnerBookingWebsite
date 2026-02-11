@@ -7,7 +7,7 @@ import './index.scss'
 import { useEffect } from 'react'
 import NewService, { fetchMetadataWithCache } from '../../../services/addBookingService'
 import L2FunctionButtonList from './L2FunctionButtonList'
-import L2MainButton from './L2MainButton'
+import MainButton from '../../../components/MainButton'
 import { useLocation, useHistory } from 'react-router-dom'
 import 'zmp-ui/zaui.min.css'
 import { getBannerBySectionCache } from '../../../helper/getBannerBySectionCache'
@@ -199,7 +199,7 @@ const HomeLayout3 = (props) => {
         <div className="more mt-3">
           <div className="layout2-body" style={{ maxWidth: 600, margin: 'auto' }}>
             {homeMainServicesList?.length > 0 && (
-              <L2MainButton setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={homeMainServicesList} title={'Dịch vụ chính trang chủ'} />
+              <MainButton setSheetVisible={setSheetVisible} setDataBtn={setDataBtn} list={homeMainServicesList} title={'Dịch vụ chính trang chủ'} />
             )}
             <div>
               <div className="booking-layout2 mb-4">

@@ -472,7 +472,7 @@ export const HOT_SERVICES = [
 
 export const HOME_CONFIG_CATEGORY = {
   DEFAULT: null,
-  DRIVER_UTILITIES: 1,      // Tiện ích đối tác
+  DRIVER_UTILITIES: 1,      // Tiện ích cho tài xế
   GOVERNMENT_AGENCIES: 2,   // Cơ quan chính phủ
   PARTNER: 3,               // Đối tác
   VEHICLE_INSPECTION: 4,    // Đăng kiểm
@@ -481,12 +481,14 @@ export const HOME_CONFIG_CATEGORY = {
   HOME_MAIN_SERVICES: 7,    // Dịch vụ chính trang chủ,
   TAX_INFO_LOOKUP: 8,       // Tra cứu thông tin thuế
   SUPPORT_PARTNER: 9,       // Đơn vị hỗ trợ
-  UTILITIES: 10,            // Tiền ích
+  UTILITIES: 10,            // Tiện ích
+  FEATURED_SERVICES: 11,    // Dịch vụ nổi bật
+  VEHICLE_INSPECTION_SERVICES: 12, // Dịch vụ đăng kiểm
 }
 
 export const HOME_CONFIG_CATEGORY_TEXT = {
   [HOME_CONFIG_CATEGORY.DEFAULT]: null,
-  [HOME_CONFIG_CATEGORY.DRIVER_UTILITIES]: "Tiện ích đối tác",
+  [HOME_CONFIG_CATEGORY.DRIVER_UTILITIES]: "Tiện ích cho tài xế",
   [HOME_CONFIG_CATEGORY.GOVERNMENT_AGENCIES]: "Cơ quan chính phủ",
   [HOME_CONFIG_CATEGORY.PARTNER]: "Đối tác",
   [HOME_CONFIG_CATEGORY.VEHICLE_INSPECTION]: "Đăng kiểm xe cơ giới",
@@ -496,4 +498,6 @@ export const HOME_CONFIG_CATEGORY_TEXT = {
   [HOME_CONFIG_CATEGORY.TAX_INFO_LOOKUP]: "Tra cứu thông tin thuế",
   [HOME_CONFIG_CATEGORY.SUPPORT_PARTNER]: "Đơn vị hỗ trợ",
   [HOME_CONFIG_CATEGORY.UTILITIES]: "Tiện ích",
+  [HOME_CONFIG_CATEGORY.FEATURED_SERVICES]: "Dịch vụ nổi bật",
+  [HOME_CONFIG_CATEGORY.VEHICLE_INSPECTION_SERVICES]: "Dịch vụ đăng kiểm",
 };
