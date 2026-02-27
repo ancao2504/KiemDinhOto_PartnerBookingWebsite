@@ -5,7 +5,6 @@ export const MESSAGE_BACK_TO_HOME_MINI_APP = "BackToHomeMiniApp";  // PostMessag
 
 export const PARAM_IS_WEB_VIEW = 'isWebView'
 export const PARAM_IS_HEADER_MINI_APP = 'isHeaderMiniApp';
-export const PARAM_APIKEY = 'apikey' // apikey cố định mặc định cho app chứ ko phải để chuyển link
 
 export const PARAM_REFER_USER_ID = 'referUserId' // id người giới thiệu
 export const PARAM_REFER_STATION_ID = 'referStationId' // id trạm giới thiệu

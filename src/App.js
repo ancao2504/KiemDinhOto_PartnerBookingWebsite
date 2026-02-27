@@ -1,7 +1,6 @@
 import './App.css';
 import React, { useEffect, useLayoutEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
-import { Spin } from 'antd'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import "./assets/scss/index.scss"
@@ -16,12 +15,10 @@ import './main.scss'
 import './dropDownCommon.scss'
 import { IS_ZALO_MINI_APP } from './constants/global';
 import Layout from './components/Layout';
-import Logo from './assets/MAINLOGO.png'
 import { PATH } from './constants/router';
 import { GlobalProvider } from './context/GlobalContext';
 import { fillterRoutes } from './router';
-import { setMetaData } from "./actions";
-import { useDispatch } from 'react-redux'
+
 import SystemConfigurationsService from './services/SystemConfigurationsService';
 import { getQueryParams } from './page/BookingPartner/bookingPartnerForm';
 import addKeyLocalStorage from './helper/localStorage';
@@ -44,14 +41,15 @@ function App() {
   }, [])
   
   const handleCheckApiKey = ()=>{
-    const API_KEY = process.env.REACT_APP_BOOKING_API_KEY
+    const params = getQueryParams()
+    const API_KEY = params?.apiKey || params?.apikey || process.env.REACT_APP_BOOKING_API_KEY
     if(!API_KEY){
       // const domain = 'dangkiem1406D.ttdk.com.vn' // dùng cho trường hợp localhost
-      const domain = window.location.origin.split('//')[1] // dùng cho trường hợp dev
+      const domain = window.location.origin.split('//')[1]
       SystemConfigurationsService.getApiKeyByDomain({domain}).then(result => {
         if(result){
           const enableApiKey = result[0]?.apiKeyEnable
-          enableApiKey && result[0]?.apiKey && localStorage.setItem('API_KEY', result[0]?.apiKey)
+          enableApiKey && result[0]?.apiKey && localStorage.setItem('apiKey', result[0]?.apiKey)
         }
       })
     }

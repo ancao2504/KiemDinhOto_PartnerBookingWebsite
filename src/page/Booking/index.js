@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Steps,Button } from 'antd'
+import { Steps } from 'antd'
 import { ReactComponent as LeftIcon } from './../../assets/Booking-icon/ArrowLeft.svg'
 import { ReactComponent as DrivingIcon } from './../../assets/Booking-icon/driving.svg'
 import { ReactComponent as SmartCarIcon } from './../../assets/Booking-icon/smart-car.svg'

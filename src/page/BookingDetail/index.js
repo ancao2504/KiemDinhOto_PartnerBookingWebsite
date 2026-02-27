@@ -9,6 +9,7 @@ import moment from 'moment'
 import BookingService from '../../services/addBookingService'
 import PopupMessage from '../BookingPartner/PopupMessage'
 import { useParams } from 'react-router-dom/cjs/react-router-dom'
+import { CheckApiKey } from '../../helper/CheckApiKey'
 
 const { TextArea } = Input
 
@@ -30,8 +31,10 @@ const BookingDetail = ({
   const { customerScheduleId } = useParams()
   const urlParams = new URLSearchParams(window.location.search);
   const scheduleHash = localStorage.getItem('schedulehash') || urlParams.get('schedulehash');
-  const apiKey = localStorage.getItem('apiKey') || urlParams.get('apiKey');
-  localStorage.setItem('apiKey', apiKey);
+  let apiKey = CheckApiKey()
+  if (apiKey) {
+    localStorage.setItem('apiKey', apiKey);
+  }
   let wab = []
   const [scheduleInformation, setScheduleInformation] = useState([])
   const [isModal, setIsModal] = useState(false)

@@ -1,11 +1,5 @@
-import React, { useEffect, useState } from 'react'
 import { Modal, Button } from 'antd'
-// import { routes } from 'App'
 import successImage from '../../../src/assets/icons/popup-success.png'
-import BookingService from './../../services/addBookingService'
-import { STATION_SESSION_KEY } from './../../constants/schedule'
-import { useLocation } from 'react-router-dom'
-import { CheckApiKey } from '../../helper/CheckApiKey'
 
 const BookingSuccess = ({ isModalOpen, onClose, history, scheduleId,setStep,setIsModalOpen }) => {
   const handleClose = () => {

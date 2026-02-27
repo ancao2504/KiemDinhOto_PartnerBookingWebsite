@@ -1,12 +1,8 @@
-import React, { useCallback } from 'react'
-import { SCHEDULE_DATA,SCHEDULE_TYPE } from './../../constants/serviceOption'
+import { useCallback } from 'react'
+import { SCHEDULE_DATA } from './../../constants/serviceOption'
 import { debounce } from 'lodash'
-import { Steps,Button } from 'antd'
-import { useHistory, useLocation } from 'react-router-dom'
-import { CheckApiKey } from '../../helper/CheckApiKey'
 
 function BookingService({ setStep, setData, step }) {
-  let apiKey = CheckApiKey()
   const handleClick = useCallback(
     debounce((_item) => {
       if (_item.disabled) return

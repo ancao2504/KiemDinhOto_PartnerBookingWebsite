@@ -1,7 +1,7 @@
 import React from 'react'
 import { LocalStorageManager, SessionStorageManager } from '../helper/localStorage'
 import { getUrlParamValue, smartParseParam } from '../helper/params'
-import { PARAM_APIKEY, PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW, PARAM_REFER_STATION_ID, PARAM_REFER_USER_ID } from '../constants/params'
+import { PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW, PARAM_REFER_STATION_ID, PARAM_REFER_USER_ID } from '../constants/params'
 export const AppParamsContext = React.createContext(null)
 
 const getFirstUrlParamValue = (paramKey, search) => {
@@ -76,13 +76,6 @@ const PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE = {
   referStationId: {
     paramKey: PARAM_REFER_STATION_ID,
     storageKey: PARAM_REFER_STATION_ID,
-    envKey: undefined,
-    defaultValue: undefined,
-    parser: (v) => v
-  },
-  apikey: {
-    paramKey: [PARAM_APIKEY, 'apiKey'],
-    storageKey: PARAM_APIKEY,
     envKey: undefined,
     defaultValue: undefined,
     parser: (v) => v

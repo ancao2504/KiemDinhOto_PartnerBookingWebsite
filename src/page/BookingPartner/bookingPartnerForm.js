@@ -110,17 +110,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
   // states cho phương thức thanh toán
   const [zalopayPaymentMethod, setZalopayPaymentMethod] = useState(null)
 
-  // Các functions bổ trợ
-  // const CheckSum = () => {
-  //   const apiKey = dataBookingParam?.apiKey || undefined
-  //   const checksum = dataBookingParam?.checksum || undefined
-  //   const name = dataBookingParam?.name || undefined
-  //   const phone = dataBookingParam?.phone || undefined
-  //   const raw = `apiKey=${apiKey}&name=${name}&phone=${phone}&key=${process.env.REACT_APP_CHECKSUM_SECRET_KEY}`
-  //   const expectedChecksum = SHA256(raw).toString()
-  //   return expectedChecksum == checksum
-  // }
-
   const getPublicPaymentMethod = async () => {
     try {
       const data = await PaymentService.getPaymentQRMethod()
@@ -134,7 +123,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
 
   const getStationConfigByApiKey = (paramsFromUrl) => {
     setIsLoading(true)
-    const apiKey = paramsFromUrl?.apiKey || paramsFromUrl?.apikey || localStorage.getItem('apiKey') || undefined
+    const apiKey = paramsFromUrl?.apiKey || paramsFromUrl?.apikey || localStorage.getItem('apiKey') || process.env.REACT_APP_BOOKING_API_KEY || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apiKey })
       .then((result) => {
         const stationMiniAppLink = JSON.parse(result?.[0]?.stationMiniAppLink || '{}')
@@ -970,7 +959,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
   useEffect(() => {
     if (form.getFieldValue('scheduleType') === SCHEDULE_TYPE_MINIAPP.E_TICKET_SALE) {
       if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
-        getStationByApiKey(dataBookingParam?.apiKey || dataBookingParam?.apikey || localStorage.getItem('apiKey')).then((station) => {
+        getStationByApiKey(dataBookingParam?.apiKey || dataBookingParam?.apikey || localStorage.getItem('apiKey') || process.env.REACT_APP_BOOKING_API_KEY).then((station) => {
           if (station) {
             getStationServices(station?.stationsId).then((services) => {
               const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
