@@ -24,7 +24,12 @@ function BookingPartner() {
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
   let partner = params.get('partner')?.toLowerCase()
-  const { isWebView, isHeaderMiniApp } = useAppParamsContext()
+  const { isWebView, isHeaderMiniApp, checkUrlParamSaveContext } = useAppParamsContext()
+  useEffect(() => {
+    checkUrlParamSaveContext('isWebView')
+    checkUrlParamSaveContext('isHeaderMiniApp')
+  }, [checkUrlParamSaveContext, location.search])
+  
   let apikey = CheckApiKey()
   const localLogo = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})?.stationsLogo
 

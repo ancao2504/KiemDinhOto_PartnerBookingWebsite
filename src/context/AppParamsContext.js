@@ -67,41 +67,119 @@ const PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE = {
     envKey: undefined,
     defaultValue: undefined,
     parser: (v) => v
-  },
+  }
 }
 
-const PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE = {
+const PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE = {}
+
+const findMiniAppParamConfig = (paramKey) => {
+  if (!paramKey) return null
+
+  if (PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE[paramKey]) {
+    return {
+      contextKey: paramKey,
+      config: PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE[paramKey],
+      storage: 'session'
+    }
+  }
+
+  if (PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE[paramKey]) {
+    return {
+      contextKey: paramKey,
+      config: PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE[paramKey],
+      storage: 'local'
+    }
+  }
+
+  const sessionEntry = Object.entries(PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE).find(
+    ([, config]) => config.paramKey === paramKey || config.storageKey === paramKey
+  )
+
+  if (sessionEntry) {
+    return {
+      contextKey: sessionEntry[0],
+      config: sessionEntry[1],
+      storage: 'session'
+    }
+  }
+
+  const localEntry = Object.entries(PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE).find(
+    ([, config]) => config.paramKey === paramKey || config.storageKey === paramKey
+  )
+
+  if (localEntry) {
+    return {
+      contextKey: localEntry[0],
+      config: localEntry[1],
+      storage: 'local'
+    }
+  }
+
+  return null
+}
+
+const buildInitialParamsValue = () => {
+  const params = {}
+
+  Object.keys(PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE).forEach((key) => {
+    params[key] = resolveParamsMiniAppSessionStorage(PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE[key])
+  })
+
+  Object.keys(PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE).forEach((key) => {
+    params[key] = resolveParamsMiniAppLocalStorage(PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE[key])
+  })
+
+  return params
 }
 
 export const AppParamsContextProvider = (props) => {
-  const paramsMiniAppSessionStorage = React.useMemo(() => {
-    const params = {}
+  const [paramsValue, setParamsValue] = React.useState(() => buildInitialParamsValue())
 
-    Object.keys(PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE).forEach((key) => {
-      params[key] = resolveParamsMiniAppSessionStorage(PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE[key])
+  const checkUrlParamSaveContext = React.useCallback((paramKey, options = {}) => {
+    if (!paramKey) return undefined
+
+    const schema = findMiniAppParamConfig(paramKey)
+    const config = schema?.config ?? { paramKey, storageKey: paramKey, parser: undefined }
+    const contextKey = schema?.contextKey ?? paramKey
+
+    const paramValue = getUrlParamValue(config.paramKey, options.search)
+    if (paramValue === null || paramValue === undefined) return undefined
+
+    const parsedValue = config.parser ? config.parser(paramValue) : paramValue
+    const storageMode = options.storage ?? 'auto'
+    const storageType = storageMode === 'auto' ? schema?.storage : storageMode
+
+    if (storageType === 'session' && config.storageKey) {
+      SessionStorageManager.setItem(config.storageKey, paramValue)
+    }
+
+    if (storageType === 'local' && config.storageKey) {
+      LocalStorageManager.setItem(config.storageKey, paramValue)
+    }
+
+    setParamsValue((prev) => {
+      if (prev?.[contextKey] === parsedValue) return prev
+      return {
+        ...prev,
+        [contextKey]: parsedValue
+      }
     })
 
-    return params
+    return parsedValue
   }, [])
 
-  const paramsMiniAppLocalStorage = React.useMemo(() => {
-    const params = {}
-
-    Object.keys(PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE).forEach((key) => {
-      params[key] = resolveParamsMiniAppLocalStorage(PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE[key])
-    })
-
-    return params
-  }, [])
+  const contextValue = React.useMemo(() => {
+    return {
+      ...paramsValue,
+      checkUrlParamSaveContext
+    }
+  }, [paramsValue, checkUrlParamSaveContext])
 
   // pass resolved params through context value
   return React.createElement(
     AppParamsContext.Provider,
     {
-      value: {
-        ...paramsMiniAppSessionStorage,
-        ...paramsMiniAppLocalStorage
-      }
+      value: contextValue
     },
     props.children
   )

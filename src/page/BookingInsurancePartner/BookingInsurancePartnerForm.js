@@ -93,7 +93,11 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
   const [isLoadDataLocal, setIsLoadDataLocal] = useState(false)
   const [vehicleSubCategoryOptions, setVehicleSubCategoryOptions] = useState([])
   const [targetLink, setTargetLink] = useState('')
-  const { referUserId, referStationId } = useAppParamsContext()
+  const { referUserId, referStationId, checkUrlParamSaveContext } = useAppParamsContext()
+  useEffect(() => {
+    checkUrlParamSaveContext('referUserId')
+    checkUrlParamSaveContext('referStationId')
+  }, [checkUrlParamSaveContext, location.search])
   
   const [dateFilter, setDateFilter] = useState({
     startDate: moment().format(DATE_DISPLAY_FORMAT),

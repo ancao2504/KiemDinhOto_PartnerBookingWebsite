@@ -3,6 +3,8 @@ import { ReactComponent as SuccessIcon } from './../../assets/icons/success.svg'
 import './index.scss'
 import { SCHEDULE_TYPE } from '../../constants/serviceOption'
 import { useAppParamsContext } from '../../context/AppParamsContext'
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,scheduleType }) => {
   const consultantTypes = [
     SCHEDULE_TYPE.CONSULTANT_MAINTENANCE,
@@ -13,8 +15,12 @@ const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,schedule
     SCHEDULE_TYPE.CONSULTANT_TNDS_INSURANCE,
   ]
   const isConsultantType = consultantTypes.includes(scheduleType)
-  const { isWebView } = useAppParamsContext()
-
+  const { isWebView, checkUrlParamSaveContext } = useAppParamsContext()
+  const location = useLocation()
+  useEffect(() => {
+    checkUrlParamSaveContext('isWebView')
+  }, [checkUrlParamSaveContext, location.search])
+  
   const handleViewListBooking=()=>{
     setTimeout(() => {
       setTabKey()
