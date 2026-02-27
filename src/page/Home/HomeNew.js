@@ -27,7 +27,7 @@ const HomeNew = ({ listNews , linkDirectDetail = "detail-post" , showEye = true}
 
   const handleCardClick = (value) => {
     if (!isDragging) {
-      const link = `${process.env.REACT_APP_DEPLOY_URL}/${linkDirectDetail}/${value?.stationNewsId}?isEmbeddedView=true`
+      const link = `${process.env.REACT_APP_URL_WEB_TTDK}/${linkDirectDetail}/${value?.stationNewsId}?isEmbeddedView=true`
       history.push(`${PATH.IFRAME_VIEW}?${PARAM_IFRAME_URL}=${encodeLink(link)}`)
     }
   }

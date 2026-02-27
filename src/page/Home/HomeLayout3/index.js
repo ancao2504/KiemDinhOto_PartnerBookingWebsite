@@ -219,7 +219,7 @@ const HomeLayout3 = (props) => {
                     <div className="d-flex justify-content-between align-items-center news-center" >
                       <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Tin tức</div>
                       <div className="d-flex mb-0 justify-content-end home-link" onClick={() => {
-                        const link = `${process.env.REACT_APP_DEPLOY_URL}/new`
+                        const link = `${process.env.REACT_APP_URL_WEB_TTDK}/new`
                         history.push(`${PATH.IFRAME_VIEW}?${PARAM_IFRAME_URL}=${encodeLink(link)}`)
                       }}>
                         <a href="/" onClick={(e) => e.preventDefault()}>

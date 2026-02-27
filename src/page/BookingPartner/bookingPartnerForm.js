@@ -123,7 +123,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
 
   const getStationConfigByApiKey = (paramsFromUrl) => {
     setIsLoading(true)
-    const apiKey = paramsFromUrl?.apiKey || paramsFromUrl?.apikey || localStorage.getItem('apiKey') || process.env.REACT_APP_BOOKING_API_KEY || undefined
+    const apiKey = paramsFromUrl?.apiKey || paramsFromUrl?.apikey || localStorage.getItem('apiKey') || process.env.REACT_APP_APIKEY || undefined
     SystemConfigurationsService.getStationConfigByApiKey({ apiKey: apiKey })
       .then((result) => {
         const stationMiniAppLink = JSON.parse(result?.[0]?.stationMiniAppLink || '{}')
@@ -959,7 +959,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
   useEffect(() => {
     if (form.getFieldValue('scheduleType') === SCHEDULE_TYPE_MINIAPP.E_TICKET_SALE) {
       if (scheduleCategory === SCHEDULE_BOOKING_TYPE.CONSULTANT) {
-        getStationByApiKey(dataBookingParam?.apiKey || dataBookingParam?.apikey || localStorage.getItem('apiKey') || process.env.REACT_APP_BOOKING_API_KEY).then((station) => {
+        getStationByApiKey(dataBookingParam?.apiKey || dataBookingParam?.apikey || localStorage.getItem('apiKey') || process.env.REACT_APP_APIKEY).then((station) => {
           if (station) {
             getStationServices(station?.stationsId).then((services) => {
               const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())

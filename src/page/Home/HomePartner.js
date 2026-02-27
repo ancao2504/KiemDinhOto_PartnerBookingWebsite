@@ -62,7 +62,7 @@ const HomePartner = ({ setSheetVisible, setDataBtn }) => {
     setSheetVisible(true)
     let data= {
       label: value?.title,
-      link: (value?.linkNavigation)?.slice(0, 7)?.includes("http") ? value?.linkNavigation : `${process.env.REACT_APP_DEPLOY_URL}${value?.linkNavigation}`
+      link: (value?.linkNavigation)?.slice(0, 7)?.includes("http") ? value?.linkNavigation : `${process.env.REACT_APP_URL_WEB_TTDK}${value?.linkNavigation}`
     }
     setDataBtn(data)
   }
