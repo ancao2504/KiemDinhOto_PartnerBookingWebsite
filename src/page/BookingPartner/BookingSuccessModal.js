@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react'
 import { Modal, Button } from 'antd'
 import { ReactComponent as SuccessIcon } from './../../assets/icons/success.svg'
 import './index.scss'
 import { SCHEDULE_TYPE } from '../../constants/serviceOption'
-import { PARAM_IS_WEB_VIEW } from '../../constants/params'
-import { useLocation } from 'react-router-dom'
-import { smartParseParam } from '../../helper/params'
-import { checkIsWebView } from '../../helper/checkIsEmbeddedView'
+import { useAppParamsContext } from '../../context/AppParamsContext'
 const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,scheduleType }) => {
   const consultantTypes = [
     SCHEDULE_TYPE.CONSULTANT_MAINTENANCE,
@@ -17,15 +13,8 @@ const BookingSuccess = ({ isModalOpen, onClose,setTabKey,setIsModalOpen,schedule
     SCHEDULE_TYPE.CONSULTANT_TNDS_INSURANCE,
   ]
   const isConsultantType = consultantTypes.includes(scheduleType)
-  const location = useLocation()
-  const searchparam = location.search
-  const params = new URLSearchParams(searchparam)
-  const isWebView = checkIsWebView(window.location.href) ||
-    sessionStorage.getItem(PARAM_IS_WEB_VIEW) === 'true' ||
-    sessionStorage.getItem(PARAM_IS_WEB_VIEW) === '1'
-  if (isWebView) {
-    sessionStorage.setItem(PARAM_IS_WEB_VIEW, 'true')
-  }
+  const { isWebView } = useAppParamsContext()
+
   const handleViewListBooking=()=>{
     setTimeout(() => {
       setTabKey()

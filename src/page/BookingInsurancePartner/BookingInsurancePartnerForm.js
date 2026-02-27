@@ -19,6 +19,7 @@ import PopupMessage from '../BookingPartner/PopupMessage'
 import BookingSuccess from '../BookingPartner/BookingSuccessModal'
 import redirectToInsurancePartner from './redirectToInsurancePartner'
 import MainLogo from '../../components/MainLogo'
+import { useAppParamsContext } from '../../context/AppParamsContext'
 
 const usagePurposeTypeOptions=[
   {
@@ -92,6 +93,8 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
   const [isLoadDataLocal, setIsLoadDataLocal] = useState(false)
   const [vehicleSubCategoryOptions, setVehicleSubCategoryOptions] = useState([])
   const [targetLink, setTargetLink] = useState('')
+  const { referUserId, referStationId } = useAppParamsContext()
+  
   const [dateFilter, setDateFilter] = useState({
     startDate: moment().format(DATE_DISPLAY_FORMAT),
     endDate: moment().endOf('month').format(DATE_DISPLAY_FORMAT),
@@ -314,8 +317,8 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
       insuranceEnd:values?.insuranceEnd || undefined,
       referCode:values?.referCode || undefined,
       discountCode:values?.discountCode || undefined,
-      referUserId:Number(localStorage.getItem('partnerReferStationId')) > 0  ? undefined : (Number(localStorage.getItem('partnerReferUserId')) || undefined),
-      referStationId:Number(localStorage.getItem('partnerReferStationId')) > 0 ? Number(localStorage.getItem('partnerReferStationId')) : undefined,
+      referUserId: referStationId ? undefined : (referUserId || undefined),
+      referStationId: referStationId || undefined,
     }
     Object.keys(newData).forEach((key) => {
       if (newData[key] === "") {

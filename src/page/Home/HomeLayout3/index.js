@@ -16,7 +16,7 @@ import { Spin } from 'antd'
 import { getHomePageConfigCache } from '../../../helper/getHomePageConfigCache'
 import HomeNew from '../HomeNew'
 import { PATH } from '../../../constants/router'
-import { PARAM_URL_IFRAME } from '../../../constants/params'
+import { PARAM_IFRAME_URL } from '../../../constants/params'
 import { encodeLink } from '../../../helper/common'
 import useWindowDimensions from '../../../hooks/window-dimensions'
 import Header from '../../../components/Header'
@@ -220,7 +220,7 @@ const HomeLayout3 = (props) => {
                       <div className='text-large title-homelayout' style={{padding:'0 10px'}}>Tin tức</div>
                       <div className="d-flex mb-0 justify-content-end home-link" onClick={() => {
                         const link = `${process.env.REACT_APP_DEPLOY_URL}/new`
-                        history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeLink(link)}`)
+                        history.push(`${PATH.IFRAME_VIEW}?${PARAM_IFRAME_URL}=${encodeLink(link)}`)
                       }}>
                         <a href="/" onClick={(e) => e.preventDefault()}>
                           Xem tất cả

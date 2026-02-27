@@ -1,8 +1,12 @@
-export const PARAM_HEADER_TITLE = 'headerTitle'
-export const PARAM_URL_IFRAME = 'url'
+export const PARAM_IFRAME_HEADER_TITLE = 'headerTitle' // chỉ xài ở iframe mini app
+export const PARAM_IFRAME_URL = 'url' // chỉ xài ở iframe mini app
+export const PARAM_IS_BACK_TO_HOME_MINI_APP = 'isBackToHomeMiniApp' // chỉ xài ở iframe mini app
+export const MESSAGE_BACK_TO_HOME_MINI_APP = "BackToHomeMiniApp";  // PostMessage keys: chỉ xài ở iframe mini app
+
 export const PARAM_IS_WEB_VIEW = 'isWebView'
 export const PARAM_IS_HEADER_MINI_APP = 'isHeaderMiniApp';
-export const PARAM_IS_BACK_TO_HOME_MINI_APP = 'isBackToHomeMiniApp'
+export const PARAM_APIKEY = 'apikey' // apikey cố định mặc định cho app chứ ko phải để chuyển link
 
-// PostMessage keys
-export const MESSAGE_BACK_TO_HOME_MINI_APP = "BackToHomeMiniApp";
+export const PARAM_REFER_USER_ID = 'referUserId' // id người giới thiệu
+export const PARAM_REFER_STATION_ID = 'referStationId' // id trạm giới thiệu
+

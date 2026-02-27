@@ -4,14 +4,11 @@ import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
 import { useGlobalContext } from './../../../context/GlobalContext'
 import Slider from 'react-slick'
 import useWindowDimensions from '../../../hooks/window-dimensions'
-import { PATH } from '../../../constants/router'
-import { PARAM_URL_IFRAME } from '../../../constants/params'
-import { encodeLink } from '../../../helper/common'
 import { handleDirect } from '../../../components/Slider/SliderHome'
 
 const L2FunctionButtonList = (props) => {
   const { handleZaloAuthorize,globalState } = useGlobalContext();
-  const {setSheetVisible, setDataBtn,slider}=props
+  const {setSheetVisible, setDataBtn, slider}=props
   const { list ,title,className } = props
   const history = useHistory()
   const { handleGetUserPhone } = useGlobalContext();

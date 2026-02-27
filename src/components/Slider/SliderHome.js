@@ -7,7 +7,7 @@ import addKeyLocalStorage, { saveClickToLocalStorage } from '../../helper/localS
 import LogService from '../../services/logService'
 import { useHistory } from 'react-router-dom'
 import { PATH } from '../../constants/router'
-import { PARAM_URL_IFRAME } from '../../constants/params'
+import { PARAM_IFRAME_URL } from '../../constants/params'
 import { encodeLink } from '../../helper/common'
 import { NAVIGATION_TYPE } from '../../constants/global'
 
@@ -20,7 +20,7 @@ export const handleDirect = (link, type, history) => {
     if (!(link?.startsWith("https://") || link?.startsWith("http://"))) {
       history.push(link)
     } else{
-      history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeLink(link)}`)
+      history.push(`${PATH.IFRAME_VIEW}?${PARAM_IFRAME_URL}=${encodeLink(link)}`)
     }
   }
 }

@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom'
 import BasicPlaceholder from './../../components/BasicComponent/BasicPlaceholder'
 import CardItem from './CardItemNews'
 import { PATH } from '../../constants/router'
-import { PARAM_URL_IFRAME } from '../../constants/params'
+import { PARAM_IFRAME_URL } from '../../constants/params'
 import { encodeLink } from '../../helper/common'
 
 const HomeNew = ({ listNews , linkDirectDetail = "detail-post" , showEye = true}) => {
@@ -28,7 +28,7 @@ const HomeNew = ({ listNews , linkDirectDetail = "detail-post" , showEye = true}
   const handleCardClick = (value) => {
     if (!isDragging) {
       const link = `${process.env.REACT_APP_DEPLOY_URL}/${linkDirectDetail}/${value?.stationNewsId}?isEmbeddedView=true`
-      history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeLink(link)}`)
+      history.push(`${PATH.IFRAME_VIEW}?${PARAM_IFRAME_URL}=${encodeLink(link)}`)
     }
   }
 

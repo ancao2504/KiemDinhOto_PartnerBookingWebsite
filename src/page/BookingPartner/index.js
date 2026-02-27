@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Form, Tabs, Spin, notification } from 'antd'
+import { useEffect, useState } from 'react'
+import { Form, Spin, notification } from 'antd'
 import './index.scss'
 import BookingPartnerForm from './bookingPartnerForm'
 import { useGtelpayUserData } from '../../context/GtelpayContext'
@@ -7,15 +7,12 @@ import { useLocation } from 'react-router-dom'
 import LoadFormBookingFailed from '../../components/BasicComponent/LoadFormBookingFailed'
 import { CheckApiKey } from '../../helper/CheckApiKey'
 import { TTDK_PARTNER } from '../../components/BasicComponent/CheckLogoPartner'
-import { getZaloUserName, getZaloUserPhone } from '../../helper/zaloSDK'
 import { useGlobalContext } from '../../context/GlobalContext'
 import { SCHEDULE_TYPE, WEBVIEW_TYPES } from '../../constants/global'
 import MainLogo from '../../components/MainLogo'
 import addKeyLocalStorage from '../../helper/localStorage'
 import Header from '../../components/Header'
-import { PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW } from '../../constants/params'
-import { smartParseParam } from '../../helper/params'
-import { checkHeaderMiniApp, checkIsBackToHomeMiniApp, checkIsWebView } from '../../helper/checkIsEmbeddedView'
+import { useAppParamsContext } from '../../context/AppParamsContext'
 function BookingPartner() {
   const { globalState, handleGetUserPhone, handleGetUserName, setGlobalState } = useGlobalContext();
   const { gtelpayUser } = useGtelpayUserData()
@@ -27,22 +24,9 @@ function BookingPartner() {
   const searchparam = location.search
   const params = new URLSearchParams(searchparam)
   let partner = params.get('partner')?.toLowerCase()
-  const isWebView = checkIsWebView(window.location.href) ||
-    sessionStorage.getItem(PARAM_IS_WEB_VIEW) === 'true' ||
-    sessionStorage.getItem(PARAM_IS_WEB_VIEW) === '1'
-  const isHeaderMiniApp =
-    checkHeaderMiniApp(window.location.href) ||
-    sessionStorage.getItem(PARAM_IS_HEADER_MINI_APP) === 'true' ||
-    sessionStorage.getItem(PARAM_IS_HEADER_MINI_APP) === '1'
-  if (isWebView) {
-    sessionStorage.setItem(PARAM_IS_WEB_VIEW, 'true')
-  }
-  if (isHeaderMiniApp) {
-    sessionStorage.setItem(PARAM_IS_HEADER_MINI_APP, 'true')
-  }
+  const { isWebView, isHeaderMiniApp } = useAppParamsContext()
   let apikey = CheckApiKey()
   const localLogo = (JSON.parse(localStorage.getItem(addKeyLocalStorage('dataTheme'))) || {})?.stationsLogo
-
 
   const handleGetUserInfor = async () => {
     try {
@@ -102,7 +86,7 @@ function BookingPartner() {
                       <Tabs activeKey={tabKey}>
                         <Tabs.TabPane tab="Đặt lịch" key="booking"> */}
                   {
-                    (Number(isWebView) === WEBVIEW_TYPES.WEBVIEW) ? null : <div className='booking-title title-normal mb-4'>{getTitleName(searchparam)}</div>
+                    isWebView ? null : <div className='booking-title title-normal mb-4'>{getTitleName(searchparam)}</div>
                   }
                   <div className='mt-3'>
                     <BookingPartnerForm gtelpayUser={gtelpayUser} zaloUserPhone={globalState.phoneNumber} zaloUserName={globalState.userName} setTabKey={setTabKey} form={form} />

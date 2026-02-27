@@ -1,10 +1,8 @@
 import React, { useRef } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useGlobalContext } from '../../context/GlobalContext'
-import { PATH } from '../../constants/router'
-import { PARAM_URL_IFRAME } from '../../constants/params'
-import { encodeLink } from '../../helper/common'
 import './index.scss'
+import { handleDirect } from '../Slider/SliderHome'
 
 const MainButton = ({ setSheetVisible, setDataBtn, list, title, className }) => {
   const history = useHistory()
@@ -31,11 +29,7 @@ const MainButton = ({ setSheetVisible, setDataBtn, list, title, className }) => 
 
       const isZaloLink = link.includes('zalo.me')
       if (link) {
-        if (!(link?.startsWith("https://") || link?.startsWith("http://"))) {
-          history.push(link)
-        } else {
-          history.push(`${PATH.IFRAME_VIEW}?${PARAM_URL_IFRAME}=${encodeLink(link)}`)
-        }
+        handleDirect(link, element?.navigationType  , history)
       }
     } finally {
       isAuthorizingRef.current = false
