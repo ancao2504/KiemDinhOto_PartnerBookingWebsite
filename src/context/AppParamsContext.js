@@ -1,12 +1,24 @@
 import React from 'react'
 import { LocalStorageManager, SessionStorageManager } from '../helper/localStorage'
 import { getUrlParamValue, smartParseParam } from '../helper/params'
-import { PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW, PARAM_REFER_STATION_ID, PARAM_REFER_USER_ID } from '../constants/params'
+import { PARAM_APIKEY, PARAM_IS_HEADER_MINI_APP, PARAM_IS_WEB_VIEW, PARAM_REFER_STATION_ID, PARAM_REFER_USER_ID } from '../constants/params'
 export const AppParamsContext = React.createContext(null)
+
+const getFirstUrlParamValue = (paramKey, search) => {
+  if (Array.isArray(paramKey)) {
+    for (const key of paramKey) {
+      const value = getUrlParamValue(key, search)
+      if (value !== null && value !== undefined) return value
+    }
+    return null
+  }
+
+  return getUrlParamValue(paramKey, search)
+}
 
 const resolveParamsMiniAppSessionStorage = (config) => {
   // 1. param (raw)
-  const param = getUrlParamValue(config.paramKey)
+  const param = getFirstUrlParamValue(config.paramKey)
 
   // có param thì lưu session (raw)
   if (param !== null && param !== undefined && config.storageKey) {
@@ -22,7 +34,7 @@ const resolveParamsMiniAppSessionStorage = (config) => {
 
 const resolveParamsMiniAppLocalStorage = (config) => {
   // 1. param (raw)
-  const param = getUrlParamValue(config.paramKey)
+  const param = getFirstUrlParamValue(config.paramKey)
 
   // có param thì lưu local (raw)
   if (param !== null && param !== undefined && config.storageKey) {
@@ -67,10 +79,25 @@ const PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE = {
     envKey: undefined,
     defaultValue: undefined,
     parser: (v) => v
+  },
+  apikey: {
+    paramKey: [PARAM_APIKEY, 'apiKey'],
+    storageKey: PARAM_APIKEY,
+    envKey: undefined,
+    defaultValue: undefined,
+    parser: (v) => v
   }
 }
 
 const PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE = {}
+
+const matchesParamKey = (config, paramKey) => {
+  if (!config || !paramKey) return false
+  if (Array.isArray(config.paramKey)) {
+    return config.paramKey.includes(paramKey)
+  }
+  return config.paramKey === paramKey
+}
 
 const findMiniAppParamConfig = (paramKey) => {
   if (!paramKey) return null
@@ -92,7 +119,7 @@ const findMiniAppParamConfig = (paramKey) => {
   }
 
   const sessionEntry = Object.entries(PARAMS_MINIAPP_SCHEMA_SESSION_STORAGE).find(
-    ([, config]) => config.paramKey === paramKey || config.storageKey === paramKey
+    ([, config]) => matchesParamKey(config, paramKey) || config.storageKey === paramKey
   )
 
   if (sessionEntry) {
@@ -104,7 +131,7 @@ const findMiniAppParamConfig = (paramKey) => {
   }
 
   const localEntry = Object.entries(PARAMS_MINIAPP_SCHEMA_LOCAL_STORAGE).find(
-    ([, config]) => config.paramKey === paramKey || config.storageKey === paramKey
+    ([, config]) => matchesParamKey(config, paramKey) || config.storageKey === paramKey
   )
 
   if (localEntry) {
@@ -142,7 +169,7 @@ export const AppParamsContextProvider = (props) => {
     const config = schema?.config ?? { paramKey, storageKey: paramKey, parser: undefined }
     const contextKey = schema?.contextKey ?? paramKey
 
-    const paramValue = getUrlParamValue(config.paramKey, options.search)
+    const paramValue = getFirstUrlParamValue(config.paramKey, options.search)
     if (paramValue === null || paramValue === undefined) return undefined
 
     const parsedValue = config.parser ? config.parser(paramValue) : paramValue
@@ -171,6 +198,7 @@ export const AppParamsContextProvider = (props) => {
   const contextValue = React.useMemo(() => {
     return {
       ...paramsValue,
+      checkUrlParam: checkUrlParamSaveContext,
       checkUrlParamSaveContext
     }
   }, [paramsValue, checkUrlParamSaveContext])
