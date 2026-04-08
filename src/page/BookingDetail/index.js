@@ -302,9 +302,6 @@ const BookingDetail = ({
         <div className="w-100 d-flex justify-content-center" style={{gap:"2em"}}>
           {scheduleInformation?.confirmStatus === 0 ? (
             <>
-          <Button className="cancel-schedule d-flex justify-content-center align-items-center" type="primary" onClick={() => { setIsModal(true) }} size="larger" style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px'}}>
-            Hủy lịch hẹn
-          </Button>
           <Button className="d-flex justify-content-center align-items-center" type="primary" 
             onClick={() => { 
               history.push({
@@ -316,6 +313,9 @@ const BookingDetail = ({
             style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px'}}
             >
               Sửa
+          </Button>
+          <Button className="d-flex justify-content-center align-items-center" type="primary" onClick={() => { setIsModal(true) }} size="larger" style={{width: '100%',padding: '20px',borderRadius:'6px',marginTop:'30px', backgroundColor:"var(--gray-mid-gray)!important"}}>
+            Hủy lịch hẹn
           </Button>
             </>
           ):(null)}
