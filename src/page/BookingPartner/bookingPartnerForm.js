@@ -95,7 +95,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
 
   // Kiểm tra các biển trong ENV
   const isZaloApp = process.env.REACT_APP_ZALO_AUTH_ENABLE * 1 === 1 // ==> dùng cho miniApp
-  const MINIAPP_GTELPAY = window?._env_?.REACT_APP_MINIAPP_GTELPAY == '1' 
+  const MINIAPP_GTELPAY = window?._env_?.REACT_APP_MINIAPP_GTELPAY == '1'
   const MINIAPP_ZALOPAY = window?._env_?.REACT_APP_MINIAPP_ZALOPAY == '1' // dùng để tích hợp thanh toán qua ZALOPAY
 
   // state này để lấy thông tin trên params và hiển thị cho lần đầu tiên
@@ -416,14 +416,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
     getBookingDate()
   }
 
-  const handleFillStationDateTime = () => {
-    const stationsId = form.getFieldValue('stationsId')
-    setWorkdayFilter({
-      ...workdayFilter,
-      stationsId: stationsId
-    })
-  }
-
   const getMetaData = () => {
     fetchMetadataWithCache()
       .then((result) => {
@@ -460,7 +452,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
     const hasBooking = !!element?.totalBookingSchedule
     const hasSchedule = !!element?.totalSchedule
 
-    // if (disableBookingHour) {
     if (element?.scheduleTimeStatus === 0) {
       if (fullSchedule) {
         return <div style={{ color: 'var(--error-btn-color)' }}>Đã đầy</div>
@@ -476,7 +467,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
     if (hasSchedule || hasBooking) {
       return `${element.totalBookingSchedule || 0}/${element.totalSchedule}`
     }
-    // }
 
     const isEnableBooking = stationBookingConfig.some((item) => item?.enableBooking)
 
@@ -487,80 +477,202 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
     )
   }
 
+  function parseStationBookingConfig(configStr) {
+    if (!configStr) return null
+    try {
+      return JSON.parse(configStr)
+    } catch (error) {
+      return null
+    }
+  }
+
+  function getStationAcceptBooking(stationOrStationId) {
+    const resolvedId = stationOrStationId || form.getFieldValue('stationsId')
+    const stationConfig = stationOrStationId?.stationBookingConfig
+      ? parseStationBookingConfig(stationOrStationId.stationBookingConfig)
+      : parseStationBookingConfig(
+        (listStation || []).find((item) => item?.stationsId == resolvedId || item?.value == resolvedId)?.stationBookingConfig
+      )
+
+    if (stationConfig) {
+      return stationConfig?.some((item) => item?.enableBooking) ? 1 : 0
+    }
+
+    return stationBookingConfig?.some((item) => item?.enableBooking) ? 1 : 0
+  }
+
+  function getScheduleDateDisplayConfig(item, stationAcceptBooking) {
+    const totalSchedule = item?.totalSchedule
+    const totalBookingSchedule = item?.totalBookingSchedule
+    const isMissingData = totalSchedule === null || totalSchedule === undefined || totalBookingSchedule === null || totalBookingSchedule === undefined
+    const isFull = totalSchedule > 0 && totalBookingSchedule >= totalSchedule
+
+    if (isMissingData) {
+      return { disabled: true, isFull: false, text: '' }
+    }
+
+    if (item?.scheduleDateStatus == 0) {
+      if (!stationAcceptBooking) {
+        return { disabled: false, isFull: false, text: `Đang chờ ${totalBookingSchedule || 0}` }
+      }
+      if (isFull) {
+        return { disabled: true, isFull: true, text: 'Đã đầy' }
+      }
+      return { disabled: true, isFull: false, text: '' }
+    }
+
+    if (item?.scheduleDateStatus == 1) {
+      if (totalSchedule <= 0) {
+        return { disabled: true, isFull: false, text: '' }
+      }
+      if (isFull) {
+        return { disabled: true, isFull: true, text: 'Đã đầy' }
+      }
+      return { disabled: false, isFull: false, text: `${totalBookingSchedule}/${totalSchedule}` }
+    }
+
+    return { disabled: true, isFull: false, text: '' }
+  }
+
+  function isDisabledScheduleTime(item) {
+    const totalSchedule = item?.totalSchedule
+    const totalBookingSchedule = item?.totalBookingSchedule
+    const isMissingData = totalSchedule === null || totalSchedule === undefined || totalBookingSchedule === null || totalBookingSchedule === undefined
+
+    if (isMissingData) return true
+    if (item?.scheduleTimeStatus !== 1) return true
+    if (totalSchedule <= 0) return true
+    return totalBookingSchedule >= totalSchedule
+  }
+
+  const onChangeDate = (date, stationsId, vehicleType) => {
+    setWorkdaySelectedDate(date)
+    form.setFieldValue('dateSchedule', date)
+
+    // Reset Time
+    form.setFieldValue('time', undefined)
+    setListBookingTime([])
+
+    if (date && stationsId && vehicleType) {
+      getBookingHours({
+        stationsId: stationsId,
+        date: date,
+        vehicleType: vehicleType
+      })
+    }
+  }
+
+  const onChangeStation = async (stationsId, overrideVehicleType = null) => {
+    // Reset Date & Time
+    form.setFieldValue('dateSchedule', undefined)
+    form.setFieldValue('time', undefined)
+    setWorkdaySelectedDate(undefined)
+    setListBookingDate([])
+    setListBookingTime([])
+
+    if (!stationsId) {
+      setWorkdayFilter((prev) => ({ ...prev, stationsId: undefined }))
+      return
+    }
+
+    getStationServices(stationsId).then((services) => {
+      const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
+      const filteredServices = services.filter((service) => allowedLabels.includes(service?.label?.toLowerCase()))
+      setETicketOptions(filteredServices)
+    })
+
+    try {
+      const vType = overrideVehicleType || workdayFilter.vehicleType || VEHICLE_SUB_TYPE[0].vehicleType
+      const f = { ...workdayFilter, stationsId, vehicleType: vType }
+
+      const result = await findFirstAvailableDateRange(f)
+      const actualFilter = result || f
+      setWorkdayFilter(actualFilter)
+      getBookingDate(actualFilter)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   function getBookingHours(params) {
     setLoadingHoursPicker(true)
     BookingService.getBookingHours(params)
       .then((data) => {
         if (data.statusCode == 505) {
-        } else {
-          let tmp = data || []
-          if (tmp.length > 0) {
-            tmp.forEach((element) => {
-              element.disabled = element.scheduleTimeStatus === 0 || element?.totalBookingSchedule >= element?.totalSchedule
-              // const enableBookingHandler = stationBookingConfig.some((item) => {
-              //   return item?.enableBooking
-              // })
-              element.label = (
-                <div className="ai-c j-sb w-100">
-                  <div>{changeTime(element.scheduleTime)}</div>
-                  <div className="text-primary">{getDisplayTextByScheduleTimeStatus(element)}</div>
-                </div>
-              )
-              element.value = element.disabled
-            })
-            const firstAvailableTime = tmp.find((item) => item.scheduleTimeStatus === 1 && item.totalBookingSchedule < item.totalSchedule)
-            form.setFieldValue('time', firstAvailableTime?.scheduleTime)
-            if (!firstAvailableTime) {
-              form.setFieldValue('time', undefined)
-            } else {
-              form.setFieldValue('time', firstAvailableTime)
-            }
-            setListBookingTime(tmp)
+          setListBookingTime([])
+          return
+        }
+
+        let tmp = data || []
+        if (tmp.length > 0) {
+          tmp.forEach((element) => {
+            element.disabled = isDisabledScheduleTime(element)
+            element.label = (
+              <div className="ai-c j-sb w-100">
+                <div>{changeTime(element.scheduleTime)}</div>
+                <div className="text-primary">{getDisplayTextByScheduleTimeStatus(element)}</div>
+              </div>
+            )
+            element.value = element.disabled
+          })
+
+          const firstAvailableTime = tmp.find((item) => !item.disabled)
+          if (firstAvailableTime) {
+            form.setFieldValue('time', firstAvailableTime)
+          } else {
+            form.setFieldValue('time', undefined)
           }
+          setListBookingTime(tmp)
+        } else {
+          setListBookingTime([])
+          form.setFieldValue('time', undefined)
         }
       })
       .catch(() => {
         setErrorMessage('Lấy thông tin giờ hẹn thất bại.')
         setIsModalErrOpen(true)
-        setLoadingHoursPicker(false)
+        setListBookingTime([])
       })
       .finally(() => {
         setLoadingHoursPicker(false)
       })
   }
 
-  const getBookingDate = () => {
+  const getBookingDate = (filterArgs) => {
+    const fetchFilter = filterArgs || workdayFilter;
+    const stationAcceptBooking = getStationAcceptBooking(fetchFilter?.stationsId)
     setIsWorkdayLoading(true)
-    BookingService.getBookingDate(workdayFilter)
+    BookingService.getBookingDate(fetchFilter)
       .then((data) => {
         if (data.statusCode == 505) {
-        } else {
-          if (data.length > 0) {
-            let tmp = data || []
-            if (tmp.length > 0) {
-              tmp.forEach((element) => {
-                if (element.scheduleDateStatus == 0) {
-                  element.disabled = false
-                }
-                element.value = element.scheduleDate
-              })
-              setListBookingDate(tmp)
+          setListBookingDate([])
+          return
+        }
 
-              const firstAvailableSchedule = tmp.find((item) => item.scheduleDateStatus === 1 && item.totalBookingSchedule < item.totalSchedule)
-              form.setFieldValue('dateSchedule', firstAvailableSchedule?.scheduleDate)
-              if (!firstAvailableSchedule?.scheduleDate) {
-                form.setFieldValue('time', undefined)
-              }
-              setWorkdaySelectedDate(firstAvailableSchedule?.scheduleDate)
-            }
+        if (data.length > 0) {
+          let tmp = data || []
+          tmp.forEach((element) => {
+            const config = getScheduleDateDisplayConfig(element, stationAcceptBooking)
+            element.disabled = config.disabled
+            element.displayText = config.text
+            element.isFull = config.isFull
+            element.value = element.scheduleDate
+          })
+          setListBookingDate(tmp)
+
+          const firstAvailableSchedule = tmp.find((item) => !item.disabled)
+          const tDate = firstAvailableSchedule?.scheduleDate
+          if (tDate) {
+            onChangeDate(tDate, fetchFilter.stationsId, fetchFilter.vehicleType)
           } else {
-            setListBookingDate([])
+            onChangeDate(undefined, fetchFilter.stationsId, fetchFilter.vehicleType)
           }
+        } else {
+          setListBookingDate([])
         }
       })
       .catch(() => {
-        // setErrorMessage('Lấy thông tin ngày hẹn thất bại.')
-        // setIsModalErrOpen(true)
+        setListBookingDate([])
         setIsWorkdayLoading(false)
       })
       .finally(() => {
@@ -577,7 +689,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
           let disabled = false
 
           // Ưu tiên
-          if (station.enablePriorityMode) {
+          if (station.enablePriorityMode >= 1) {
             label = (
               <div className="text-station-select" style={{ display: 'flex', flexWrap: 'wrap' }}>
                 <div className="ai-c" style={{ display: 'inline-flex', paddingRight: '4px' }}>
@@ -626,7 +738,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
             ...station,
             label,
             value: station.stationsId,
-            disabled
+            disabled,
+            hasBookingEnabled
           }
         })
 
@@ -635,19 +748,23 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
         } else {
           setListStation(stationList)
           const activeStations = stationList.filter((station) => station.stationStatus === 1)
-          const priorityStation = activeStations.find((station) => station.enablePriorityMode === 1)
-          const selectedStation = priorityStation || activeStations[0]
-          setStationSelected(selectedStation?.stationsId)
-          setWorkdaySelectedDate(undefined)
+          const priorityStation = activeStations.find((station) => station.enablePriorityMode >= 1 && station.hasBookingEnabled)
+          const defaultStation = priorityStation || activeStations[0]
 
           const hasStationIdByConfig = stationList?.find((item) => item?.stationsId === dataBookingParam?.stationsId)
+          let targetStationId = defaultStation?.stationsId
+
           if (dataBookingParam?.stationsId && hasStationIdByConfig) {
-            setStationSelected(dataBookingParam?.stationsId)
-            form.setFieldValue('stationsId', dataBookingParam?.stationsId)
+            targetStationId = dataBookingParam?.stationsId
+          }
+
+          setStationSelected(targetStationId)
+          form.setFieldValue('stationsId', targetStationId)
+
+          if (targetStationId) {
+            onChangeStation(targetStationId)
           } else {
-            form.setFieldValue('stationsId', selectedStation?.stationsId)
-            form.setFieldValue('dateSchedule', undefined)
-            form.setFieldValue('time', undefined)
+            onChangeStation(undefined)
           }
         }
       })
@@ -745,7 +862,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
   //function lấy ra ngày đầu tiên có lịch làm
   async function findFirstAvailableDateRange(baseDateFilter) {
     let current = moment() // ngày hiện tại
-    const endLimit = moment().add(1, 'year').endOf('year') // 31/12 năm sau
+    const endLimit = moment().add(3, 'month').endOf('month') // 31/12 năm sau
 
     while (current.isSameOrBefore(endLimit, 'month')) {
       const startDate = current.startOf('month').format('DD/MM/YYYY')
@@ -848,54 +965,6 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
   }, [form.getFieldValue('vntId')])
 
   useEffect(() => {
-    const fetchData = async () => {
-      // Lấy giá trị của stationsId từ form
-      const stationsId = form.getFieldValue('stationsId')
-
-      if (stationsId) {
-        try {
-          // Gọi hàm async để tìm tháng đầu tiên có lịch khả dụng
-          const result = await findFirstAvailableDateRange({ ...workdayFilter, stationsId })
-
-          // Nếu có kết quả, cập nhật lại workdayFilter
-          if (result) {
-            setWorkdayFilter(result)
-          }
-        } catch (err) {
-          console.error('Error fetching available date range:', err)
-        }
-      }
-    }
-
-    if (form.getFieldValue('stationsId')) {
-      getStationServices(form.getFieldValue('stationsId')).then((services) => {
-        const allowedLabels = E_TICKET_SALE_OPTIONS.map((option) => option?.label?.toLowerCase())
-        const filteredServices = services.filter((service) => allowedLabels.includes(service?.label?.toLowerCase()))
-        setETicketOptions(filteredServices)
-      })
-    }
-
-    // Gọi hàm fetchData
-    fetchData()
-  }, [form.getFieldValue('stationsId')]) // Dependency array theo stationsId
-
-  useEffect(() => {
-    if ((workdayFilter.vehicleType && workdayFilter.stationsId) || (workdayFilter.stationsId && form.getFieldValue('vehicleSubType'))) {
-      getBookingDate()
-    }
-  }, [workdayFilter])
-
-  useEffect(() => {
-    if (workdayFilter.vehicleType && workdayFilter.stationsId && workdaySelectedDate) {
-      getBookingHours({
-        stationsId: workdayFilter.stationsId,
-        date: workdaySelectedDate,
-        vehicleType: workdayFilter.vehicleType
-      })
-    }
-  }, [workdaySelectedDate, stationSelected])
-
-  useEffect(() => {
     if (dataBookingParam?.vehicleSubType || form.getFieldValue('vehicleSubType')) {
       handleCategory(dataBookingParam?.vehicleSubType || form.getFieldValue('vehicleSubType') || VEHICLE_SUB_TYPE[0]?.value) // Phân loại
       const vehicleType = VEHICLE_SUB_TYPE.find((item) => item.value === (dataBookingParam?.vehicleSubType || form.getFieldValue('vehicleSubType'))) // loại phương tiện
@@ -984,12 +1053,12 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
 
   useEffect(() => {
     const scheduleTypeWithParams = scheduleTypes.find((item) => item.value === +form.getFieldValue('scheduleType'))
-     setScheduleCategory(scheduleTypeWithParams?.scheduleCategory || SCHEDULE_BOOKING_TYPE.SCHEDULE)
+    setScheduleCategory(scheduleTypeWithParams?.scheduleCategory || SCHEDULE_BOOKING_TYPE.SCHEDULE)
   }, [scheduleTypes, form.getFieldValue('scheduleType')])
 
   return (
     <div className="position-relative">
-      {dataTheme?.partnerBackground && <img className="bg-partner" src={dataTheme?.partnerBackground} alt=""/>}
+      {dataTheme?.partnerBackground && <img className="bg-partner" src={dataTheme?.partnerBackground} alt="" />}
       <Form
         className={dataTheme?.partnerBackground ? 'styled-form' : ''}
         name="booking"
@@ -1051,15 +1120,15 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                   message: 'Vui lòng chọn mục đích đặt lịch'
                 }
               ]}
-              hidden = {String(dataBookingParam?.visible_scheduleType) === 'false'}
-              >
+              hidden={String(dataBookingParam?.visible_scheduleType) === 'false'}
+            >
               <SelectAntd
                 defaultValue={dataBookingParam?.scheduleType || optionServiceType[0]?.value}
                 className="cs-select ant-custom booking-input"
                 isSearchable={true}
                 placeholder="Vui lòng chọn mục đích đặt lịch"
                 styles={customStyles}
-                options={paramsScheduleTypeParams ? (scheduleTypes || optionServiceType)?.filter((item) => +item?.value === +paramsScheduleTypeParams ) : (scheduleTypes || optionServiceType)}
+                options={paramsScheduleTypeParams ? (scheduleTypes || optionServiceType)?.filter((item) => +item?.value === +paramsScheduleTypeParams) : (scheduleTypes || optionServiceType)}
                 menuPlacement="top"
                 onChange={(values, scheduleType) => {
                   setScheduleCategory(scheduleType?.scheduleCategory)
@@ -1158,11 +1227,15 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                     options={VEHICLE_SUB_TYPE}
                     defaultValue={dataBookingParam?.vehicleSubType || VEHICLE_SUB_TYPE[0]?.value}
                     onChange={(values, vehicleType) => {
-                      setWorkdayFilter({
+                      const newFilter = {
                         ...workdayFilter,
                         vehicleType: vehicleType?.vehicleType
-                      })
+                      }
+                      setWorkdayFilter(newFilter)
                       handleCategory(values)
+                      if (newFilter.stationsId) {
+                        onChangeStation(newFilter.stationsId, vehicleType?.vehicleType)
+                      }
                     }}
                   />
                 </Form.Item>
@@ -1244,7 +1317,8 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                   className="cs-select ant-custom booking-input"
                   showSearch
                   onChange={(values) => {
-                    handleFillStationDateTime()
+                    form.setFieldValue('vntId', values)
+                    getStations({ filter: { stationArea: values } })
                   }}
                   placeholder="Vui lòng chọn khu vực"
                   styles={customStyles}
@@ -1278,9 +1352,9 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                   options={listStation}
                   menuPlacement="top"
                   onChange={(value, station) => {
-                    setStationSelected(station)
-                    handleFillStationDateTime()
                     form.setFieldValue('stationsId', value)
+                    setStationSelected(station)
+                    onChangeStation(value)
                   }}
                 />
               </Form.Item>
@@ -1299,22 +1373,24 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                 <BookingDatePicker
                   selectedDate={workdaySelectedDate}
                   setSelectedDate={(date) => {
-                    setWorkdaySelectedDate(date)
-                    form.setFieldValue('dateSchedule', date)
+                    const stId = form.getFieldValue('stationsId')
+                    const vType = workdayFilter.vehicleType || VEHICLE_SUB_TYPE[0].vehicleType
+                    onChangeDate(date, stId, vType)
                   }}
-                  disabled={listBookingDate.length === 0}
+                  disabled={!form.getFieldValue('stationsId') || isWorkdayLoading || loadingHoursPicker}
                   listBookingDate={listBookingDate}
-                  bookingConfig={stationBookingConfig}
                   currentMonth={workdayFilter.startDate}
                   loading={isWorkdayLoading}
                   setCurrentMonth={(selectedMonth) => {
-                    setWorkdayFilter({
+                    const nf = {
                       ...workdayFilter,
                       startDate: moment(selectedMonth).format(DATE_DISPLAY_FORMAT),
                       endDate: moment(selectedMonth).endOf('months').format(DATE_DISPLAY_FORMAT)
-                    })
+                    }
+                    setWorkdayFilter(nf)
+                    getBookingDate(nf)
                   }}
-                  minAvailableMonth={minMonthAvailable} // Truyền giá trị hoặc mặc định tháng hiện tại
+                  minAvailableMonth={minMonthAvailable}
                 />
               </Form.Item>
             )}
@@ -1329,14 +1405,13 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                   }
                 ]}>
                 <BookingHoursPicker
-                  disabled={false}
+                  disabled={!workdaySelectedDate || loadingHoursPicker}
                   listBookingTime={listBookingTime}
                   loading={loadingHoursPicker}
                   setSelectedTime={(values) => {
                     form.setFieldValue('time', values)
                   }}
                   selectedTime={form.getFieldValue('time')}
-                  bookingConfig={stationBookingConfig}
                 />
               </Form.Item>
             )}
