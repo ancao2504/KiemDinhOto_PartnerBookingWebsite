@@ -3,7 +3,7 @@ import { Form, Input, Button, Row, Col, Modal } from 'antd'
 import { useHistory, useLocation } from 'react-router-dom'
 import './index.scss'
 import seriGCN from './../../assets/icons/seriGCN.png'
-import { validatorPlateNumber, normalizePlate } from '../../helper/validatorPlateNumber'
+import { validatorPlateNumber } from '../../helper/validatorPlateNumber'
 import PopupMessage from '../BookingPartner/PopupMessage'
 import LoadingPopup from '../../components/LoadingPopup'
 import { PATH } from '../../constants/router'
@@ -25,11 +25,11 @@ function CheckVihcle() {
   const onFinish = (values) => {
     setIsLoading(true)
     let data={
-      vehicleIdentity: normalizePlate(values.vehicleIdentity),
+      vehicleIdentity: values.vehicleIdentity,
       certificateSeries: values.certificateSeries
     }
     setDataVihcle((prev) => ({ ...prev, 
-      vehicleIdentity: normalizePlate(values.vehicleIdentity),
+      vehicleIdentity: values.vehicleIdentity,
       certificateSeries: values.certificateSeries
     }))
     BookingService.userCheckVehicleInfo(data)
@@ -126,7 +126,7 @@ function CheckVihcle() {
                 type="text"
                 allowClear
                 size="large"
-                onInput={(e) => (e.target.value = normalizePlate(e.target.value))}
+                onInput={(e) => (e.target.value = e.target.value.toUpperCase().replace(/\s/g, ''))}
               />
             </Form.Item>
 

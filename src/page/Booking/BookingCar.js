@@ -16,7 +16,7 @@ import {
   VEHICLE_SUB_CATEGORY,
   VIHCLE_TYPES
 } from './../../constants/global'
-import { validatorPlateNumber, normalizePlate } from './../../helper/validatorPlateNumber'
+import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
 import { DATE_DISPLAY_FORMAT } from './../../constants/dateFormats'
 import ChoosingCarModal from './ChoosingCarModal'
 import { SCHEDULE_TYPE } from './../../constants/global'
@@ -112,7 +112,7 @@ function BookingCar({ history, setData, data, listPlate, setListPlate, setStep ,
         name="login"
         autoComplete="new-password"
         initialValues={{
-          vehicleIdentity: normalizePlate(dataBookingParam?.licensePlates) || undefined,
+          vehicleIdentity:dataBookingParam?.licensePlates?.toUpperCase() || undefined,
           licensePlateColor:Number(dataBookingParam?.licensePlateColor) || undefined,
           vehicleType:Number(dataBookingParam?.vehicleType) || undefined,
         }}
@@ -173,10 +173,10 @@ function BookingCar({ history, setData, data, listPlate, setListPlate, setStep ,
               type="text"
               allowClear
               size="large"
-              onInput={(e) => (e.target.value = normalizePlate(e.target.value))}
+              onInput={(e) => (e.target.value = e.target.value.toUpperCase().replace(/\s/g, ''))}
               onChange={(e) => {
-                const value = normalizePlate(e.target.value)
-                const index = listPlate?.findIndex((item) => normalizePlate(item.vehicleIdentity) === value)
+                const value = e.target.value
+                const index = listPlate?.findIndex((item) => item.vehicleIdentity === value)
                 if (index !== -1) {
                   setDataVihcle(listPlate[index])
                   handleCategory(listPlate[index].vehicleType,listPlate[index].vehicleSubCategory)
@@ -187,7 +187,7 @@ function BookingCar({ history, setData, data, listPlate, setListPlate, setStep ,
                 if (!value && dataVihcle.appUserVehicleId) {
                   setDataVihcle({})
                 } else {
-                  setDataVihcle((prev) => ({ ...prev, vehicleIdentity: value }))
+                  setDataVihcle((prev) => ({ ...prev, vehicleIdentity: e.target.value }))
                   setBtnText('Lưu phương tiện')
                 }
               }}

@@ -14,7 +14,7 @@ import { SCHEDULE_ERROR } from '../../constants/errorMessage'
 import { useLocation } from 'react-router-dom'
 import AreaByIP from '../../services/getAreaByIP'
 import addKeyLocalStorage from '../../helper/localStorage'
-import { validatorPlateNumber, normalizePlate } from '../../helper/validatorPlateNumber'
+import { validatorPlateNumber } from '../../helper/validatorPlateNumber'
 import PopupMessage from '../BookingPartner/PopupMessage'
 import BookingSuccess from '../BookingPartner/BookingSuccessModal'
 import redirectToInsurancePartner from './redirectToInsurancePartner'
@@ -298,7 +298,7 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
   const onFinish = (values) => {
     setIsLoading(true)
     const newData = {
-      licensePlates: normalizePlate(values.licensePlates),
+      licensePlates: values.licensePlates.toUpperCase(),
       phone: values.phone,
       fullnameSchedule: values.fullnameSchedule.trim(),
       email: values.email,
@@ -641,16 +641,16 @@ function BookingInsurancePartnerForm({form, setTabKey, zaloUserName,zaloUserPhon
           }
           ]}>
         <div className="login__input__icon">
-          <Input defaultValue={normalizePlate(dataBookingParam?.licensePlates || dataLocal?.licensePlates)}
+          <Input defaultValue={dataBookingParam?.licensePlates?.toUpperCase() || dataLocal?.licensePlates?.toUpperCase()} 
             className="login__input booking-input" 
             style={{textTransform:'uppercase'}} 
             placeholder="59B16856" 
             type="text" 
             readOnly={dataVihcle?.vehicleIdentity}
             size="large"
-            onInput={(e) => {
-              e.target.value = normalizePlate(e.target.value)
-              saveDataLocal('licensePlates', e.target.value)
+            onInput={(e)=>{
+              e.target.value = e.target.value.toUpperCase().replace(/\s/g, '')
+              saveDataLocal('licensePlates',e.target.value)
             }} />
         </div>
       </Form.Item>
