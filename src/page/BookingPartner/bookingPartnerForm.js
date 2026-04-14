@@ -7,7 +7,7 @@ import { Form, Input, Button, Spin, Select as SelectAntd, Row, Col } from 'antd'
 import BookingSuccess from './BookingSuccessModal'
 import PopupMessage from './PopupMessage'
 import { changeTime } from '../../helper/changeTime'
-import { validatorPlateNumber } from './../../helper/validatorPlateNumber'
+import { validatorPlateNumber, normalizePlate } from './../../helper/validatorPlateNumber'
 import { E_TICKET_SALE_OPTIONS, optionServiceType, SCHEDULE_TITLE, SCHEDULE_TYPE_MINIAPP } from '../../constants/serviceOption'
 import {
   PAYMENT_SUB_TYPE,
@@ -382,7 +382,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
 
   const onFinish = (values) => {
     const data = {
-      licensePlates: values.licensePlates,
+      licensePlates: normalizePlate(values.licensePlates),
       phone: values.phone,
       fullnameSchedule: values.name,
       email: values.email,
@@ -1009,7 +1009,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
         vntId: dataBookingParam.vntId || listStationArea[0]?.value,
         vehicleSubCategory: dataBookingParam.vehicleSubCategory || vehicleSubCategoryOptions[0]?.value,
         certificateSeries: dataBookingParam.certificateSeries || undefined,
-        licensePlates: dataBookingParam.licensePlates || undefined,
+        licensePlates: normalizePlate(dataBookingParam.licensePlates) || undefined,
         stationsId: dataBookingParam.stationsId || undefined
       })
     }
@@ -1205,7 +1205,7 @@ function BookingPartnerForm({ form, setTabKey, zaloUserName, zaloUserPhone, gtel
                   type="text"
                   size="large"
                   onInput={(e) => {
-                    e.target.value = e.target.value.toUpperCase().replace(/\s/g, '')
+                    e.target.value = normalizePlate(e.target.value)
                   }}
                 />
               </Form.Item>
